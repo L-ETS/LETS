@@ -8,6 +8,7 @@ function Register() {
   const [emailMessage, setEmailMessage] = useState('');
   const [emailValid, setEmailVaild] = useState(false);
 
+  //이메일 유효성 검사
   function isValidEmail(email) {
     const emailRegex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/
     if(emailRegex.test(email)) {
@@ -20,6 +21,7 @@ function Register() {
     }
   }
 
+  //이메일 입력칸 밑에 메시지 출력
   const handleEmailChange = (e) => {
     if(!e.target.value) {
       setEmailMessage('이메일을 입력해주세요.')
