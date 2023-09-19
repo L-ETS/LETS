@@ -73,7 +73,17 @@ function Register() {
         </div>
 
         <div className="input-group">
-          {/* 지역 입력 ui */}
+          <label for="reg">Region</label>
+              <select name="region" id="reg">
+                  <option value="seoul">서울</option>
+              <optgroup label="경기">
+                  <option value="yongin">용인</option>
+                  <option value="suwon">수원</option>
+              </optgroup>
+                  <option value="busan">부산</option>
+                  <option value="gwangju">광주</option>
+                  <option value="jeju">제주</option>
+              </select>
         </div>
         
         <button type="submit">회원가입</button>
