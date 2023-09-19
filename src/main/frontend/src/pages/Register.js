@@ -1,10 +1,36 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 //해당 페이지에 적용될 css파일(chat gpt 복붙 한건데 만들 때 방해되면 지우셔도 됩니다.)
 import '../styles/registerPage.css'
 
 function Register() {
   const [email, setEmail] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [emailValid, setEmailVaild] = useState(false);
+
+  function isValidEmail(email) {
+    const emailRegex = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/
+    if(emailRegex.test(email)) {
+      setEmailVaild(true)
+      return true
+    }
+    else {
+      setEmailVaild(false)
+      return false
+    }
+  }
+
+  const handleEmailChange = (e) => {
+    if(!e.target.value) {
+      setEmailMessage('이메일을 입력해주세요.')
+    }
+    else if(!isValidEmail(e.target.value)) {
+      setEmailMessage('이메일 형식으로 작성해주세요.')
+    }
+    else {
+      setEmailMessage('사용 가능한 이메일입니다.')
+    }
+  }
 
   //회원가입 버튼 눌렀을 때 벌어질 이벤트
   const handleSubmit = (e) => {
@@ -33,9 +59,12 @@ function Register() {
             id="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={handleEmailChange}
+            maxLength={30}
             required
           />
         </div>
+        <p>{emailMessage}</p>
 
         <div className="input-group">
           {/* 닉네임 입력 ui */}
