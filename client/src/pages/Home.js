@@ -1,4 +1,4 @@
-import Login from "../components/Login"
+import Login from "./Login"
 import Barter from "./Barter";
 import React, { useState } from "react"
 
