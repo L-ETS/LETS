@@ -9,7 +9,7 @@ function Register() {
   const [password, setPassword] = useState('');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
-  const [location, setLocation] = useState('');
+  const [region, setRegion] = useState('');
 
   const navigate = useNavigate();
   
@@ -69,11 +69,11 @@ function Register() {
         </div>
 
         <div className="input-group">
-          <label htmlFor="location">거래 희망 지역</label>
+          <label htmlFor="region">거래 희망 지역</label>
           <select 
-            id="location" 
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            id="region" 
+            value={region}
+            onChange={(e) => setRegion(e.target.value)}
             required
           >
             <option value="">지역 선택</option>
