@@ -1,3 +1,34 @@
+var mysql = require('mysql');
+
+var connection = mysql.createConnection({
+  host     : 'localhost',
+  user     : 'root',
+  password : 'lets',
+  port     : 3306,
+  database : 'LETS'
+});
+
+connection.connect();
+
+/* 쿼리 결과 값이 필요 없는 경우 */
+//var query = `insert into users(name) values('name')`;
+connection.query(query);
+
+/* 쿼리 결과 값을 받아올 경우 */
+var query = `select * from users`;
+connection.query(query, function(error, rows, fields) {
+  if(!error){
+    console.log(rows);
+    console.log(JSON.parse(JSON.stringify(rows))) // 이렇게 해야 제대로 object 방식으로 사용 가능
+  }else{
+    console.log('Error while performing Query.', error);
+  }
+});
+
+
+connection.end();
+
+
 const express = require('express');
 const path = require('path');
 const app = express();
