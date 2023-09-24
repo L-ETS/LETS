@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom'
 import '../styles/login.css'; 
+import axios from "axios";
 
 function Login() {
   
@@ -14,17 +15,25 @@ function Login() {
     e.preventDefault();
 
     try {
-      await axios.post('/user/login', {
+      const response = await axios.post('/user/login', {
         id: id,
         pw: pw
       });
+
       // 로그인 성공했을 때의 코드 작성.
       // For example, you might store the JWT token in local storage and redirect the user to the home page
-      alert('로그인 성공');
-      navigate('/')
+      if(response.status === 200) {
+        alert('로그인 성공!');
+        navigate('/');
+      }
 
     } catch(error) {
-      console.log('login error: ', error);
+      // Handle different HTTP status codes here, for example:
+      if (error.response && error.response.status === 401) {
+        alert('아이디와 비밀번호를 다시 확인해주세요.');
+      } else {
+        alert('오류 발생. 잠시 후 다시 시도해주세요.');
+      }
     }
    
   };
