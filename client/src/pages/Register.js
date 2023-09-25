@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import '../styles/register.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -12,12 +12,45 @@ function Register() {
   const [email, setEmail] = useState('');
   const [region, setRegion] = useState('');
 
+  const [userIdError, setUserIdError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [nicknameError, setNicknameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [regionError, setRegionError] = useState('');
+
   const navigate = useNavigate();
   
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Handle actual registration logic here
-    
+    const userIdRegex = /^[a-zA-Z0-9]{4,12}$/;
+    const passwordRegex = /^[a-zA-Z0-9]{8,20}$/;
+    const nicknameRegex = /^[가-힣a-zA-Z]{2,10}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;  
+
+    if (!userIdRegex.test(userId)) {
+      setUserIdError('올바른 아이디 형식이 아닙니다. [대소문자, 숫자로 4 ~ 12자]');
+    } else {
+      setUserIdError('');
+    }
+
+    if (!passwordRegex.test(password)) {
+      setPasswordError('올바른 비밀번호 형식이 아닙니다. [대소문자, 숫자로 8 ~ 20자]');
+    } else {
+      setPasswordError('');
+    }
+
+    if (!nicknameRegex.test(nickname)) {
+      setNicknameError('올바른 닉네임 형식이 아닙니다. [한글, 대소문자로 2 ~ 10자]');
+    } else {
+      setNicknameError('');
+    }
+
+    if (!emailRegex.test(email)) {
+      setEmailError('올바른 이메일 형식이 아닙니다. [Example@Example.com]');
+    } else {
+      setEmailError('');
+    }
   }
 
   return (
@@ -34,6 +67,7 @@ function Register() {
             onChange={(e) => setUserId(e.target.value)}
             required
           />
+          {userIdError && <p>{userIdError}</p>}
         </div>
 
         <div className="input-group">
@@ -45,6 +79,7 @@ function Register() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {passwordError && <p>{passwordError}</p>}
         </div>
 
         <div>
@@ -56,6 +91,7 @@ function Register() {
             onChange={(e) => setNickname(e.target.value)}
             required
           />
+          {nicknameError && <p>{nicknameError}</p>}
         </div>
 
         <div className="input-group">
@@ -67,6 +103,7 @@ function Register() {
             onChange={(e) => setEmail(e.target.value)}
             required
           />
+           {emailError && <p>{emailError}</p>}
         </div>
 
         <div className="input-group">
