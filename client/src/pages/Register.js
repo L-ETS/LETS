@@ -2,6 +2,7 @@ import { useState } from 'react';
 import '../styles/register.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import React from 'react';
 
 function Register() {
   

@@ -1,4 +1,5 @@
 // 로그인이 되었을 때 보일 물물교환 메인페이지.
+import React from 'react';
 
 function Barter() {
   return (

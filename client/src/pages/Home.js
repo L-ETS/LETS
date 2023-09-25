@@ -1,6 +1,6 @@
-import Login from "./Login"
+import Login from "./Login";
 import Barter from "./Barter";
-import React, { useState } from "react"
+import React, { useState } from "react";
 
 function Home() {
   //로그인이 되었는지 여부를 나타냄.
