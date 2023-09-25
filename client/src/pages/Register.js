@@ -8,12 +8,14 @@ function Register() {
   
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordCheck, setPasswordCheck] = useState('');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [region, setRegion] = useState('');
 
   const [userIdError, setUserIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [passwordCheckError, setPasswordCheckError] = useState('');
   const [nicknameError, setNicknameError] = useState('');
   const [emailError, setEmailError] = useState('');
   const [regionError, setRegionError] = useState('');
@@ -38,6 +40,12 @@ function Register() {
       setPasswordError('올바른 비밀번호 형식이 아닙니다. [대소문자, 숫자로 8 ~ 20자]');
     } else {
       setPasswordError('');
+    }
+
+    if (passwordCheck != password) {
+      setPasswordCheckError('비밀번호가 일치하지 않습니다.');
+    } else {
+      setPasswordCheckError('');
     }
 
     if (!nicknameRegex.test(nickname)) {
@@ -82,7 +90,19 @@ function Register() {
           {passwordError && <p>{passwordError}</p>}
         </div>
 
-        <div>
+        <div className="input-group">
+          <label htmlFor="passwordCheck">비밀번호 확인</label>
+          <input
+            type="password"
+            id="passwordCheck"
+            value={passwordCheck}
+            onChange={(e) => setPasswordCheck(e.target.value)}
+            required
+          />
+          {passwordCheckError && <p>{passwordCheckError}</p>}
+        </div>
+
+        <div className="input-group">
           <label htmlFor="nickname">닉네임</label>
           <input
             type="text"
