@@ -1,7 +1,7 @@
-var mysql = require('mysql');
+const mysql = require('mysql2');
 require("dotenv").config();
 
-var connection = mysql.createConnection({
+const connection = mysql.createConnection({
   host     : process.env.DB_HOST,
   user     : process.env.DB_USER,
   password : process.env.DB_PASSWORD,
@@ -16,7 +16,7 @@ connection.connect();
 connection.query(query);
 
 /* 쿼리 결과 값을 받아올 경우 */
-var query = `select * from users`;
+let query = `select * from users`;
 connection.query(query, function(error, rows, fields) {
   if(!error){
     console.log(rows);
