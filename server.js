@@ -8,7 +8,7 @@ const connection = mysql.createConnection({
   port     : 3306,
   database : process.env.DB_NAME
 });
-
+//푸쉬가 이것도 안되나
 connection.connect();
 
 /* 쿼리 결과 값이 필요 없는 경우 */
