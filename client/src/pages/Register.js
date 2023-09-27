@@ -80,11 +80,12 @@ function Register() {
       .then(response => {
         setData(response.data);
         console.log("register success");
+        navigate('/');
       })
       .catch(error => {
         console.error('회원가입 에러: ', error);
       });
-    navigate('/');
+      
   }
 
   return (

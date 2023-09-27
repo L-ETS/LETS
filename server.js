@@ -25,13 +25,13 @@ const userRouter = require('./routes/user');
 
 app.use('/user', userRouter);
 
-router.post("/user/login", (req, res) => { // 데이터 받아서 결과 전송
+// router.post("/user/login", (req, res) => { // 데이터 받아서 결과 전송
 
-});
+// });
 
-router.post("/user/register", (req, res) => {
+// router.post("/user/register", (req, res) => {
 
-});
+// });
 
 
 
