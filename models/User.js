@@ -25,31 +25,7 @@ class User {
     })
   }
 
-  static saveUser(id, pw, nickname, email, region, callback) {
-    let sql = 'INSERT INTO USER(id,pw,nickname,email,region) VALUES(?,?,?,?,?)'
-    let params = [id, pw, nickname, email, region];
-
-    pool.getConnection((error, connection)=>{
-      if(error) {
-        console.log(`User.saveUser() db처리 중 에러: ${error}`);
-      }
-      else {
-        connection.query(sql, params, (error)=>{
-          if(error) {
-            console.error('Error executing the query: '+ error.stack);
-            callback(error);
-          }
-          else {
-            connection.release();
-            callback(null);
-          }
-
-        })
-      }
-
-    })
-
-  }
+ 
 }
 
 module.exports = User;
