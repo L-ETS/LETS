@@ -72,6 +72,43 @@ app.post('/user/register', async (req, res) => {
   }
 })
 
+//로그인 요청에 대한 처리와 응답.
+app.post('/user/login', (req, res) => {
+  const body = {...req.body};
+
+  let sql = 'SELECT * FROM USER WHERE userId = ?';
+    let params = [body.userId];
+
+    pool.getConnection((error, connection)=>{
+      if(error) {
+        console.log(error);
+      }
+      else {
+        connection.query(sql, params, (error, result)=>{
+          if(error) {
+            console.error('Error executing the query: '+ error.stack)
+            res.status(401).json({message: 'db조회 실패'});
+            connection.release();
+          }
+          else {
+            let user = result[0]
+            //If user not found or password does not match, send error response
+            if (!user || !bcrypt.compareSync(body.password, user.password)) {
+              connection.release();
+              return res.status(401).json({ error: 'Invalid username or password' });
+            }
+
+            // Here you would typically create a token or a session and send it to the client
+            // For simplicity, we're just sending a success message
+            res.status(200).json({ message: 'Login successful!' });
+            
+            connection.release();
+
+          }
+        })
+      }
+    })
+})
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {

@@ -5,8 +5,8 @@ import axios from "axios";
 
 function Login() {
   
-  const [id, setId] = useState('');
-  const [pw, setPw] = useState('');
+  const [userId, setUserId] = useState('');
+  const [password, setPassword] = useState('');
 
   const navigate = useNavigate();
 
@@ -16,8 +16,8 @@ function Login() {
 
     try {
       const response = await axios.post('/user/login', {
-        id: id,
-        pw: pw
+        userId: userId,
+        password: password
       });
 
       // 로그인 성공했을 때의 코드 작성.
@@ -43,24 +43,24 @@ function Login() {
       <h2>로그인</h2>
       <form onSubmit={handleSubmit}>
         <div className="input-group">
-          <label htmlFor="id">아이디</label>
+          <label htmlFor="userId">아이디</label>
           <input
             type="text"
-            id="id"
-            value={id}
+            id="userId"
+            value={userId}
             maxLength={30}
-            onChange={(e) => setId(e.target.value)}
+            onChange={(e) => setUserId(e.target.value)}
             required
           />
         </div>
         <div className="input-group">
-        <label htmlFor="pw">비밀번호</label>
+        <label htmlFor="password">비밀번호</label>
           <input
             type="password"
-            id="pw"
-            value={pw}
+            id="password"
+            value={password}
             maxLength={30}
-            onChange={(e) => setPw(e.target.value)}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>
