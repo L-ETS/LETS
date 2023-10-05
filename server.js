@@ -5,6 +5,9 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 const mysql = require("mysql2");
+const session = require('express-session');
+const MySQLStore = require("express-mysql-session")(session);
+const cookieParser = require('cookie-parser');
 
 //유저가 보낸 object, array데이터 출력해보기 위함.
 app.use(express.json());
@@ -32,6 +35,38 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   connectionLimit: 10
 });
+
+
+app.use(cookieParser());
+
+const sessionStore = new MySQLStore({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME
+});
+
+app.use(session({
+  secret: process.env.SESSION_SECRET,
+  store: sessionStore,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: false,
+    httpOnly: true,
+    maxAge: 1800000 //밀리초 단위
+  },
+  name: 'session-cookie'
+}));
+
+const isAuthenticated = (req, res, next) => {
+  if (req.session && req.session.user) {
+    next();
+  } else {
+    res.status(401).json({ error: 'Not authenticated' });
+  }
+}
 
 //회원가입 요청에 대한 처리와 응답.
 app.post('/user/register', async (req, res) => {
@@ -97,9 +132,8 @@ app.post('/user/login', (req, res) => {
               connection.release();
               return res.status(401).json({ error: 'Invalid username or password' });
             }
-
-            // Here you would typically create a token or a session and send it to the client
-            // For simplicity, we're just sending a success message
+            
+            req.session.user = user.userId;
             res.status(200).json({ message: 'Login successful!' });
             
             connection.release();
@@ -108,6 +142,20 @@ app.post('/user/login', (req, res) => {
         })
       }
     })
+})
+
+app.get('/user/logout', (req, res) => {
+  req.session.destroy(err => {
+    if (err) {
+        return res.status(500).json({ success: false, message: 'Failed to logout' });
+    }
+    res.clearCookie('session-cookie'); // Clear the session cookie
+    res.status(200).json({ success: true, message: 'Logged out' });
+  });
+})
+
+app.get('/user/mypage', isAuthenticated, (req, res) => {
+  res.status(200).json({success: true})
 })
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
