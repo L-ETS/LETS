@@ -23,11 +23,26 @@ function Barter({setIsLogin}) {
     }
   }
 
+  const gotoMyPage = async() => {
+    try {
+      const response = await axios.get('/user/mypage');
+      if(response.status === 200 && response.data.success) {
+        navigate('/user/mypage');
+      }
+      
+    } catch(error) {
+      console.log(error);
+      alert('로그인이 필요한 서비스입니다.');
+      navigate('/');
+    }
+  }
+
   return (
     <div>
       <h1>로그인이 되었을 때 보일 물물교환 메인페이지 입니다.</h1>
 
       <button type="button" onClick={logout}>로그아웃</button>
+      <button type="button" onClick={gotoMyPage}>마이페이지</button>
     </div>
   )
 }

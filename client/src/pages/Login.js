@@ -39,37 +39,6 @@ function Login({setIsLogin}) {
    
   };
 
-  const gotoMyPage = async() => {
-    try {
-      const response = await axios.get('/user/mypage');
-      if(response.status === 200 && response.data.success) {
-        navigate('/user/mypage');
-      }
-      
-    } catch(error) {
-      console.log(error);
-      alert('로그인이 필요한 서비스입니다.');
-      navigate('/');
-    }
-  }
-
-  const logout = async() => {
-    try {
-      const response = await axios.get('/user/logout');
-      if(response.status === 200 && response.data.success) {
-        alert('로그아웃 되었습니다.');
-        navigate('/');
-      }
-      else if(response.status === 500 && !response.data.success) {
-        alert('로그아웃에 실패했습니다.')
-      }
-    } catch(error) {
-      console.log(error);
-      alert('로그아웃 에러.');
-    }
-  }
-
-
   return (
     <div className="login-page">
       <h2>로그인</h2>
@@ -99,8 +68,7 @@ function Login({setIsLogin}) {
         <button type="submit">로그인</button>
         <button type="button" onClick={()=>navigate('/user/register')}>회원가입</button>
       </form>
-      <button type="button" onClick={gotoMyPage}>마이페이지</button>
-      <button type="button" onClick={logout}>로그아웃</button>
+      
     </div>
   );
 }
