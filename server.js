@@ -154,6 +154,14 @@ app.get('/user/logout', (req, res) => {
   });
 })
 
+app.get('/api/check-session', (req, res) => {
+  if (req.session.user) {
+    res.json({ loggedIn: true });
+  } else {
+    res.json({ loggedIn: false });
+  }
+})
+
 app.get('/user/mypage', isAuthenticated, (req, res) => {
   res.status(200).json({success: true})
 })

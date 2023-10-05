@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import '../styles/login.css'; 
 import axios from "axios";
 
-function Login() {
+function Login({setIsLogin}) {
   
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -24,6 +24,7 @@ function Login() {
       // For example, you might store the JWT token in local storage and redirect the user to the home page
       if(response.status === 200) {
         alert('로그인 성공!');
+        setIsLogin(true);
         navigate('/');
       }
 
