@@ -8,7 +8,7 @@ const mysql = require("mysql2");
 const session = require('express-session');
 const MySQLStore = require("express-mysql-session")(session);
 const cookieParser = require('cookie-parser');
-const AWS = require('aws-sdk');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
@@ -31,9 +31,7 @@ app.listen(8080, function () {
 });
 
 // AWS S3 configuration
-const s3 = new AWS.S3({
-  accessKeyId: process.env.S3_ACCESSKEY,
-  secretAccessKey: process.env.S3_SECRETKEY,
+const s3 = new S3Client({
   region: process.env.S3_REGION
 });
 
@@ -45,7 +43,7 @@ const upload = multer({
           cb(null, 'productImages/' + Date.now().toString() + '-' + file.originalname) 
       }
   })
-}).array('images');
+});
 
 //DB 커넥션 풀 셋팅. (.env파일에서 변수명 맞춰주세요.)
 const pool = mysql.createPool({
@@ -182,7 +180,7 @@ app.get('/api/check-session', (req, res) => {
   }
 })
 
-app.post('/trade/upload', isAuthenticated, upload, (req, res) => {
+app.post('/trade/upload', isAuthenticated, upload.array('images'), (req, res) => {
   const uploadedFiles = req.files.map(file => ({
       originalName: file.originalname,
       s3ObjectName: file.key,
