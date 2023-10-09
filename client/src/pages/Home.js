@@ -5,7 +5,7 @@ import axios from "axios";
 
 function Home() {
   //로그인이 되었는지 여부를 나타냄.
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(true); //원래 false여야 하는데 테스트용으로 true로 바꿈.
 
   useEffect(() => {
     // Check if the user is logged in when the component mounts

@@ -8,6 +8,9 @@ const mysql = require("mysql2");
 const session = require('express-session');
 const MySQLStore = require("express-mysql-session")(session);
 const cookieParser = require('cookie-parser');
+const AWS = require('aws-sdk');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
 
 //유저가 보낸 object, array데이터 출력해보기 위함.
 app.use(express.json());
@@ -26,6 +29,23 @@ app.get('/', function (request, response) {
 app.listen(8080, function () {
   console.log('listening on 8080')
 });
+
+// AWS S3 configuration
+const s3 = new AWS.S3({
+  accessKeyId: process.env.S3_ACCESSKEY,
+  secretAccessKey: process.env.S3_SECRETKEY,
+  region: process.env.S3_REGION
+});
+
+const upload = multer({
+  storage: multerS3({
+      s3: s3,
+      bucket: process.env.S3_BUCKET,
+      key: function (req, file, cb) {
+          cb(null, 'productImages/' + Date.now().toString() + '-' + file.originalname) 
+      }
+  })
+}).array('images');
 
 //DB 커넥션 풀 셋팅. (.env파일에서 변수명 맞춰주세요.)
 const pool = mysql.createPool({
@@ -161,6 +181,19 @@ app.get('/api/check-session', (req, res) => {
     res.json({ loggedIn: false });
   }
 })
+
+app.post('/trade/upload', isAuthenticated, upload, (req, res) => {
+  const uploadedFiles = req.files.map(file => ({
+      originalName: file.originalname,
+      s3ObjectName: file.key,
+      s3Url: file.location
+  }));
+
+  res.status(200).send({
+      message: 'Files uploaded successfully',
+      data: uploadedFiles
+  });
+});
 
 app.get('/user/mypage', isAuthenticated, (req, res) => {
   res.status(200).json({success: true})
