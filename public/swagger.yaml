@@ -7,130 +7,234 @@ info:
 servers:
   - url:  'http://localhost:8080/'
 tags:
-  - name: exchangePage
-    description: 거래 게시판
-  - name: exchangeReply
-    description: 댓글
+  - name: posts
+  - name: comment
   - name: user
-    description: 유저 정보
 paths:
-  /exchangePage:
+  /posts:
     get:
       tags:
-        - exchangePage
-      summary: 게시판 페이지
-      operationId: homePage
-      parameters:
-        - in: query
-          name: searchPage
-          description: 게시물 검색
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: skip
-          description: 페이지 넘기기
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-        - in: query
-          name: limit
-          description: 페이지 끝, 처음으로
-          schema:
-              type: integer
-              format: int32
-              minimum: 0
-              maximum: 50
+        - posts
+      summary: 모든 게시물 조회
       responses:
         '200':
-          description: 
-  /exchangePage/post:
+          description: 성공적으로 게시물을 조회했습니다.
     post:
       tags:
-        - exchangePage
-      summary:  게시판 게시글 생성
-      operationId: addPost
-      parameter:
+        - posts
+      summary: 새로운 게시물 작성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 게시물 제목
+                content:
+                  type: string
+                  description: 게시물 내용
+                author:
+                  type: string
+                  description: 게시물 작성자
+              required:
+                - title
+                - content
+                - author
+      responses:
+        '201':
+          description: 게시물이 성공적으로 작성되었습니다.
+  /posts/{postId}:
+    get:
+      tags:
+        - posts
+      summary: 특정 게시물 조회
+      parameters:
         - name: postId
           in: path
-          description: update
+          description: 조회할 게시물의 ID
           required: true
           schema:
             type: integer
-            format: int64  
       responses:
         '200':
-          description: success
-        '405':
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ExchangePage'
+          description: 성공적으로 게시물을 조회했습니다.
+        '404':
+          description: 해당 ID의 게시물을 찾을 수 없습니다.
     put:
       tags:
-        - exchangePage
-      summary: 게시판 게시글 수정
-      operationId: updatePost
+        - posts
+      summary: 게시물 수정
+      parameters:
+        - name: postId
+          in: path
+          description: 수정할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 게시물 제목
+                content:
+                  type: string
+                  description: 게시물 내용
+              required:
+                - title
+                - content
       responses:
-        '400':
-          description: Invalid ID
+        '200':
+          description: 게시물이 성공적으로 수정되었습니다.
         '404':
-          description: Post not found
-        '405':
-          description: invalid input
+          description: 해당 ID의 게시물을 찾을 수 없습니다.
     delete:
       tags:
-        - exchangePage
-      summary: 게시판 게시글 삭제
-      operationId: deletePost
+        - posts
+      summary: 게시물 삭제
+      parameters:
+        - name: postId
+          in: path
+          description: 삭제할 게시물의 ID
+          required: true
+          schema:
+            type: integer
       responses:
-        '400':  
-          description:  Invalid ID
+        '204':
+          description: 게시물이 성공적으로 삭제되었습니다.
         '404':
-          description:  Post not found
-  /exchangePage/Reply:
+          description: 해당 ID의 게시물을 찾을 수 없습니다.
+  /posts/{postId}/comments:
+    get:
+      tags:
+        - comment
+      summary: 특정 게시물의 모든 댓글 조회
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 조회할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공적으로 댓글을 조회했습니다.
+  /posts/{postId}/comments/{commentId}:
+    get:
+      tags:
+        - comment
+      summary: 특정 댓글 조회
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 조회할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+        - name: commentId
+          in: path
+          description: 조회할 댓글의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공적으로 댓글을 조회했습니다.
+        '404':
+          description: 해당 ID의 게시물 또는 댓글을 찾을 수 없습니다.
     post:
       tags:
-        - exchangePage
-      summary:  게시판 댓글 생성
-      operationId: addReply
+        - comment
+      summary: 새로운 댓글 작성
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 작성할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: 댓글 내용
+                author:
+                  type: string
+                  description: 댓글 작성자
+              required:
+                - content
+                - author
       responses:
-        default:
-          description: success
-        '400':
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ExchangePage'
+        '201':
+          description: 댓글이 성공적으로 작성되었습니다.
     put:
       tags:
-        - exchangePage
-      summary: 게시판 댓글 수정
-      operationId: updateReply
+        - comment
+      summary: 댓글 수정
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 수정할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+        - name: commentId
+          in: path
+          description: 수정할 댓글의 ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: 댓글 내용
+              required:
+                - content
       responses:
-        '400':
-          description: Invalid ID
+        '200':
+          description: 댓글이 성공적으로 수정되었습니다.
         '404':
-          description: Text not found
-        '405':
-          description: invalid input
+          description: 해당 ID의 게시물 또는 댓글을 찾을 수 없습니다.
     delete:
       tags:
-        - exchangePage
-      summary: 게시판 댓글 삭제
-      operationId: deleteReply
+        - comment
+      summary: 댓글 삭제
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 삭제할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+        - name: commentId
+          in: path
+          description: 삭제할 댓글의 ID
+          required: true
+          schema:
+            type: integer
       responses:
-        '400':  
-          description:  Invalid ID
+        '204':
+          description: 댓글이 성공적으로 삭제되었습니다.
         '404':
-          description:  Text not found
+          description: 해당 ID의 게시물 또는 댓글을 찾을 수 없습니다.
   /user:
     post:
       tags:
@@ -268,7 +372,7 @@ paths:
           description: User not found
 components:
   schemas:
-    ExchangePage:
+    Page:
       type: object
       required:
         - postId
