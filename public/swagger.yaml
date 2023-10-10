@@ -7,9 +7,130 @@ info:
 servers:
   - url:  'http://localhost:8080/'
 tags:
+  - name: exchangePage
+    description: 거래 게시판
+  - name: exchangeReply
+    description: 댓글
   - name: user
-    description: about user
+    description: 유저 정보
 paths:
+  /exchangePage:
+    get:
+      tags:
+        - exchangePage
+      summary: 게시판 페이지
+      operationId: homePage
+      parameters:
+        - in: query
+          name: searchPage
+          description: 게시물 검색
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: 페이지 넘기기
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: 페이지 끝, 처음으로
+          schema:
+              type: integer
+              format: int32
+              minimum: 0
+              maximum: 50
+      responses:
+        '200':
+          description: 
+  /exchangePage/post:
+    post:
+      tags:
+        - exchangePage
+      summary:  게시판 게시글 생성
+      operationId: addPost
+      parameter:
+        - name: postId
+          in: path
+          description: update
+          required: true
+          schema:
+            type: integer
+            format: int64  
+      responses:
+        '200':
+          description: success
+        '405':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExchangePage'
+    put:
+      tags:
+        - exchangePage
+      summary: 게시판 게시글 수정
+      operationId: updatePost
+      responses:
+        '400':
+          description: Invalid ID
+        '404':
+          description: Post not found
+        '405':
+          description: invalid input
+    delete:
+      tags:
+        - exchangePage
+      summary: 게시판 게시글 삭제
+      operationId: deletePost
+      responses:
+        '400':  
+          description:  Invalid ID
+        '404':
+          description:  Post not found
+  /exchangePage/Reply:
+    post:
+      tags:
+        - exchangePage
+      summary:  게시판 댓글 생성
+      operationId: addReply
+      responses:
+        default:
+          description: success
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExchangePage'
+    put:
+      tags:
+        - exchangePage
+      summary: 게시판 댓글 수정
+      operationId: updateReply
+      responses:
+        '400':
+          description: Invalid ID
+        '404':
+          description: Text not found
+        '405':
+          description: invalid input
+    delete:
+      tags:
+        - exchangePage
+      summary: 게시판 댓글 삭제
+      operationId: deleteReply
+      responses:
+        '400':  
+          description:  Invalid ID
+        '404':
+          description:  Text not found
   /user:
     post:
       tags:
@@ -27,28 +148,6 @@ paths:
               $ref: '#/components/schemas/User'
         description: Created user object
         required: true
-  /user/createWithArray:
-    post:
-      tags:
-        - user
-      summary: Creates list of users with given input array
-      operationId: createUsersWithArrayInput
-      responses:
-        default:
-          description: successful operation
-      requestBody:
-        $ref: '#/components/requestBodies/UserArray'
-  /user/createWithList:
-    post:
-      tags:
-        - user
-      summary: Creates list of users with given input array
-      operationId: createUsersWithListInput
-      responses:
-        default:
-          description: successful operation
-      requestBody:
-        $ref: '#/components/requestBodies/UserArray'
   /user/login:
     get:
       tags:
@@ -120,9 +219,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
-            application/xml:
-              schema:
-                $ref: '#/components/schemas/User'
         '400':
           description: Invalid username supplied
         '404':
@@ -170,48 +266,64 @@ paths:
           description: Invalid username supplied
         '404':
           description: User not found
-  components:
-    schemas:
-      User:
-        type: object
-        properties:
-          userId:
-            type: string
-          password:
-            type: string
-          email:
-            type: string
-          username:
-            type: string
-          userStatus:
-            type: integer
-            format: int32
-            description: User Status
-          complete:
-            type: boolean
-            default: false  
-        xml:
-          name: User
-    ApiResponse:
+components:
+  schemas:
+    ExchangePage:
       type: object
+      required:
+        - postId
+        - userId
+        - title
+        - content
+        - view_count
+        - create_date
+        - update_date
+        - image
       properties:
-        code:
+        postId:
           type: integer
           format: int32
-        type:
+        userId:
           type: string
-        message:
+        title:
           type: string
-  requestBodies:
-    UserArray:
-      content:
-        application/json:
-          schema:
-            type: array
-            items:
-              $ref: '#/components/schema/User'
-      description: List of user object
-      required: true
+          format: text
+        view_count:
+          type: integer
+          format: int32
+        create_date:
+          type: string
+          format: date-time
+          example: '2023-10-10T22:28:33'
+        update_time:
+          type: string
+          format: date-time
+          example: '2023-10-11T08:11:56'
+        image:
+          type: image
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        nickname:
+          type: string
+        region:
+          type: string
+    requestBodies:
+       UserArray:
+        content:
+          application/json:
+             schema:
+              type: array
+              items:
+                $ref: '#/components/schema/User'
+        description: List of user object
+        required: true
     
         
         
