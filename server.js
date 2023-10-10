@@ -18,7 +18,7 @@ const cors = require('cors');
 app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'client/build')));
-app.use(express.static('public'));  
+app.use(express.static('public'));    
 
 app.get('/', function (request, response) {
   response.sendFile(path.join(__dirname, '/client/build/index.html'));
@@ -165,97 +165,6 @@ app.get('/api/check-session', (req, res) => {
 
 app.get('/user/mypage', isAuthenticated, (req, res) => {
   res.status(200).json({success: true})
-})
-
-app.post('', upload.single("upload"), (req, res) => { //게시글 등록
-  try {
-    const body = {...req.body};
-    const image = '/images/${req.file.filename}';
-
-    let sql = 'INSERT INTO POST(postId,userId,title,content,create_date,image) VALUES(?,?,?,?,?)'
-    let params = [body.postId, hashedPassword, body.title, body.content, body.create_date, image];
-
-    pool.getConnection((error, connection)=>{
-      if(error) {
-        console.log(error);
-        res.status(500).json({message: 'db 커넥션 가져오기 실패.'});
-        connection.release();
-      }
-      else {
-        connection.query(sql, params, (error)=>{
-          if(error) {
-            console.error('Error executing the query: '+ error.stack);
-            res.status(500).json({message: 'db 저장 실패.'});
-            connection.release();
-          }
-          else {
-            res.status(200).json({message: 'db 저장 성공.'})
-            connection.release();
-          }
-        })
-      }
-    })
-  }
-  catch (error) {
-    console.log(error);
-  }
-})
-
-app.post('', (req, res) => { //모든 게시글 출력
-
-  let sql = 'SELECT * FROM POST ORDER BY postId';
-
-  pool.getConnection((error, connection)=>{
-    if(error) {
-      console.log(error);
-    }
-    else {
-      connection.query(sql, params, (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack)
-          res.status(401).json({message: 'db조회 실패'});
-          connection.release();
-        }
-        else {
-          res.render('postList', {result:result[0]});
-          connection.release();
-
-        }
-      })
-    }
-  })
-})
-
-app.post('', (req, res) => { //특정 게시글 출력
-  const postId = req.postId;
-
-  let sql = 'SELECT * FROM POST WHERE postId = ?';
-  let params = [postId];
-
-  pool.getConnection((error, connection)=>{
-    if(error) {
-      console.log(error);
-    }
-    else {
-      connection.query(sql, params, (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack)
-          res.status(401).json({message: 'db조회 실패'});
-          connection.release();
-        }
-        else {
-          let post = result[0]
-          if (!post) {
-            connection.release();
-            return res.status(401).json({ error: 'Invalid postId' });
-          }
-
-          res.render('postList', {post:result[0]});
-          connection.release();
-        }
-      })
-    }
-  })
 })
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
