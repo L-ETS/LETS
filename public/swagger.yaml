@@ -46,6 +46,27 @@ paths:
       responses:
         '201':
           description: 게시물이 성공적으로 작성되었습니다.
+  /posts/criteria:
+    get:
+      tags:
+        - posts
+      summary: 게시물 상태 분류
+      operationId: criteria
+      parameters:
+        - name: criteria
+          in: query
+          description: 게시물 상태 분류
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - 거래 가능
+                - 거래 진행 중
+                - 거래 완료
+              default: 거래 가능
   /posts/{postId}:
     get:
       tags:
