@@ -1,30 +1,24 @@
 // 로그인이 되었을 때 보일 물물교환 메인페이지.
-import {React, useEffect} from 'react';
+import {React, useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from "axios";
 
 function Barter({setIsLogin}) {
   const navigate = useNavigate();
-  const posts = [
-    {
-      postId: 1,
-      userId: 'gunwoo',
-      title: 'IPhone 14 Pro',
-      content: '맥북 m2 air 512GB, 16GB만 교환 가능'
-    },
-    {
-      postId: 2,
-      userId: 'doyoon',
-      title: 'Macbook m1 air',
-      content: '집 한채만 교환 가능'
-    },
-    {
-      postId: 3,
-      userId: 'gyutae',
-      title: 'Macbook m2 air',
-      content: '맥북 프로만 교환 가능'
-    },
-  ];
+  const [posts, setPosts] = useState([]);
+
+  const getBoardList = async () => {
+    try {
+      const response = await axios.get('/trade/boardList');
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.log(error);      
+    }
+  }
+  
+  useEffect(() => {
+    getBoardList();
+  }, [])
   
 
   const logout = async() => {

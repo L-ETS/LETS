@@ -18,6 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 
 //다른 도메인 주소끼리 ajax요청 가능하게함.
 const cors = require('cors');
+const { resolveSoa } = require('dns');
 app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'client/build')));
@@ -130,36 +131,36 @@ app.post('/user/login', (req, res) => {
   const body = {...req.body};
 
   let sql = 'SELECT * FROM USER WHERE userId = ?';
-    let params = [body.userId];
+  let params = [body.userId];
 
-    pool.getConnection((error, connection)=>{
-      if(error) {
-        console.log(error);
-      }
-      else {
-        connection.query(sql, params, (error, result)=>{
-          if(error) {
-            console.error('Error executing the query: '+ error.stack)
-            res.status(401).json({message: 'db조회 실패'});
+  pool.getConnection((error, connection)=>{
+    if(error) {
+      console.log(error);
+    }
+    else {
+      connection.query(sql, params, (error, result)=>{
+        if(error) {
+          console.error('Error executing the query: '+ error.stack)
+          res.status(401).json({message: 'db조회 실패'});
+          connection.release();
+        }
+        else {
+          let user = result[0]
+          //If user not found or password does not match, send error response
+          if (!user || !bcrypt.compareSync(body.password, user.password)) {
             connection.release();
+            return res.status(401).json({ error: 'Invalid username or password' });
           }
-          else {
-            let user = result[0]
-            //If user not found or password does not match, send error response
-            if (!user || !bcrypt.compareSync(body.password, user.password)) {
-              connection.release();
-              return res.status(401).json({ error: 'Invalid username or password' });
-            }
-            
-            req.session.user = user.userId;
-            res.status(200).json({ message: 'Login successful!' });
-            
-            connection.release();
+          
+          req.session.user = user.userId;
+          res.status(200).json({ message: 'Login successful!' });
+          
+          connection.release();
 
-          }
-        })
-      }
-    })
+        }
+      })
+    }
+  })
 })
 
 app.get('/user/logout', (req, res) => {
@@ -181,17 +182,86 @@ app.get('/api/check-session', (req, res) => {
 })
 
 app.post('/trade/upload', isAuthenticated, upload.array('images'), (req, res) => {
-  const uploadedFiles = req.files.map(file => ({
-      originalName: file.originalname,
-      s3ObjectName: file.key,
-      s3Url: file.location
-  }));
 
-  res.status(200).send({
-      message: 'Files uploaded successfully',
-      data: uploadedFiles
-  });
+  // const uploadedFiles = req.files.map(file => ({
+  //     originalName: file.originalname,
+  //     s3ObjectName: file.key,
+  //     s3Url: file.location
+  // }));
+
+  const { title, content } = {...req.body};
+  
+  pool.getConnection((error, connection)=>{
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      //post테이블에 게시글 정보 저장.
+      let sql = 'INSERT INTO post (userId, title, content) VALUES (?, ?, ?)';
+      let params = [req.session.user, title, content];
+      connection.query(sql, params, async (error, result)=>{
+        if(error) {
+          console.error('Error executing the query: '+ error.stack)
+          connection.release();
+          return res.status(500).json({message: 'db문제 발생.'});
+        }
+        else {
+          //image테이블에 이미지 정보 저장.
+          const promises = req.files.map(file => {
+            return new Promise((resolve, reject) => {
+              sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
+              params = [result.insertId, file.originalname, file.location];
+              connection.query(sql, params, (error) => {
+                if (error) {
+                  reject(error);
+                } else {
+                  resolve();
+                }
+              });
+            });
+          });
+
+          try {
+            await Promise.all(promises);
+            connection.release();
+            res.status(200).json({ message: '저장완료' });
+          } catch (error) {
+            console.error('Error executing the query: ' + error.stack);
+            connection.release();
+            return res.status(500).json({ message: 'db문제 발생.' });
+          }
+
+        }
+      })
+    }
+  })
 });
+
+app.get('/trade/boardList', (req, res) => {
+  
+  pool.getConnection((error, connection)=>{
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      let sql = 'SELECT * FROM post';
+      connection.query(sql, (error, result)=>{
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json({message: '조회 성공.', posts: result})
+          connection.release();
+        }
+      })
+    }
+  })
+})
 
 app.get('/user/mypage', isAuthenticated, (req, res) => {
   res.status(200).json({success: true})
