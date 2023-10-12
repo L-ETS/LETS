@@ -10,7 +10,7 @@ const MySQLStore = require("express-mysql-session")(session);
 const cookieParser = require('cookie-parser');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
-const aws = require('aws-sdk');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 //유저가 보낸 object, array데이터 출력해보기 위함.
 app.use(express.json());
@@ -40,22 +40,22 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-const s3 = new aws.S3({
-  accessKeyId: process.env.S3_ACCESSKEY,
-  secretAccessKey: process.env.S3_SECRETKEY,
+const s3 = new S3Client({
   region: process.env.S3_REGION,
+  credentials: {
+    accessKeyId: process.env.S3_ACCESSKEY,
+    secretAccessKey: process.env.S3_SECRETKEY
+}
 });
 
-let upload = multer({
+const upload = multer({
   storage: multerS3({
-    s3: s3,
-    bucket: process.env.S3_BUCKET,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    acl: 'public-read',
-    key: (req, file, cb) => {
-      cb(null, `productImages/${Date.now()}_${file.originalname}`);
-    },
-  }),
+      s3: s3,
+      bucket: process.env.S3_BUCKET,
+      key: function (req, file, cb) {
+          cb(null, 'productImages/' + Date.now().toString() + '-' + file.originalname) 
+      }
+  })
 });
 
 app.use(cookieParser());
@@ -187,7 +187,7 @@ app.get('/user/mypage', isAuthenticated, (req, res) => {
   res.status(200).json({success: true})
 })
 
-app.post('', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
+app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
   const uploadedFiles = req.files.map(file => ({
       originalName: file.originalname,
