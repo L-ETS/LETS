@@ -1,10 +1,25 @@
 // 로그인이 되었을 때 보일 물물교환 메인페이지.
-import React from 'react';
+import {React, useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from "axios";
 
 function Barter({setIsLogin}) {
   const navigate = useNavigate();
+  const [posts, setPosts] = useState([]);
+
+  const getBoardList = async () => {
+    try {
+      const response = await axios.get('/trade/boardList');
+      setPosts(response.data.posts);
+    } catch (error) {
+      console.log(error);      
+    }
+  }
+  
+  useEffect(() => {
+    getBoardList();
+  }, [])
+  
 
   const logout = async() => {
     try {
@@ -53,7 +68,23 @@ function Barter({setIsLogin}) {
 
   return (
     <div>
-      <h1>로그인이 되었을 때 보일 물물교환 메인페이지 입니다.</h1>
+      <h1>당근교환</h1>
+      <button onClick={()=>navigate('/trade/upload')}>물건올리기</button>
+      <div>
+        <ul style={{listStyle: 'none'}}>
+          {
+            posts.map((post)=>{ 
+              return (
+                <li style={{border: '1px solid'}}>
+                  <p>글번호: {post.postId}</p>
+                  <h3>글제목: {post.title}</h3>
+                  <p>작성자: {post.userId}</p>
+                </li>
+              )
+            })
+          }
+        </ul>
+      </div>
 
       <button type="button" onClick={logout}>로그아웃</button>
       <button type="button" onClick={gotoMyPage}>마이페이지</button>
