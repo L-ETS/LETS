@@ -5,7 +5,6 @@ import { Routes, Route } from 'react-router-dom';
 import Register from './pages/Register';
 import Upload from './pages/Upload';
 import React from 'react';
-import UploadProduct from './pages/trade/UploadProduct';
 
 function App() {
   return (

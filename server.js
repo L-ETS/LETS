@@ -184,64 +184,7 @@ app.get('/api/check-session', (req, res) => {
   }
 })
 
-app.post('/trade/upload', isAuthenticated, upload.array('images'), (req, res) => {
-
-  // const uploadedFiles = req.files.map(file => ({
-  //     originalName: file.originalname,
-  //     s3ObjectName: file.key,
-  //     s3Url: file.location
-  // }));
-
-  const { title, content } = {...req.body};
-  
-  pool.getConnection((error, connection)=>{
-    if(error) {
-      console.log(error);
-      return res.status(500).json({ message: 'Database connection error.' });
-    }
-    else {
-      //post테이블에 게시글 정보 저장.
-      let sql = 'INSERT INTO post (userId, title, content) VALUES (?, ?, ?)';
-      let params = [req.session.user, title, content];
-      connection.query(sql, params, async (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack)
-          connection.release();
-          return res.status(500).json({message: 'db문제 발생.'});
-        }
-        else {
-          //image테이블에 이미지 정보 저장.
-          const promises = req.files.map(file => {
-            return new Promise((resolve, reject) => {
-              sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
-              params = [result.insertId, file.originalname, file.location];
-              connection.query(sql, params, (error) => {
-                if (error) {
-                  reject(error);
-                } else {
-                  resolve();
-                }
-              });
-            });
-          });
-
-          try {
-            await Promise.all(promises);
-            connection.release();
-            res.status(200).json({ message: '저장완료' });
-          } catch (error) {
-            console.error('Error executing the query: ' + error.stack);
-            connection.release();
-            return res.status(500).json({ message: 'db문제 발생.' });
-          }
-
-        }
-      })
-    }
-  })
-});
-
-app.get('/trade/boardList', (req, res) => {
+app.get('/posts', (req, res) => {
   
   pool.getConnection((error, connection)=>{
     if(error) {
@@ -275,18 +218,6 @@ app.get('/posts/upload', isAuthenticated, (req, res) => {
 })
 
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
-
-  const uploadedFiles = req.files.map(file => ({
-      originalName: file.originalname,
-      s3ObjectName: file.key,
-      s3Url: file.location
-  }));
-  uploadedFiles.map((file=>{
-    console.log(`file: ${file}`);
-    console.log(`file.originalname: ${JSON.stringify(file.originalName)}`);
-    console.log(`file key: ${file.key}`);
-    console.log(`file location: ${file.location}`);
-  }))  
 
   const { title, content } = {...req.body};
   

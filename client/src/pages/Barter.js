@@ -9,7 +9,7 @@ function Barter({setIsLogin}) {
 
   const getBoardList = async () => {
     try {
-      const response = await axios.get('/trade/boardList');
+      const response = await axios.get('/posts');
       setPosts(response.data.posts);
     } catch (error) {
       console.log(error);      
@@ -69,7 +69,9 @@ function Barter({setIsLogin}) {
   return (
     <div>
       <h1>당근교환</h1>
-      <button onClick={()=>navigate('/trade/upload')}>물건올리기</button>
+      <button type="button" onClick={logout}>로그아웃</button>
+      <button type="button" onClick={gotoMyPage}>마이페이지</button>
+      <button type="button" onClick={postUpload}>게시글 쓰기</button>
       <div>
         <ul style={{listStyle: 'none'}}>
           {
@@ -85,10 +87,6 @@ function Barter({setIsLogin}) {
           }
         </ul>
       </div>
-
-      <button type="button" onClick={logout}>로그아웃</button>
-      <button type="button" onClick={gotoMyPage}>마이페이지</button>
-      <button type="button" onClick={postUpload}>게시글 쓰기</button>
     </div>
   )
 }
