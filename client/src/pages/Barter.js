@@ -68,21 +68,43 @@ function Barter({setIsLogin}) {
 
   return (
     <div>
-      <h1>당근교환</h1>
+      <h1>등록된 물건</h1>
       <button type="button" onClick={logout}>로그아웃</button>
       <button type="button" onClick={gotoMyPage}>마이페이지</button>
       <button type="button" onClick={postUpload}>게시글 쓰기</button>
       <div>
         <ul style={{listStyle: 'none'}}>
           {
-            posts.map((post)=>{ 
-              return (
-                <li style={{border: '1px solid'}}>
-                  <p>글번호: {post.postId}</p>
-                  <h3>글제목: {post.title}</h3>
-                  <p>작성자: {post.userId}</p>
-                </li>
-              )
+            posts.map((post, index)=>{ 
+              
+              let create = new Date(post.create_date);
+              let update = new Date(post.update_date);
+              
+              //create보다 update시점이 더 미래일 때. 즉, 글 수정을 한 게시글일 때.
+              if(create < update) {
+                //수정일을 표기하기.
+                return (
+                  <li style={{border: '1px solid'}} key={index}>
+                    <h3>제목: {post.title}</h3>
+                    <p>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</p>
+                    <p>작성자: {post.userId}</p>
+                    <p>조회수: {post.view_count}</p>
+                  </li>
+                )
+              }
+              //글 수정을 하지 않았을 때.
+              else {
+                //작성일을 표기하기.
+                return (
+                  <li style={{border: '1px solid'}} key={index}>
+                    <h3>제목: {post.title}</h3>
+                    <p>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</p>
+                    <p>작성자: {post.userId}</p>
+                    <p>조회수: {post.view_count}</p>
+                  </li>
+                )
+              }
+              
             })
           }
         </ul>
