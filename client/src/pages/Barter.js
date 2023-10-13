@@ -37,12 +37,27 @@ function Barter({setIsLogin}) {
     }
   }
 
+  const postUpload = async() => {
+    try {
+      const response = await axios.get('/posts/upload');
+      if(response.status === 200 && response.data.success) {
+        navigate('/posts/upload');
+      }
+      
+    } catch(error) {
+      console.log(error);
+      alert('잘못된 접근입니다.');
+      navigate('/');
+    }
+  }
+
   return (
     <div>
       <h1>로그인이 되었을 때 보일 물물교환 메인페이지 입니다.</h1>
 
       <button type="button" onClick={logout}>로그아웃</button>
       <button type="button" onClick={gotoMyPage}>마이페이지</button>
+      <button type="button" onClick={postUpload}>게시글 쓰기</button>
     </div>
   )
 }

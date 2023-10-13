@@ -187,6 +187,10 @@ app.get('/user/mypage', isAuthenticated, (req, res) => {
   res.status(200).json({success: true})
 })
 
+app.get('/posts/upload', isAuthenticated, (req, res) => {
+  res.status(200).json({success: true})
+})
+
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
   const uploadedFiles = req.files.map(file => ({
@@ -197,7 +201,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
   uploadedFiles.map((file=>{
     console.log(`file: ${file}`);
     console.log(`file.originalname: ${JSON.stringify(file.originalName)}`);
-    
+    console.log(`file key: ${file.key}`);
+    console.log(`file location: ${file.location}`);
   }))  
 
   const { title, content } = {...req.body};
