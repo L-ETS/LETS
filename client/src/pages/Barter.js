@@ -84,7 +84,7 @@ function Barter({setIsLogin}) {
               if(create < update) {
                 //수정일을 표기하기.
                 return (
-                  <li style={{border: '1px solid'}} key={index}>
+                  <li style={{border: '1px solid'}} key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
                     <h3>제목: {post.title}</h3>
                     <p>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</p>
                     <p>작성자: {post.userId}</p>
@@ -96,7 +96,7 @@ function Barter({setIsLogin}) {
               else {
                 //작성일을 표기하기.
                 return (
-                  <li style={{border: '1px solid'}} key={index}>
+                  <li style={{border: '1px solid'}} key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
                     <h3>제목: {post.title}</h3>
                     <p>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</p>
                     <p>작성자: {post.userId}</p>

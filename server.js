@@ -53,6 +53,7 @@ const upload = multer({
   storage: multerS3({
       s3: s3,
       bucket: process.env.S3_BUCKET,
+      acl: 'public-read',
       key: function (req, file, cb) {
           cb(null, 'productImages/' + Date.now().toString() + '-' + file.originalname) 
       }
@@ -268,8 +269,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
   })
 });
 
-app.post('',isAuthenticated, (req, res) => { //특정 게시글 출력
-  const postId = req.body.postId;
+app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출력
+  const postId = req.params.postId;
 
   let sql = 'SELECT * FROM POST WHERE postId = ?';
   let params = [postId];
@@ -288,10 +289,7 @@ app.post('',isAuthenticated, (req, res) => { //특정 게시글 출력
         else {
           let post = result[0]
           let images;
-          if (!post) {
-            connection.release();
-            return res.status(401).json({ error: 'Invalid postId' });
-          }
+          
           sql = 'SELECT * FROM image WHERE postId = ?';
           params = [postId];
           connection.query(sql, params, (error, result) => {
@@ -300,12 +298,14 @@ app.post('',isAuthenticated, (req, res) => { //특정 게시글 출력
               res.status(401).json({message: 'db조회 실패'});
               connection.release();
             } else {
-              images = result[0];
+              images = result;
+              res.status(200).json({post: post, images: images});
+              
+              connection.release();
             }
           });
 
-          res.render('post', {post:result[0], images:images});
-          connection.release();
+          
         }
       })
     }
