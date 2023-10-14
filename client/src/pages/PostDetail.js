@@ -7,6 +7,7 @@ function PostDetail() {
 
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
+  const [mainImageSrc, setMainImageSrc] = useState('');
   
   useEffect(() => {
     axios.get(`/posts/${postId}`)
@@ -14,7 +15,7 @@ function PostDetail() {
 
         setImages(response.data.images);
         setPost(response.data.post);
-        
+        setMainImageSrc(response.data.images[0].imageUrl)
       })
       .catch(error => {
         alert(error);
@@ -24,20 +25,27 @@ function PostDetail() {
   
 
   return (
-    <div>    
-        <h2>{post.title}</h2>
+    <div>
+      <h2>{post.title}</h2>
+      <div style={{width: '410px', height: '410px'}}>
+        <img style={{height: '410px'}} src={mainImageSrc} alt="Main Preview" fluid />
+      </div>
         {
           images.map((image, index)=>{
             return (
-              <div key={index}>
-                <img src={image.imageUrl} />
+
+              <div key={index} style={{display:"inline-block"}}>
+                <img  width='40px' src={image.imageUrl} onMouseEnter={() => setMainImageSrc(image.imageUrl)}/>
               </div>
+              
             )
           })
         }
-        <div>
-          {post.content}
-        </div>
+      
+      <div>
+        {post.content}
+      </div>
+    
     </div>
   )
 }
