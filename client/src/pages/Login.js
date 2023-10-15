@@ -23,7 +23,6 @@ function Login({setIsLogin}) {
       // 로그인 성공했을 때의 코드 작성.
       // For example, you might store the JWT token in local storage and redirect the user to the home page
       if(response.status === 200) {
-        alert('로그인 성공!');
         setIsLogin(true);
         navigate('/');
       }
