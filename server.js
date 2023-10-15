@@ -299,7 +299,23 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
               connection.release();
             } else {
               images = result;
-              res.status(200).json({post: post, images: images});
+
+              sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
+              params = [postId, req.session.user];
+              connection.query(sql, params, (error,results) => {
+                if (error) {
+                  res.status(500).json({ error: 'Failed to update view count.' });
+                  return;
+                }
+          
+                if (results.affectedRows === 0) {
+                  // This means the post was the user's own post and the view_count was not increased
+                  res.status(200).json({ message: 'Viewed your own post.', post: post, images: images});
+                } else {
+                  // The view_count was increased
+                  res.status(200).json({ message: 'View count updated successfully.', post: post, images: images});
+                }
+              })
               
               connection.release();
             }
