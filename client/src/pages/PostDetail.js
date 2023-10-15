@@ -48,15 +48,15 @@ function PostDetail() {
         {
           create < update ?
           <div>
-            <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>
-            <br/>
             <span>작성자: {post.userId}</span>
+            <br/>
+            <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>            
           </div>
           :
           <div>
-            <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
-            <br/>
             <span>작성자: {post.userId}</span>
+            <br/>
+            <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
           </div>
         }
       </div>
