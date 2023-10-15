@@ -8,7 +8,10 @@ function PostDetail() {
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
   const [mainImageSrc, setMainImageSrc] = useState('');
-  
+
+  const create = new Date(post.create_date);
+  const update = new Date(post.update_date);
+
   useEffect(() => {
     axios.get(`/posts/${postId}`)
       .then(response => {
@@ -41,10 +44,26 @@ function PostDetail() {
             )
           })
         }
-      
-      <div>
-        {post.content}
+      <div style={{margin: '10px 0', borderBottom: '1px solid'}}>
+        {
+          create < update ?
+          <div>
+            <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>
+            <br/>
+            <span>작성자: {post.userId}</span>
+          </div>
+          :
+          <div>
+            <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
+            <br/>
+            <span>작성자: {post.userId}</span>
+          </div>
+        }
       </div>
+      
+      <p>
+        {post.content}
+      </p>
     
     </div>
   )
