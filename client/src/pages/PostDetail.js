@@ -36,7 +36,7 @@ function PostDetail() {
       {
         isMyPost ? 
         <div>
-          <Button variant="primary">수정</Button>
+          <Button variant="success">수정</Button>
           <Button variant="danger">삭제</Button>
         </div>
         : 

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom'
 import '../styles/login.css'; 
 import axios from "axios";
+import Button from 'react-bootstrap/Button';
 
 function Login({setIsLogin}) {
   
@@ -64,8 +65,10 @@ function Login({setIsLogin}) {
             required
           />
         </div>
-        <button type="submit">로그인</button>
-        <button type="button" onClick={()=>navigate('/user/register')}>회원가입</button>
+        {/* <button type="submit">로그인</button>
+        <button type="button" onClick={()=>navigate('/user/register')}>회원가입</button> */}
+        <Button variant="success" type="submit">로그인</Button>
+        <Button variant="success" type="button" onClick={()=>navigate('/user/register')}>회원가입</Button>
       </form>
       
     </div>

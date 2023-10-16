@@ -2,6 +2,7 @@
 import {React, useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from "axios";
+import Button from 'react-bootstrap/Button';
 
 function Barter({setIsLogin}) {
   const navigate = useNavigate();
@@ -68,10 +69,12 @@ function Barter({setIsLogin}) {
 
   return (
     <div>
-      <h1>등록된 물건</h1>
-      <button type="button" onClick={logout}>로그아웃</button>
-      <button type="button" onClick={gotoMyPage}>마이페이지</button>
-      <button type="button" onClick={postUpload}>게시글 쓰기</button>
+      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+        <span><h1>등록된 물건</h1></span>
+        <span><Button variant="success" onClick={logout}>로그아웃</Button></span>
+        
+      </div>
+      
       <div>
         <ul style={{listStyle: 'none'}}>
           {

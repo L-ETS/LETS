@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
+import Button from 'react-bootstrap/Button';
 
 function Upload() {
   const [title, setTitle] = useState('');
@@ -104,7 +105,7 @@ function Upload() {
             </div>
           ))}
         </div>
-        <button type="submit">게시글 작성</button>
+        <Button variant="success" type="submit">게시글 작성</Button>
       </form>
     </div>
   );

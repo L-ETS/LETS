@@ -3,6 +3,7 @@ import '../styles/register.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
+import Button from 'react-bootstrap/Button';
 
 function Register() {
 
@@ -172,8 +173,7 @@ function Register() {
             <option value="부산">부산</option>
           </select>
         </div>
-
-        <button type="submit">회원가입</button>
+        <Button variant="success" type="submit">회원가입</Button>
       </form>
     </div>
   );
