@@ -185,7 +185,7 @@ app.get('/api/check-session', (req, res) => {
   }
 })
 
-app.get('/posts', (req, res) => {
+app.get('/posts', isAuthenticated, (req, res) => {
   
   pool.getConnection((error, connection)=>{
     if(error) {
@@ -274,6 +274,7 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
 
   let sql = 'SELECT * FROM POST WHERE postId = ?';
   let params = [postId];
+  let isMyPost = false;
 
   pool.getConnection((error, connection)=>{
     if(error) {
@@ -290,6 +291,11 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
           let post = result[0]
           let images;
           
+          
+          if(post.userId === req.session.user) {
+            isMyPost = true;
+          }
+
           sql = 'SELECT * FROM image WHERE postId = ?';
           params = [postId];
           connection.query(sql, params, (error, result) => {
@@ -310,10 +316,10 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
           
                 if (results.affectedRows === 0) {
                   // This means the post was the user's own post and the view_count was not increased
-                  res.status(200).json({ message: 'Viewed your own post.', post: post, images: images});
+                  res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost});
                 } else {
                   // The view_count was increased
-                  res.status(200).json({ message: 'View count updated successfully.', post: post, images: images});
+                  res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost});
                 }
               })
               

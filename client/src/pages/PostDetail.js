@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import Button from 'react-bootstrap/Button';
 
 function PostDetail() {
   const { postId } = useParams();
@@ -8,6 +9,7 @@ function PostDetail() {
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
   const [mainImageSrc, setMainImageSrc] = useState('');
+  const [isMyPost, setIsMyPost] = useState(false);
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
@@ -18,7 +20,8 @@ function PostDetail() {
 
         setImages(response.data.images);
         setPost(response.data.post);
-        setMainImageSrc(response.data.images[0].imageUrl)
+        setMainImageSrc(response.data.images[0].imageUrl);
+        setIsMyPost(response.data.isMyPost);
       })
       .catch(error => {
         alert(error);
@@ -30,6 +33,15 @@ function PostDetail() {
   return (
     <div>
       <h2>{post.title}</h2>
+      {
+        isMyPost ? 
+        <div>
+          <Button variant="primary">수정</Button>
+          <Button variant="danger">삭제</Button>
+        </div>
+        : 
+        null
+      }
       <div style={{width: '410px', height: '410px'}}>
         <img style={{height: '410px'}} src={mainImageSrc} alt="Main Preview" fluid />
       </div>
