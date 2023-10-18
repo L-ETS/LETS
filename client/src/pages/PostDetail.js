@@ -6,6 +6,7 @@ import '../styles/postdetail.css';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Spinner from 'react-bootstrap/Spinner';
 
 function PostDetail() {
   const { postId } = useParams();
@@ -14,6 +15,7 @@ function PostDetail() {
   const [images, setImages] = useState([]);
   const [mainImageSrc, setMainImageSrc] = useState('');
   const [isMyPost, setIsMyPost] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
@@ -31,23 +33,25 @@ function PostDetail() {
         alert(error);
         console.log(error);
       })
+      .finally(()=>{
+        setLoading(false);
+      })
   }, [postId]);
   
+  if(loading) {
+    return (
+      <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}>
+        <Spinner animation="border" />
+      </div>
+    );
+  }
 
   return (
     <Container className="container">
       <Row>
         <Col>
           <h2>{post.title}</h2>
-          {
-            isMyPost ? 
-            <div>
-              <Button variant="success">수정</Button>
-              <Button variant="danger">삭제</Button>
-            </div>
-            : 
-            null
-          }
+          
           <div >
             <img style={{maxWidth: '100%', height: '410px'}} src={mainImageSrc} alt="Main Preview" fluid />
           </div>
@@ -68,15 +72,37 @@ function PostDetail() {
             {
               create < update ?
               <div>
-                <span>작성자: {post.userId}</span>
-                <br/>
-                <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>            
+                <div>
+                  <span>작성자: {post.userId}</span>
+                  <br/>
+                  <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>        
+                </div>  
+                {
+                  isMyPost ? 
+                  <div>
+                    <Button variant="success">수정</Button>
+                    <Button variant="danger">삭제</Button>
+                  </div>
+                  : 
+                  null
+                }  
               </div>
               :
-              <div>
-                <span>작성자: {post.userId}</span>
-                <br/>
-                <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
+              <div style={{display: "flex", justifyContent: "space-between"}}>
+                <div>
+                  <span>작성자: {post.userId}</span>
+                  <br/>
+                  <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
+                </div>
+                {
+                  isMyPost ? 
+                  <div>
+                    <Button variant="success">수정</Button>
+                    <Button variant="danger">삭제</Button>
+                  </div>
+                  : 
+                  null
+                } 
               </div>
             }
           </div>

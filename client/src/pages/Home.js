@@ -26,7 +26,9 @@ function Home() {
 
   if(loading) {
     return (
-      <Spinner animation="border" />
+      <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}>
+        <Spinner animation="border" />
+      </div>
     );
   }
 
