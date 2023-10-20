@@ -5,16 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import React from 'react';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
-import RegionSelector from '../components/RegionSelector';
 
 function Register() {
+
+  const regions = {
+    
+    '경기': ['수원시', '고양시', '성남시', '용인시', '부천시', '안산시', '남양주시', '안양시', '화성시', '평택시', '의정부시', '시흥시', '파주시', '김포시', '광명시', '광주시', '군포시', '오산시', '이천시', '양주시', '안성시', '구리시', '포천시', '의왕시', '하남시', '여주시', '양평군', '동두천시', '과천시', '가평군', '연천군', ],
+
+    '서울': ['강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구', '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구', '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'],
+  
+  };
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [passwordCheck, setPasswordCheck] = useState('');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
-  const [wideRegion, setwideRegion] = useState('');
+  const [wideRegion, setWideRegion] = useState('');
   const [detailRegion, setDetailRegion] = useState('');
   
   const [userIdError, setUserIdError] = useState('');
@@ -80,12 +87,7 @@ function Register() {
       setEmailError('');
     }
 
-    if(wideRegion === '' || detailRegion === '') {
-      setRegionError('지역을 선택해주세요.')
-      return;
-    } else {
-      setRegionError('');
-    }
+    
 
     // 백엔드에서 데이터를 처리할 url로 변경
     axios.post('/user/register', requestData)
@@ -168,7 +170,51 @@ function Register() {
         <div className="input-group">
           <label htmlFor="region">거래 희망 지역</label>
 
-          <RegionSelector wideRegion = {wideRegion}  setwideRegion = {setwideRegion} detailRegion ={detailRegion} setDetailRegion = {setDetailRegion}/>
+          {/* <RegionSelector wideRegion = {wideRegion}  setWideRegion = {setWideRegion} detailRegion ={detailRegion} setDetailRegion = {setDetailRegion}/> */}
+
+          <select 
+            value={wideRegion}
+            onChange={(e) => {
+              setWideRegion(e.target.value);
+              setDetailRegion(''); // Clear the sub-region when the main region changes
+            }}
+            onBlur={()=>{
+              if(!wideRegion || !detailRegion) {
+                setRegionError('지역을 선택해주세요.')
+                return;
+              } else {
+                setRegionError('');
+              }
+            }}
+            >
+            <option value="">선택</option>
+            {Object.keys(regions).map(region => (
+                <option key={region} value={region}>{region}</option>
+            ))}
+          </select>
+
+          <select 
+            value={detailRegion}
+            onChange={(e) => {
+              setDetailRegion(e.target.value)
+            }}
+            onBlur={()=>{
+              if(!wideRegion || !detailRegion) {
+                setRegionError('지역을 선택해주세요.')
+                return;
+              } else {
+                setRegionError('');
+              }
+            }}
+            disabled={!wideRegion}>
+            <option value="">선택</option>
+            {
+              wideRegion ?
+              regions[wideRegion].map(region => (
+                  <option key={region} value={region}>{region}</option>
+              )) : null
+            }
+          </select>
           {regionError && <p>{regionError}</p>}
 
         </div>

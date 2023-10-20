@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import ListGroup from 'react-bootstrap/ListGroup';
 
 function Barter({setIsLogin}) {
+  
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [tempRegionList, setTempRegionList] = useState(['구갈동', '서현동', '야탑동'])
