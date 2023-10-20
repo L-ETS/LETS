@@ -185,7 +185,33 @@ app.get('/api/check-session', (req, res) => {
   }
 })
 
+app.get('/api/getUserRegion', isAuthenticated, (req, res) => {
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      let sql = `SELECT * FROM user WHERE userId = '${req.session.user}'`
+      connection.query(sql, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json({message: '조회 성공.', user: result[0]})
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
 app.get('/posts', isAuthenticated, (req, res) => {
+  
+  const {wideRegion, detailRegion} = req.query;
   
   pool.getConnection((error, connection)=>{
     if(error) {
@@ -194,7 +220,8 @@ app.get('/posts', isAuthenticated, (req, res) => {
       connection.release();
     }
     else {
-      let sql = 'SELECT * FROM post';
+      let sql = `SELECT * FROM post WHERE wideRegion = '${wideRegion}' AND detailRegion = '${detailRegion}'`;
+
       connection.query(sql, (error, result)=>{
         if(error) {
           console.error('Error executing the query: '+ error.stack);
@@ -203,6 +230,7 @@ app.get('/posts', isAuthenticated, (req, res) => {
         }
         else {
           res.status(200).json({message: '조회 성공.', posts: result})
+
           connection.release();
         }
       })

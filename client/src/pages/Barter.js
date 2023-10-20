@@ -7,27 +7,60 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import ListGroup from 'react-bootstrap/ListGroup';
 
 function Barter({setIsLogin}) {
+  const regions = {
+    
+    '경기': ['수원시', '고양시', '성남시', '용인시', '부천시', '안산시', '남양주시', '안양시', '화성시', '평택시', '의정부시', '시흥시', '파주시', '김포시', '광명시', '광주시', '군포시', '오산시', '이천시', '양주시', '안성시', '구리시', '포천시', '의왕시', '하남시', '여주시', '양평군', '동두천시', '과천시', '가평군', '연천군', ],
+
+    '서울': ['강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구', '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구', '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'],
   
+  };
+
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
-  const [tempRegionList, setTempRegionList] = useState(['구갈동', '서현동', '야탑동'])
-  const [region, setRegion] = useState(tempRegionList[0]);
-  const sortList = ['최신순', '인기순']; //인기순은 조회수순.
-  const [sort, setSort] = useState(sortList[0]);
-  
+  const [wideRegion, setWideRegion] = useState('');
+  const [detailRegion, setDetailRegion] = useState('');
+  const [manualControl, setManualControl] = useState(false);
 
-  const getBoardList = async () => {
+  const getUserRegion = async () => {
     try {
-      const response = await axios.get('/posts');
+      const response = await axios.get('/api/getUserRegion');
+      const userWideRegion = response.data.user.wideRegion;
+      const userDetailRegion = response.data.user.detailRegion;
+
+      setWideRegion(userWideRegion);
+      setDetailRegion(userDetailRegion);
+      getBoardList(userWideRegion, userDetailRegion);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const getBoardList = async (wideRegion, detailRegion) => {
+    const reqData = {
+      wideRegion: wideRegion,
+      detailRegion: detailRegion
+    }
+
+    try {
+      const response = await axios.get('/posts', {
+        params: reqData
+      });
       setPosts(response.data.posts);
     } catch (error) {
       console.log(error);      
     }
   }
+
   
   useEffect(() => {
-    getBoardList();
-  }, [])
+    if(manualControl) {
+      getBoardList(wideRegion, detailRegion);
+    }
+    else {
+      getUserRegion();
+    }
+    
+  }, [manualControl, wideRegion, detailRegion])
   
 
   const logout = async() => {
@@ -81,14 +114,14 @@ function Barter({setIsLogin}) {
         <div style={{display: 'flex'}}>
           <Dropdown style={{marginRight: '10px'}}>
             <Dropdown.Toggle variant="success" id="dropdown-basic">
-              {region}
+              {wideRegion}
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
               {
-                tempRegionList.map((tempRegion, index)=>{
+                Object.keys(regions).map((wide, index)=>{
                   return (
-                    <Dropdown.Item key={index} onClick={()=>{setRegion(tempRegion)}}>{tempRegion}</Dropdown.Item>
+                    <Dropdown.Item key={index} onClick={()=>{setWideRegion(wide);setManualControl(true);setDetailRegion('선택');}}>{wide}</Dropdown.Item>
                   )
                 })
               }
@@ -97,16 +130,17 @@ function Barter({setIsLogin}) {
           
           <Dropdown style={{marginRight: '10px'}}>
             <Dropdown.Toggle variant="success" id="dropdown-basic">
-              {sort}
+              {detailRegion}
             </Dropdown.Toggle>
 
             <Dropdown.Menu>
               {
-                sortList.map((sort, index)=>{
+                wideRegion ?
+                regions[wideRegion].map((detail, index)=>{
                   return (
-                    <Dropdown.Item key={index} onClick={()=>{setSort(sort)}}>{sort}</Dropdown.Item>
+                    <Dropdown.Item key={index} onClick={()=>{setDetailRegion(detail);setManualControl(true);}}>{detail}</Dropdown.Item>
                   )
-                })
+                }) : null
               }
             </Dropdown.Menu>
           </Dropdown>
