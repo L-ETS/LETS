@@ -10,7 +10,10 @@ function Barter({setIsLogin}) {
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [tempRegionList, setTempRegionList] = useState(['구갈동', '서현동', '야탑동'])
-  const [region, setRegion] = useState('구갈동');
+  const [region, setRegion] = useState(tempRegionList[0]);
+  const sortList = ['최신순', '인기순']; //인기순은 조회수순.
+  const [sort, setSort] = useState(sortList[0]);
+  
 
   const getBoardList = async () => {
     try {
@@ -73,22 +76,40 @@ function Barter({setIsLogin}) {
 
   return (
     <div className='container'>
-      <div style={{display: 'flex', justifyContent: 'space-between'}}>
-        <Dropdown>
-          <Dropdown.Toggle variant="success" id="dropdown-basic">
-            {region}
-          </Dropdown.Toggle>
+      <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
+        <div style={{display: 'flex'}}>
+          <Dropdown style={{marginRight: '10px'}}>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              {region}
+            </Dropdown.Toggle>
 
-          <Dropdown.Menu>
-            {
-              tempRegionList.map((tempRegion, index)=>{
-                return (
-                  <Dropdown.Item key={index} onClick={()=>{setRegion(tempRegion)}}>{tempRegion}</Dropdown.Item>
-                )
-              })
-            }
-          </Dropdown.Menu>
-        </Dropdown>
+            <Dropdown.Menu>
+              {
+                tempRegionList.map((tempRegion, index)=>{
+                  return (
+                    <Dropdown.Item key={index} onClick={()=>{setRegion(tempRegion)}}>{tempRegion}</Dropdown.Item>
+                  )
+                })
+              }
+            </Dropdown.Menu>
+          </Dropdown>
+          
+          <Dropdown style={{marginRight: '10px'}}>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              {sort}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {
+                sortList.map((sort, index)=>{
+                  return (
+                    <Dropdown.Item key={index} onClick={()=>{setSort(sort)}}>{sort}</Dropdown.Item>
+                  )
+                })
+              }
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
         <span><Button variant="success" onClick={logout}>로그아웃</Button></span>
         
       </div>

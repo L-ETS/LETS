@@ -101,8 +101,8 @@ app.post('/user/register', async (req, res) => {
     //비밀번호 해시
     const hashedPassword = await bcrypt.hash(body.password, saltRounds);
 
-    let sql = 'INSERT INTO USER(userId,password,nickname,email,region) VALUES(?,?,?,?,?)'
-    let params = [body.userId, hashedPassword, body.nickname, body.email, body.region];
+    let sql = 'INSERT INTO USER(userId,password,nickname,email,wideRegion,detailRegion) VALUES(?,?,?,?,?,?)'
+    let params = [body.userId, hashedPassword, body.nickname, body.email, body.wideRegion, body.detailRegion];
 
     pool.getConnection((error, connection)=>{
       if(error) {

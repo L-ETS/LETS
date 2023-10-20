@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
 import Button from 'react-bootstrap/Button';
+import Dropdown from 'react-bootstrap/Dropdown';
+import RegionSelector from '../components/RegionSelector';
 
 function Register() {
 
@@ -12,21 +14,23 @@ function Register() {
   const [passwordCheck, setPasswordCheck] = useState('');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
-  const [region, setRegion] = useState('');
-
+  const [wideRegion, setwideRegion] = useState('');
+  const [detailRegion, setDetailRegion] = useState('');
+  
   const [userIdError, setUserIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [passwordCheckError, setPasswordCheckError] = useState('');
   const [nicknameError, setNicknameError] = useState('');
   const [emailError, setEmailError] = useState('');
-  //const [regionError, setRegionError] = useState('');
+  const [regionError, setRegionError] = useState('');
 
   const requestData = {
     userId: userId,
     password: password,
     nickname: nickname,
     email: email,
-    region: region
+    wideRegion: wideRegion,
+    detailRegion: detailRegion
   };
 
   const [data, setData] = useState({});
@@ -74,6 +78,13 @@ function Register() {
       return;
     } else {
       setEmailError('');
+    }
+
+    if(wideRegion === '' || detailRegion === '') {
+      setRegionError('지역을 선택해주세요.')
+      return;
+    } else {
+      setRegionError('');
     }
 
     // 백엔드에서 데이터를 처리할 url로 변경
@@ -156,22 +167,10 @@ function Register() {
 
         <div className="input-group">
           <label htmlFor="region">거래 희망 지역</label>
-          <select
-            id="region"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            required
-          >
-            <option value="">지역 선택</option>
-            <option value="서울">서울</option>
-            <option value="경기">경기</option>
-            <option value="인천">인천</option>
-            <option value="대전">대전</option>
-            <option value="대구">대구</option>
-            <option value="광주">광주</option>
-            <option value="울산">울산</option>
-            <option value="부산">부산</option>
-          </select>
+
+          <RegionSelector wideRegion = {wideRegion}  setwideRegion = {setwideRegion} detailRegion ={detailRegion} setDetailRegion = {setDetailRegion}/>
+          {regionError && <p>{regionError}</p>}
+
         </div>
         <Button variant="success" type="submit">회원가입</Button>
       </form>
