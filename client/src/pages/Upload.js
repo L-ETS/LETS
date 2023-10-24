@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
+import regions from './regionData';
+import '../styles/Upload.css';
+import Form from 'react-bootstrap/Form';
 
 function Upload() {
   const [title, setTitle] = useState('');
@@ -66,48 +69,52 @@ function Upload() {
   };
 
   return (
-    <div className="upload-group">
-      <h1>게시글 작성</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="title">제목</label>
-          <input
-            type="text"
-            id="title"
-            name="title"
-            value={title}
-            onChange={handleTitleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="content">내용</label>
-          <textarea
-            id="content"
-            name="content"
-            value={content}
-            onChange={handleContentChange}
-            required
-          ></textarea>
-        </div>
-        <div className="form-group">
-          <label htmlFor="image">이미지 파일</label>
-          <input
-            type="file"
-            id="image"
-            name="image"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-          />
-          {imagePreviews.map((image, index) => (
-            <div key={index}>
-              <img src={image}/>
-            </div>
-          ))}
-        </div>
-        <Button variant="success" type="submit">게시글 작성</Button>
-      </form>
+    <div className="container">
+      <h4>게시글 작성</h4>
+
+      <Form onSubmit={handleSubmit}>
+     
+        <Form.Label htmlFor="title">제목</Form.Label>
+        <Form.Control 
+          type="text" 
+          id='title' 
+          name='title'
+          value={title} 
+          onChange={handleTitleChange} 
+          required
+        />
+    
+        <Form.Label htmlFor="content">내용</Form.Label>
+        <Form.Control 
+          as="textarea" rows={15}
+          id="content"
+          name="content"
+          value={content}
+          onChange={handleContentChange}
+          required
+        />
+
+        <Form.Label htmlFor="image">이미지 파일</Form.Label>
+        <Form.Control 
+          type="file"
+          id="image"
+          name="image"
+          accept="image/*"
+          multiple
+          onChange={handleImageChange}
+        />
+        
+      </Form>
+      
+      <div style={{display: 'flex' }}>
+
+        {imagePreviews.map((image, index) => (
+          <img src={image} key={index} style={{width: '150px'}}/>
+          
+        ))}
+      </div>
+      <Button variant="success" type="submit">게시글 작성</Button>
+      
     </div>
   );
 }
