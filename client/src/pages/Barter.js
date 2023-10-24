@@ -61,7 +61,6 @@ function Barter({setIsLogin}) {
     try {
       const response = await axios.get('/user/logout');
       if(response.status === 200 && response.data.success) {
-        alert('로그아웃 되었습니다.');
         setIsLogin(false);
         navigate('/');
       }
