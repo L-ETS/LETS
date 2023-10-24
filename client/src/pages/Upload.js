@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
@@ -12,8 +12,29 @@ function Upload() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+  const [wideRegion, setWideRegion] = useState('');
+  const [detailRegion, setDetailRegion] = useState('');
+  const [manualControl, setManualControl] = useState(false);
 
   const navigate = useNavigate();
+
+  const getUserRegion = async () => {
+    try {
+      const response = await axios.get('/api/getUserRegion');
+      const userWideRegion = response.data.user.wideRegion;
+      const userDetailRegion = response.data.user.detailRegion;
+
+      setWideRegion(userWideRegion);
+      setDetailRegion(userDetailRegion);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  useEffect(() => {
+    getUserRegion();
+  }, [])
 
   const handleTitleChange = (e) => {
     setTitle(e.target.value);
@@ -47,6 +68,8 @@ function Upload() {
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
+    formData.append('wideRegion', wideRegion);
+    formData.append('detailRegion', detailRegion);
     images.forEach((image, index) => {
       formData.append('images', image);
     });
@@ -70,9 +93,47 @@ function Upload() {
 
   return (
     <div className="container">
-      <h4>게시글 작성</h4>
+      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+        <div style={{display: 'flex'}}>
+          <Dropdown style={{marginRight: '10px'}}>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              {wideRegion}
+            </Dropdown.Toggle>
 
-      <Form onSubmit={handleSubmit}>
+            <Dropdown.Menu>
+              {
+                Object.keys(regions).map((wide, index)=>{
+                  return (
+                    <Dropdown.Item key={index} onClick={()=>{setWideRegion(wide);setManualControl(true);setDetailRegion('선택');}}>{wide}</Dropdown.Item>
+                  )
+                })
+              }
+            </Dropdown.Menu>
+          </Dropdown>
+            
+          <Dropdown style={{marginRight: '10px'}}>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              {detailRegion}
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              {
+                wideRegion ?
+                regions[wideRegion].map((detail, index)=>{
+                  return (
+                    <Dropdown.Item key={index} onClick={()=>{setDetailRegion(detail);setManualControl(true);}}>{detail}</Dropdown.Item>
+                  )
+                }) : null
+              }
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+        <div>
+          <Button variant="success" onClick={handleSubmit}>게시글 작성</Button>
+        </div>
+      </div>
+
+      <Form>
      
         <Form.Label htmlFor="title">제목</Form.Label>
         <Form.Control 
@@ -113,7 +174,6 @@ function Upload() {
           
         ))}
       </div>
-      <Button variant="success" type="submit">게시글 작성</Button>
       
     </div>
   );

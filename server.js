@@ -248,7 +248,7 @@ app.get('/posts/upload', isAuthenticated, (req, res) => {
 
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
-  const { title, content } = {...req.body};
+  const { title, content, wideRegion, detailRegion} = {...req.body};
   
   pool.getConnection((error, connection)=>{
     if(error) {
@@ -257,8 +257,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
     }
     else {
       //post테이블에 게시글 정보 저장.
-      let sql = 'INSERT INTO post (userId, title, content) VALUES (?, ?, ?)';
-      let params = [req.session.user, title, content];
+      let sql = 'INSERT INTO post (userId, title, content, wideRegion, detailRegion) VALUES (?, ?, ?, ?, ?)';
+      let params = [req.session.user, title, content, wideRegion, detailRegion];
       connection.query(sql, params, async (error, result)=>{
         if(error) {
           console.error('Error executing the query: '+ error.stack)
