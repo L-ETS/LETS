@@ -146,6 +146,10 @@ function Barter({setIsLogin}) {
       <div>
         <ListGroup>
           {
+            posts.length === 0 ?
+            <h4 style={{textAlign:'center', margin: '200px 200px'}}>게시글이 없습니다.</h4>
+            :
+
             posts.map((post, index)=>{ 
               
               let create = new Date(post.create_date);
