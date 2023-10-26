@@ -30,7 +30,6 @@ function PostDetail() {
         setIsMyPost(response.data.isMyPost);
       })
       .catch(error => {
-        alert(error);
         console.log(error);
       })
       .finally(()=>{
