@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
 import ListGroup from 'react-bootstrap/ListGroup';
 import regions from './regionData';
+import Spinner from 'react-bootstrap/Spinner';
 
 function Barter({setIsLogin}) {
 
@@ -14,6 +15,7 @@ function Barter({setIsLogin}) {
   const [wideRegion, setWideRegion] = useState('');
   const [detailRegion, setDetailRegion] = useState('');
   const [manualControl, setManualControl] = useState(false);
+  const [loading, setLoading] = useState(true); //로딩중인지 나타냄.(비동기적 성격 때문에 데이터를 불러오기도 전에
 
   const getUserRegion = async () => {
     try {
@@ -42,6 +44,8 @@ function Barter({setIsLogin}) {
       setPosts(response.data.posts);
     } catch (error) {
       console.log(error);      
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -145,7 +149,7 @@ function Barter({setIsLogin}) {
       <div>
         <ListGroup>
           {
-            posts.length === 0 ?
+            posts.length === 0 && loading === false ?
             <h4 style={{textAlign:'center', margin: '200px 200px'}}>게시글이 없습니다.</h4>
             :
 
