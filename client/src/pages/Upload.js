@@ -65,6 +65,11 @@ function Upload() {
       return;
     }
 
+    if(images.length == 0) {
+      alert('이미지를 선택해주세요.(1장 ~ 5장)')
+      return;
+    }
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('content', content);
