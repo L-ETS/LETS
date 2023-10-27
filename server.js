@@ -220,7 +220,7 @@ app.get('/posts', isAuthenticated, (req, res) => {
       connection.release();
     }
     else {
-      let sql = `SELECT * FROM post WHERE wideRegion = '${wideRegion}' AND detailRegion = '${detailRegion}'`;
+      let sql = `SELECT * FROM post WHERE wideRegion = '${wideRegion}' AND detailRegion = '${detailRegion}' ORDER BY update_date DESC`;
 
       connection.query(sql, (error, result)=>{
         if(error) {
