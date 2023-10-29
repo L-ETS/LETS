@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
 import '../styles/postdetail.css';
 import Container from 'react-bootstrap/Container';
@@ -9,6 +9,7 @@ import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 
 function PostDetail() {
+  const navigate = useNavigate();
   const { postId } = useParams();
 
   const [post, setPost] = useState({});
@@ -79,7 +80,7 @@ function PostDetail() {
                 {
                   isMyPost ? 
                   <div>
-                    <Button variant="success">수정</Button>
+                    <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                     <Button variant="danger">삭제</Button>
                   </div>
                   : 
@@ -96,7 +97,7 @@ function PostDetail() {
                 {
                   isMyPost ? 
                   <div>
-                    <Button variant="success">수정</Button>
+                    <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                     <Button variant="danger">삭제</Button>
                   </div>
                   : 
