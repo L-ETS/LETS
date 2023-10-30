@@ -395,7 +395,7 @@ app.get('',isAuthenticated, (req, res) => { // 게시글 삭제 요청
           connection.release();
         } else {
           sql = 'SELECT s3Key FROM image WHERE postId = ?';
-          params = [postId, req.session.user];
+          params = [postId];
           connection.query(sql, params, (error,results) => {
             if (error) {
               res.status(500).json({ error: 'Failed to drop post.' });
