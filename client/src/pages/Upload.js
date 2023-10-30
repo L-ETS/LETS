@@ -86,11 +86,11 @@ function Upload() {
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log('서버 응답:', response.data);
+
       if(response.status === 200) {
           alert('게시글 업로드 완료')
           navigate('/');
-        }
+      }
     } catch (error) {
       console.error('서버 요청 오류:', error);
     }

@@ -355,32 +355,32 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
         }
       });
     }
-    const post_id = [1, 2, 3]; // 특정 postid 배열 (임의)
+    // const post_id = [1, 2, 3]; // 특정 postid 배열 (임의)
 
-      // 배열 루프 and 각 id마다 쿼리 실행
-      post_id.forEach((postId) => {
-      // 특정 postId count + 1 하는 쿼리
-        const sqlQuery = `
-          INSERT INTO UserPostCounts (post_id, count)
-          VALUES (?, 1)
-          ON DUPLICATE KEY UPDATE count = count + 1
-        `;
+    //   // 배열 루프 and 각 id마다 쿼리 실행
+    //   post_id.forEach((postId) => {
+    //   // 특정 postId count + 1 하는 쿼리
+    //     const sqlQuery = `
+    //       INSERT INTO UserPostCounts (post_id, count)
+    //       VALUES (?, 1)
+    //       ON DUPLICATE KEY UPDATE count = count + 1
+    //     `;
          
-        const values = [postId];
+    //     const values = [postId];
 
-        connection.query(sqlQuery, values, (error, results, fields) => {
-          if (error) {
-            console.error('Error executing query:', error);
-          } else {
-            console.log('Query executed successfully');
-          }
-        });
-      });
+    //     connection.query(sqlQuery, values, (error, results, fields) => {
+    //       if (error) {
+    //         console.error('Error executing query:', error);
+    //       } else {
+    //         console.log('Query executed successfully');
+    //       }
+    //     });
+    //   });
       connection.release();
   });
 });
 
-app.get('',isAuthenticated, (req, res) => { // 게시글 삭제 요청
+app.delete('/posts/:postId',isAuthenticated, (req, res) => { // 게시글 삭제 요청
   const postId = req.params.postId;
 
   pool.getConnection((error, connection) => {
