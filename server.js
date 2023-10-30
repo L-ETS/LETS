@@ -380,6 +380,72 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
   });
 });
 
+app.get('',isAuthenticated, (req, res) => { // 게시글 삭제 요청
+  const postId = req.params.postId;
+
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if (error) {
+          console.error('Error executing the query: '+ error.stack)
+          res.status(401).json({message: 'db조회 실패'});
+          connection.release();
+        } else {
+          sql = 'SELECT s3Key FROM image WHERE postId = ?';
+          params = [postId, req.session.user];
+          connection.query(sql, params, (error,results) => {
+            if (error) {
+              res.status(500).json({ error: 'Failed to drop post.' });
+              return;
+            }
+            const imageKey = result;
+
+            connection.query(sql, params, (error, result) => {
+              if (error) {
+                console.error('Error executing the query: '+ error.stack)
+                res.status(401).json({message: 'db조회 실패'});
+                connection.release();
+              } else {
+                sql = 'DELETE image, post FROM image inner join post ON image.postId=post.postId WHERE postId = ? AND userId = ?';
+                params = [postId, req.session.user];
+                connection.query(sql, params, (error,results) => {
+                  if (error) {
+                    res.status(500).json({ error: 'Failed to drop post.' });
+                    return;
+                  }
+            
+                  if (results.affectedRows === 0) {
+                    res.status(200).json({ message: 'Failed to drop post.'});
+                  } else {
+                    imageKey.forEach((imageKey) => {
+                      const params = {
+                        Bucket: process.env.S3_BUCKET,
+                        Key: imageKey,
+                      };
+                    
+                      s3.deleteObject(params, (err, data) => {
+                        if (err) {
+                          console.error(`Error deleting ${imageKey}: ${err}`);
+                        } else {
+                          console.log(`Successfully deleted ${imageKey}`);
+                          res.status(200).json({ message: 'Drop post successfully.'});
+                        }
+                      });
+                    });
+                  }
+                });
+              }          
+            });
+          });
+        }          
+      });
+    }
+  })
+})
+
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
   response.sendFile(path.join(__dirname, '/client/build/index.html'));
