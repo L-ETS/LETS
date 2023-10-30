@@ -269,8 +269,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           //image테이블에 이미지 정보 저장.
           const promises = req.files.map(file => {
             return new Promise((resolve, reject) => {
-              sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
-              params = [result.insertId, file.originalname, file.location];
+              sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
+              params = [result.insertId, file.originalname, file.location, file.key];
               connection.query(sql, params, (error) => {
                 if (error) {
                   reject(error);
@@ -298,79 +298,79 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
 });
 
 //게시글 수정
-// app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, res) => { 
+app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, res) => { 
 
-//   const postId = req.params.postId;
-//   const { title, content, wideRegion, detailRegion} = {...req.body};
+  const postId = req.params.postId;
+  const { title, content, wideRegion, detailRegion} = {...req.body};
   
-//   pool.getConnection((error, connection)=>{
-//     if(error) {
-//       console.log(error);
-//       return res.status(500).json({ message: 'Database connection error.' });
-//     }
-//     else {
-//       //post테이블에 게시글 정보 수정.
-//       let sql = 'UPDATE post SET userId = ?, title = ?, content = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
+  pool.getConnection((error, connection)=>{
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      //post테이블에 게시글 정보 수정.
+      let sql = 'UPDATE post SET userId = ?, title = ?, content = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
       
-//       let params = [req.session.user, title, content, wideRegion, detailRegion, postId];
-//       connection.query(sql, params, async (error, result)=>{
-//         if(error) {
-//           console.error('Error updating the post: '+ error)
-//           connection.release();
-//           return res.status(500).json({message: 'db문제 발생.'});
-//         }
-//         else {
-//           //기존 image 테이블에 postId로 저장된 row들 삭제.
-//           sql = 'DELETE FROM image WHERE postId = ?';
-//           connection.query(sql, [postId], async (error, results) => {
-//             if(error) {
-//               console.log(error);
-//               res.status(500).json({message: 'image delete 실패.'});
-//               connection.release();
-//             }
+      let params = [req.session.user, title, content, wideRegion, detailRegion, postId];
+      connection.query(sql, params, async (error, result)=>{
+        if(error) {
+          console.error('Error updating the post: '+ error)
+          connection.release();
+          return res.status(500).json({message: 'db문제 발생.'});
+        }
+        else {
+          //기존 image 테이블에 postId로 저장된 row들 삭제.
+          sql = 'DELETE FROM image WHERE postId = ?';
+          connection.query(sql, [postId], async (error, results) => {
+            if(error) {
+              console.log(error);
+              res.status(500).json({message: 'image delete 실패.'});
+              connection.release();
+            }
 
-//             if(results.affectedRows > 0) {
+            if(results.affectedRows > 0) {
 
-//               //image테이블에 이미지 정보 저장.
-//               const promises = req.files.map(file => {
-//                 return new Promise((resolve, reject) => {
-//                   sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
-//                   params = [postId, file.originalname, file.location];
-//                   connection.query(sql, params, (error) => {
-//                     if (error) {
-//                       reject(error);
-//                     } else {
-//                       resolve();
-//                     }
-//                   });
-//                 });
-//               });
+              //image테이블에 이미지 정보 저장.
+              const promises = req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                  sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
+                  params = [postId, file.originalname, file.location];
+                  connection.query(sql, params, (error) => {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve();
+                    }
+                  });
+                });
+              });
 
-//               try {
-//                 await Promise.all(promises);
-//                 connection.release();
-//                 res.status(200).json({ message: '저장완료' });
-//               } catch (error) {
-//                 console.error('Error executing the query: ' + error.stack);
-//                 connection.release();
-//                 return res.status(500).json({ message: 'db문제 발생.' });
-//               }
+              try {
+                await Promise.all(promises);
+                connection.release();
+                res.status(200).json({ message: '저장완료' });
+              } catch (error) {
+                console.error('Error executing the query: ' + error.stack);
+                connection.release();
+                return res.status(500).json({ message: 'db문제 발생.' });
+              }
 
-//             }
-//             //기존 image테이블 삭제 실패할 경우.
-//             else {
-//               res.status(500).json({message: '삭제된 이미지 없음.'});
-//               connection.release();
-//             }
-//           })
+            }
+            //기존 image테이블 삭제 실패할 경우.
+            else {
+              res.status(500).json({message: '삭제된 이미지 없음.'});
+              connection.release();
+            }
+          })
 
           
 
-//         }
-//       })
-//     }
-//   })
-// });
+        }
+      })
+    }
+  })
+});
 
 app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출력
   const postId = req.params.postId;

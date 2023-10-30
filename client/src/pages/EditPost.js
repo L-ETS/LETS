@@ -22,7 +22,7 @@ function EditPost() {
   const getPostData = async () => {
     try {
       const response = await axios.get(`/posts/${postId}`);
-      console.log(`response.data.images: ${response.data.images}`);
+      console.log(`response.data.images[0].imageUrl: ${JSON.stringify(response.data.images[0].imageUrl)}`);
       const postWideRegion = response.data.post.wideRegion;
       const postDetailRegion = response.data.post.detailRegion;
       const postImages = response.data.images;
@@ -35,8 +35,7 @@ function EditPost() {
       setTitle(postTitle);
       setContent(postContent);
 
-      const previews = images.map((image) => window.URL.createObjectURL(image));
-      setImagePreviews([...previews]);
+      console.log(`postImages:${JSON.stringify(postImages)}`);
 
     } catch (error) {
       console.log(error);
@@ -55,17 +54,19 @@ function EditPost() {
     setContent(e.target.value);
   };
 
-  const handleImageChange = (e) => {
-    const images = Array.from(e.target.files);
-    setImages(images);
+  const handleNewImageAdd = (e) => {
+    const newImages = Array.from(e.target.files);
+  
+    const newPreviews = newImages.map(image => window.URL.createObjectURL(image));
     
-    const previews = images.map((image) => window.URL.createObjectURL(image));
-    setImagePreviews([...previews]);
+    setImagePreviews(newPreviews);
+    
+    
 
-    if(!e.target.files[0]){
-      setImages([]);
-      setImagePreviews([]);
-    }
+    // if(!e.target.files[0]){
+    //   setImages([]);
+    //   setImagePreviews([]);
+    // }
   };
 
   const handleSubmit = async (e) => {
@@ -178,19 +179,20 @@ function EditPost() {
           name="image"
           accept="image/*"
           multiple
-          onChange={handleImageChange}
+          onChange={handleNewImageAdd}
         />
         
       </Form>
       
       <div style={{display: 'flex' }}>
 
-        {imagePreviews.map((image, index) => (
+        {imagePreviews.map((image, index) => {
+          return (
           <img src={image} key={index} style={{width: '150px'}}/>
-          
-        ))}
+          )
+        }
+        )}
       </div>
-      
     </div>
   );
 }
