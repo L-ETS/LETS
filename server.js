@@ -320,7 +320,7 @@ app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, re
           return res.status(500).json({message: 'db문제 발생.'});
         }
         else {
-          //기존 image 테이블에 postId로 저장된 row들 삭제.
+          //기존 image 테이블에 postId로 저장된 row들 삭제.(기존 이미지들 삭제하는게 아닌 다른 방식으로 수정 필요.)
           sql = 'DELETE FROM image WHERE postId = ?';
           connection.query(sql, [postId], async (error, results) => {
             if(error) {
