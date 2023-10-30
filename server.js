@@ -269,8 +269,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           //image테이블에 이미지 정보 저장.
           const promises = req.files.map(file => {
             return new Promise((resolve, reject) => {
-              sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
-              params = [result.insertId, file.originalname, file.location];
+              sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
+              params = [result.insertId, file.originalname, file.location, file.key];
               connection.query(sql, params, (error) => {
                 if (error) {
                   reject(error);
