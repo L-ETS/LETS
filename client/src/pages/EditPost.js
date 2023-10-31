@@ -42,8 +42,17 @@ function EditPost() {
     }
   }
 
+  const deleteOriginalImageFromS3 = async () => {
+    try {
+      const response = await axios.delete(`/posts/${postId}/imageS3`);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     getPostData();
+    deleteOriginalImageFromS3();
   }, [])
 
   const handleTitleChange = (e) => {
@@ -56,17 +65,10 @@ function EditPost() {
 
   const handleNewImageAdd = (e) => {
     const newImages = Array.from(e.target.files);
-  
     const newPreviews = newImages.map(image => window.URL.createObjectURL(image));
     
+    setImages(newImages);
     setImagePreviews(newPreviews);
-    
-    
-
-    // if(!e.target.files[0]){
-    //   setImages([]);
-    //   setImagePreviews([]);
-    // }
   };
 
   const handleSubmit = async (e) => {
@@ -94,7 +96,7 @@ function EditPost() {
 
     try {
       //put요청으로 바꾸기.
-      const response = await axios.put('/posts/:postId/edit', formData, {
+      await axios.put(`/posts/${postId}/edit`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
