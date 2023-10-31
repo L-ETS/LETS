@@ -417,24 +417,26 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                 res.status(404).json({ error: 'Failed to drop post.' });
                 return;
               }
-
-              imageKeyDelete.forEach(async (imageKey) => {
+              
+              const deletePromises = imageKeyDelete.map((imageKey) => {
                 const params = {
                   Bucket: process.env.S3_BUCKET,
                   Key: imageKey,
                 };
-                try {
-                  const command = new DeleteObjectCommand(params);
-                  await s3.send(command);
-                  console.log('이미지 삭제 성공');
-                } catch (err) {
-                  console.error('이미지 삭제 실패:', err);
-                  res.status(404).json({ error: 'Failed to drop s3 image.' });
-                  return;
-                }
+              
+                const command = new DeleteObjectCommand(params);
+                return s3.send(command);
               });
-
-              res.status(204).json({ message: 'Drop post successfully.' });
+              
+              Promise.all(deletePromises)
+                .then(() => {
+                  console.log('모든 이미지 삭제 성공');
+                  res.status(204).json({ message: 'Drop post successfully.' });
+                })
+                .catch((err) => {
+                  console.error('이미지 삭제 실패:', err);
+                  res.status(204).json({ message: 'Drop post successfully.' });
+                });
             });
           }
         });
