@@ -467,7 +467,6 @@ app.delete('/posts/:postId/imageS3', isAuthenticated, async (req, res) => {
         } else {
 
             s3Keys = results;
-            console.log(`s3Keys정보: ${JSON.stringify(s3Keys)}`);
 
             if(s3Keys.length) {
               const deletePromises = s3Keys.map((obj) => {
@@ -482,7 +481,6 @@ app.delete('/posts/:postId/imageS3', isAuthenticated, async (req, res) => {
 
               Promise.all(deletePromises)
                 .then(() => {
-                  console.log('모든 이미지 삭제 성공');
                   res.status(204).json({ message: 'Drop image successfully.' });
                 })
                 .catch((err) => {
@@ -629,7 +627,6 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
               connection.release();
             } else {
               images = result;
-              console.log(images);
 
               sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
               params = [postId, req.session.user];
@@ -693,7 +690,6 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
           return;
         }
         const imageKeyDelete = results.map(row => row.s3Key);
-        console.log(imageKeyDelete);
 
         sql = 'DELETE image FROM image INNER JOIN post ON image.postId=post.postId WHERE post.postId = ?';
         params = [postId];
@@ -726,7 +722,6 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
               
               Promise.all(deletePromises)
                 .then(() => {
-                  console.log('모든 이미지 삭제 성공');
                   res.status(204).json({ message: 'Drop post successfully.' });
                 })
                 .catch((err) => {
