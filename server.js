@@ -249,7 +249,8 @@ app.get('/posts/upload', isAuthenticated, (req, res) => {
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
   const { title, content, wideRegion, detailRegion } = { ...req.body };
-
+  let postId;
+  
   pool.getConnection((error, connection) => {
     if (error) {
       console.log(error);
@@ -270,7 +271,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           const promises = req.files.map(file => {
             return new Promise((resolve, reject) => {
               sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
-              params = [result.insertId, file.originalname, file.location, file.key];
+              postId = result.insertId
+              params = [postId, file.originalname, file.location, file.key];
               connection.query(sql, params, (error) => {
                 if (error) {
                   reject(error);
@@ -284,7 +286,7 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           try {
             await Promise.all(promises);
             connection.release();
-            res.status(200).json({ message: '저장완료' });
+            res.status(200).json({ message: '저장완료', postId: postId });
           } catch (error) {
             console.error('Error executing the query: ' + error.stack);
             connection.release();

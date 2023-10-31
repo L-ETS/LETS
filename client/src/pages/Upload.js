@@ -87,9 +87,10 @@ function Upload() {
         },
       });
 
+      const postId = response.data.postId;
       if(response.status === 200) {
           alert('게시글 업로드 완료')
-          navigate('/');
+          navigate(`/posts/${postId}`);
       }
     } catch (error) {
       console.error('서버 요청 오류:', error);
