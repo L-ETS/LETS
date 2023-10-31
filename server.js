@@ -435,7 +435,7 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                 })
                 .catch((err) => {
                   console.error('이미지 삭제 실패:', err);
-                  res.status(204).json({ message: 'Drop post successfully.' });
+                  res.status(404).json({ error: 'Failed to drop s3 image.' });
                 });
             });
           }
