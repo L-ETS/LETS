@@ -250,7 +250,7 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
 
   const { title, content, wideRegion, detailRegion } = { ...req.body };
   let postId;
-  
+
   pool.getConnection((error, connection) => {
     if (error) {
       console.log(error);
@@ -321,7 +321,6 @@ app.delete('/posts/:postId/imageS3', isAuthenticated, async (req, res) => {
         } else {
 
             s3Keys = results;
-            console.log(`s3Keys정보: ${JSON.stringify(s3Keys)}`);
 
             if(s3Keys.length) {
               const deletePromises = s3Keys.map((obj) => {
@@ -336,7 +335,6 @@ app.delete('/posts/:postId/imageS3', isAuthenticated, async (req, res) => {
 
               Promise.all(deletePromises)
                 .then(() => {
-                  console.log('모든 이미지 삭제 성공');
                   res.status(204).json({ message: 'Drop image successfully.' });
                 })
                 .catch((err) => {
