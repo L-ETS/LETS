@@ -6,7 +6,6 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import regions from './regionData';
 import '../styles/Upload.css';
 import Form from 'react-bootstrap/Form';
-import CloseButton from 'react-bootstrap/CloseButton';
 
 function EditPost() {
   const { postId } = useParams();
@@ -191,7 +190,6 @@ function EditPost() {
           return (
             <div>
               <img src={image} key={index} style={{width: '150px'}}/>
-              <CloseButton aria-label="Hide" />
             </div>
           )
         }
