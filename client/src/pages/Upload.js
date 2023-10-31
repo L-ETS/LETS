@@ -60,6 +60,16 @@ function Upload() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if(title.length === 0) {
+      alert('제목을 입력해주세요.')
+      return;
+    }
+
+    if(content.length === 0) {
+      alert('내용을 입력해주세요.')
+      return;
+    }
+
     if (images.length > 5) {
       alert('최대 5개의 이미지까지 선택할 수 있습니다.');
       return;
