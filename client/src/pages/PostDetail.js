@@ -10,8 +10,8 @@ import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
 
 function PostDetail() {
-  const { postId } = useParams();
   const navigate = useNavigate();
+  const { postId } = useParams();
 
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
@@ -117,7 +117,7 @@ function PostDetail() {
                   {
                     isMyPost ? 
                     <div>
-                      <Button variant="success">수정</Button>
+                      <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
                     </div>
                     : 
@@ -134,7 +134,7 @@ function PostDetail() {
                   {
                     isMyPost ? 
                     <div>
-                      <Button variant="success">수정</Button>
+                      <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
                     </div>
                     : 
