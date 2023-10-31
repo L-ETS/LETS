@@ -393,7 +393,7 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
       params = [postId];
       connection.query(sql, params, (error, results) => {
         if (error) {
-          res.status(500).json({ error: 'Failed to find Key.' });
+          res.status(404).json({ error: 'Failed to find Key.' });
           return;
         }
         const imageKeyDelete = results.map(row => row.s3Key);
@@ -403,18 +403,18 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
         params = [postId];
         connection.query(sql, params, (error, results) => {
           if (error) {
-            res.status(500).json({ error: 'Failed to drop image.' });
+            res.status(404).json({ error: 'Failed to drop image.' });
             return;
           }
 
           if (results.affectedRows === 0) {
-            res.status(200).json({ message: 'Failed to find post, image.' });
+            res.status(404).json({ message: 'Failed to find post, image.' });
           } else {
             sql = 'DELETE post FROM post WHERE post.postId = ?';
             params = [postId];
             connection.query(sql, params, (error, results) => {
               if (error) {
-                res.status(500).json({ error: 'Failed to drop post.' });
+                res.status(404).json({ error: 'Failed to drop post.' });
                 return;
               }
 
@@ -427,11 +427,14 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                   const command = new DeleteObjectCommand(params);
                   await s3.send(command);
                   console.log('이미지 삭제 성공');
-                  res.status(200).json({ message: 'Drop post successfully.' });
                 } catch (err) {
                   console.error('이미지 삭제 실패:', err);
+                  res.status(404).json({ error: 'Failed to drop s3 image.' });
+                  return;
                 }
               });
+
+              res.status(204).json({ message: 'Drop post successfully.' });
             });
           }
         });
