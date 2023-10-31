@@ -108,12 +108,12 @@ function PostDetail() {
             <div style={{margin: '10px 0', borderBottom: '1px solid'}}>
               {
                 create < update ?
-                <div>
+                <div style={{display: "flex", justifyContent: "space-between"}}>   
                   <div>
                     <span>작성자: {post.userId}</span>
                     <br/>
-                    <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>        
-                  </div>  
+                    <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span> 
+                  </div>    
                   {
                     isMyPost ? 
                     <div>
@@ -122,7 +122,7 @@ function PostDetail() {
                     </div>
                     : 
                     null
-                  }  
+                  }
                 </div>
                 :
                 <div style={{display: "flex", justifyContent: "space-between"}}>
