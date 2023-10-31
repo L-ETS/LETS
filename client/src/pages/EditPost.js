@@ -31,7 +31,6 @@ function EditPost() {
       
       setWideRegion(postWideRegion);
       setDetailRegion(postDetailRegion);
-      setImages(postImages);
       setTitle(postTitle);
       setContent(postContent);
 

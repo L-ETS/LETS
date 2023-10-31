@@ -393,7 +393,7 @@ app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, re
     }
     else {
       //post테이블에 게시글 정보 수정.
-      let sql = 'UPDATE post SET title = ?, content = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
+      let sql = 'UPDATE post SET title = ?, content = ?, wideRegion = ?, detailRegion = ?, update_date = NOW() WHERE postId = ?';
       
       let params = [title, content, wideRegion, detailRegion, postId];
       connection.query(sql, params, async (error, result)=>{
