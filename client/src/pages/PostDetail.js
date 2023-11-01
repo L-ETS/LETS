@@ -49,16 +49,7 @@ function PostDetail() {
         console.error(error);
         alert('서버와 통신 중 오류가 발생했습니다.');
       }
-      return (
-        <div>
-        <button onClick={clickLikeBtn}>
-          {likeBtn ? '좋아요 취소' : '좋아요'}
-        </button>
-        <p>좋아요 개수: {likeCount}</p>
-      </div>
-    );
   }
-
 
   useEffect(() => {
     axios.get(`/posts/${postId}`)
@@ -121,7 +112,8 @@ function PostDetail() {
                   <div>
                     <Button variant="success">수정</Button>
                     <Button variant="danger">삭제</Button>
-                    <button onClick={clickLikeBtn}>좋아요</button>
+                    <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
+                    <p>좋아요 개수: {likeCount}</p>
                   </div>
                   : 
                   null
@@ -139,7 +131,8 @@ function PostDetail() {
                   <div>
                     <Button variant="success">수정</Button>
                     <Button variant="danger">삭제</Button>
-                    <button onClick={clickLikeBtn}>좋아요</button>                      
+                    <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
+                    <p>좋아요 개수: {likeCount}</p>                      
                   </div>
                   : 
                   null
