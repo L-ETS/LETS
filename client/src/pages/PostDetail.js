@@ -10,7 +10,8 @@ import Spinner from 'react-bootstrap/Spinner';
 
 function PostDetail() {
   const { postId } = useParams();
-
+  const [likeCount,setLikeCount] = useState(0);
+  const [likeBtn, setLikeBtn] = useState(false);
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
   const [mainImageSrc, setMainImageSrc] = useState('');
@@ -19,11 +20,50 @@ function PostDetail() {
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
+  
+  // let getPostDetails = () =>{
+  //   axios.get(`postDetail?userId=${userId}`)
+  //   .then(response =>{
+  //     setlikeButton(response.data);
+  //   })
+  //   .catch(error => {
+  //     console.error('불러오기 오류 ' + error.message);
+  //   });
+
+  //   // let handleLikeButtonClick = () => {
+  //   //   setlikeButton(!likeButton); 
+  //   // }}
+
+  const clickLikeBtn = async() => {
+    try {
+      setLikeBtn(!likeBtn);
+      const response = await axios.get('/user/likeposts');
+        if (response.status === 200) {
+          // 요청이 성공하면 좋아요 개수를 업데이트
+          setLikeCount(response.data);
+        } else {
+          console.log('요청 실패');
+          alert('서버에서 "좋아요" 정보를 불러오지 못했습니다.');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('서버와 통신 중 오류가 발생했습니다.');
+      }
+      return (
+        <div>
+        <button onClick={clickLikeBtn}>
+          {likeBtn ? '좋아요 취소' : '좋아요'}
+        </button>
+        <p>좋아요 개수: {likeCount}</p>
+      </div>
+    );
+  }
+
 
   useEffect(() => {
     axios.get(`/posts/${postId}`)
       .then(response => {
-
+        
         setImages(response.data.images);
         setPost(response.data.post);
         setMainImageSrc(response.data.images[0].imageUrl);
@@ -35,8 +75,8 @@ function PostDetail() {
       .finally(()=>{
         setLoading(false);
       })
-  }, [postId]);
-  
+    }, [postId]);
+    
   if(loading) {
     return (
       <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}>
@@ -81,6 +121,7 @@ function PostDetail() {
                   <div>
                     <Button variant="success">수정</Button>
                     <Button variant="danger">삭제</Button>
+                    <button onClick={clickLikeBtn}>좋아요</button>
                   </div>
                   : 
                   null
@@ -98,6 +139,7 @@ function PostDetail() {
                   <div>
                     <Button variant="success">수정</Button>
                     <Button variant="danger">삭제</Button>
+                    <button onClick={clickLikeBtn}>좋아요</button>                      
                   </div>
                   : 
                   null

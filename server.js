@@ -350,36 +350,49 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
                   res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost});
                 }
               });
-            }          
+            }
           });
         }
       });
     }
-    const post_id = [1, 2, 3]; // 특정 postid 배열 (임의)
-
-      // 배열 루프 and 각 id마다 쿼리 실행
-      post_id.forEach((postId) => {
-      // 특정 postId count + 1 하는 쿼리
-        const sqlQuery = `
-          INSERT INTO UserPostCounts (post_id, count)
-          VALUES (?, 1)
-          ON DUPLICATE KEY UPDATE count = count + 1
-        `;
-         
-        const values = [postId];
-
-        connection.query(sqlQuery, values, (error, results, fields) => {
-          if (error) {
-            console.error('Error executing query:', error);
-          } else {
-            console.log('Query executed successfully');
-          }
-        });
-      });
       connection.release();
   });
 });
+  
+  app.post('/user/likeposts',isAuthenticated, (req,res) => {
+    
+    const userId = req.query.userId;
+    const insertQuery = 'INSERT INTO (userId) VALUES (?)';
+    
+    connection.query(insertQuery, [userId], (err, result)=>{
+      if(err){
+        console.error('insert error'+err.message);
+        res.status(500).send('좋아요 처리 중 오류');
+        return;
+      }
+      console.log('likeposts table에 userid 저장 성공');
+      res.status(200).send('좋아요 처리 완료');
+    });
+    connection.end();
+  });
+  app.get('/user/likeposts',(req,res)=>{
 
+    const countQuery = 'SELECT COUNT(userId) AS likeCount FROM likeposts';
+    
+    connection.query(countQuery, (err, results)=> {
+      if(err){
+        console.error('count query error' + err.message);
+        res.status(500).send('error');
+        return;
+      }
+      const likeCount = results[0].likeCount;
+      console.log('likeposts table의 사용자 id 개수'+ likeCount);
+
+      connection.end();
+      res.status(200).send('좋아요 처리 완료');
+    });
+  });
+    
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
   response.sendFile(path.join(__dirname, '/client/build/index.html'));
