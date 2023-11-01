@@ -497,37 +497,15 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
                   // The view_count was increased
                   res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost });
                 }
-              });
-            }
-            }
-          });
-        }
-      });
-    }
-    // const post_id = [1, 2, 3]; // 특정 postid 배열 (임의)
-
-    //   // 배열 루프 and 각 id마다 쿼리 실행
-    //   post_id.forEach((postId) => {
-    //   // 특정 postId count + 1 하는 쿼리
-    //     const sqlQuery = `
-    //       INSERT INTO UserPostCounts (post_id, count)
-    //       VALUES (?, 1)
-    //       ON DUPLICATE KEY UPDATE count = count + 1
-    //     `;
-
-    //     const values = [postId];
-
-    //     connection.query(sqlQuery, values, (error, results, fields) => {
-    //       if (error) {
-    //         console.error('Error executing query:', error);
-    //       } else {
-    //         console.log('Query executed successfully');
-    //       }
-    //     });
-    //   });
-    connection.release();
+                  connection.release();
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   });
-});
 
 app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭제 요청
   const postId = req.params.postId;
@@ -582,6 +560,7 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                 .catch((err) => {
                   console.error('이미지 삭제 실패:', err);
                   res.status(404).json({ error: 'Failed to drop s3 image.' });
+                  connection.release();
                 });
             });
           }
@@ -590,11 +569,6 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
     }
   })
 });
-
-      connection.release();
-  });
-});
-  
   app.post('/user/likeposts',isAuthenticated, (req,res) => {
     
     const userId = req.query.userId;

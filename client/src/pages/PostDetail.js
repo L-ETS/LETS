@@ -24,19 +24,6 @@ function PostDetail() {
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
   
-  // let getPostDetails = () =>{
-  //   axios.get(`postDetail?userId=${userId}`)
-  //   .then(response =>{
-  //     setlikeButton(response.data);
-  //   })
-  //   .catch(error => {
-  //     console.error('불러오기 오류 ' + error.message);
-  //   });
-
-  //   // let handleLikeButtonClick = () => {
-  //   //   setlikeButton(!likeButton); 
-  //   // }}
-
   const clickLikeBtn = async() => {
     try {
       setLikeBtn(!likeBtn);
@@ -150,6 +137,8 @@ function PostDetail() {
                     <div>
                       <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
+                      <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
+                    <p>좋아요 개수: {likeCount}</p>
                     </div>
                     : 
                     null
@@ -167,6 +156,8 @@ function PostDetail() {
                     <div>
                       <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
+                      <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
+                    <p>좋아요 개수: {likeCount}</p>
                     </div>
                     : 
                     null
