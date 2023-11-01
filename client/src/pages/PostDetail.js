@@ -20,19 +20,19 @@ function PostDetail() {
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
-  // useeffect로 user_likepost 백에서 겟 -> 좋아요 버튼 true/false 지정 -> 누를 시 user_likepost에 값이 있으면 삭제, 없으면 추가 후 백으로 포스트
+
+  //버튼 클릭시 버튼이 리로드되지 않아서 페이지를 리로드함 -> 리로드된 페이지의 조회수가 증가함
   const clickLikeBtn = async() => {
-    /*
     try {
-      setLikeBtn(!likeBtn);
-      const response = await axios.post('/user/likeposts', { postId });
+      const response = await axios.post('/user/updateLikepost', { pId : postId, isDelete : likeBtn });
       console.log(response.data);
+      window.location.reload();
     } catch(error) {
       console.log(error);
       alert('잘못된 접근입니다.');
     }
-    */
   }
+
   useEffect(() => {
     axios.get(`/posts/${postId}`)
       .then(response => {

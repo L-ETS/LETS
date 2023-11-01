@@ -362,7 +362,7 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
   })
 })
 
-app.get('/user/likepost', isAuthenticated, (req, res) => {
+app.get('/user/likepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 조회
   let sql = 'SELECT postId FROM likepost WHERE userId = ?';
   let params = [req.session.user];
   pool.getConnection((error, connection) => {
@@ -380,6 +380,34 @@ app.get('/user/likepost', isAuthenticated, (req, res) => {
         }
         else {
           res.status(200).json(result);
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
+app.post('/user/updateLikepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 업데이트 (추가, 삭제)
+  const { pId, isDelete } = {...req.body};
+  //string, boolean
+  let sql;
+  isDelete ? sql = 'DELETE FROM likepost WHERE userId=? AND postId=?' : sql = 'INSERT INTO likepost (userId, postId) VALUES (?, ?)';
+  let params = [req.session.user, Number(pId)]
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json({message: "success"});
           connection.release();
         }
       })
