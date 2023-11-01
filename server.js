@@ -297,7 +297,7 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
   })
 });
 
-app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출력
+app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 출력
   const postId = req.params.postId;
 
   let sql = 'SELECT * FROM POST WHERE postId = ?';
@@ -356,6 +356,31 @@ app.get('/posts/:postId',isAuthenticated, (req, res) => { //특정 게시글 출
           });
 
           
+        }
+      })
+    }
+  })
+})
+
+app.get('/user/likepost', isAuthenticated, (req, res) => {
+  let sql = 'SELECT postId FROM likepost WHERE userId = ?';
+  let params = [req.session.user];
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json(result);
+          connection.release();
         }
       })
     }

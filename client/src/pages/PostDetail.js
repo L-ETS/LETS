@@ -16,14 +16,26 @@ function PostDetail() {
   const [mainImageSrc, setMainImageSrc] = useState('');
   const [isMyPost, setIsMyPost] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [likeBtn, setLikeBtn] = useState(false);
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
-
+  // useeffect로 user_likepost 백에서 겟 -> 좋아요 버튼 true/false 지정 -> 누를 시 user_likepost에 값이 있으면 삭제, 없으면 추가 후 백으로 포스트
+  const clickLikeBtn = async() => {
+    /*
+    try {
+      setLikeBtn(!likeBtn);
+      const response = await axios.post('/user/likeposts', { postId });
+      console.log(response.data);
+    } catch(error) {
+      console.log(error);
+      alert('잘못된 접근입니다.');
+    }
+    */
+  }
   useEffect(() => {
     axios.get(`/posts/${postId}`)
       .then(response => {
-
         setImages(response.data.images);
         setPost(response.data.post);
         setMainImageSrc(response.data.images[0].imageUrl);
@@ -36,6 +48,19 @@ function PostDetail() {
         setLoading(false);
       })
   }, [postId]);
+
+  useEffect(() => {
+    axios.get('/user/likepost')
+      .then((response) => {
+        //console.log(response.data[0].postId);
+        for (let i=0; i<response.data.length; i++) {
+          if (response.data[i].postId == postId) setLikeBtn(true);
+        }
+      })
+      .catch((error) => {
+        console.error('데이터 가져오기 오류:', error);
+      })
+  }, [])
   
   if(loading) {
     return (
@@ -50,8 +75,7 @@ function PostDetail() {
       <Row>
         <Col>
           <h2>{post.title}</h2>
-          
-          <div >
+          <div>
             <img style={{maxWidth: '100%', height: '410px'}} src={mainImageSrc} alt="Main Preview" fluid />
           </div>
             {
@@ -83,7 +107,18 @@ function PostDetail() {
                     <Button variant="danger">삭제</Button>
                   </div>
                   : 
-                  null
+                  <div>
+                    {
+                      likeBtn ?
+                      <div>
+                        <Button variant="danger" onClick={clickLikeBtn}>취소</Button>
+                      </div>
+                      :
+                      <div>
+                        <Button variant="outline-danger" onClick={clickLikeBtn}>좋아요</Button>
+                      </div>
+                    }
+                  </div>
                 }  
               </div>
               :
@@ -99,8 +134,19 @@ function PostDetail() {
                     <Button variant="success">수정</Button>
                     <Button variant="danger">삭제</Button>
                   </div>
-                  : 
-                  null
+                  :
+                  <div>
+                    {
+                      likeBtn ?
+                      <div>
+                        <Button variant="danger" onClick={clickLikeBtn}>취소</Button>
+                      </div>
+                      :
+                      <div>
+                        <Button variant="outline-danger" onClick={clickLikeBtn}>좋아요</Button>
+                      </div>
+                    }
+                  </div>
                 } 
               </div>
             }
