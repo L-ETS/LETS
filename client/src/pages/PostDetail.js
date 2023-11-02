@@ -250,7 +250,7 @@ function PostDetail() {
               <div className='wrapper'>
                 <textarea 
                   placeholder='내용을 입력해 주세요.' 
-                  value={commentContent} 
+                  value={commentContent}
                   onChange={(e)=>setCommentContent(e.target.value)}
                 ></textarea>
                 <button className='confirm' type="submit" style={{borderRadius: '10px'}}>등록</button>
