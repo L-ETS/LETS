@@ -601,16 +601,17 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
   });
   app.get('/user/likeposts',(req,res)=>{
 
+    const userId = req.query.userId;
     const countQuery = 'SELECT COUNT(userId) AS likeCount FROM likeposts';
     
-    connection.query(countQuery, (err, results)=> {
+    connection.query(userId,countQuery, (err, results)=> {
       if(err){
         console.error('count query error' + err.message);
         res.status(500).send('error');
         return;
       }
-      const likeCount = results[0].likeCount;
-      console.log('likeposts table의 사용자 id 개수'+ likeCount);
+      // const likeCount = results[0].likeCount;
+      // console.log('likeposts table의 사용자 id 개수'+ likeCount);
 
       connection.end();
       res.status(200).send('좋아요 처리 완료');
