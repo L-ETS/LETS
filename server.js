@@ -8,7 +8,7 @@ const mysql = require("mysql2");
 const session = require('express-session');
 const MySQLStore = require("express-mysql-session")(session);
 const cookieParser = require('cookie-parser');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 
@@ -22,7 +22,7 @@ const { resolveSoa } = require('dns');
 app.use(cors());
 
 app.use(express.static(path.join(__dirname, 'client/build')));
-app.use(express.static('public'));    
+app.use(express.static('public'));
 
 app.get('/', function (request, response) {
   response.sendFile(path.join(__dirname, '/client/build/index.html'));
@@ -46,17 +46,17 @@ const s3 = new S3Client({
   credentials: {
     accessKeyId: process.env.S3_ACCESSKEY,
     secretAccessKey: process.env.S3_SECRETKEY
-}
+  }
 });
 
 const upload = multer({
   storage: multerS3({
-      s3: s3,
-      bucket: process.env.S3_BUCKET,
-      acl: 'public-read',
-      key: function (req, file, cb) {
-          cb(null, 'productImages/' + Date.now().toString() + '-' + file.originalname) 
-      }
+    s3: s3,
+    bucket: process.env.S3_BUCKET,
+    acl: 'public-read',
+    key: function (req, file, cb) {
+      cb(null, 'productImages/' + Date.now().toString() + '-' + file.originalname)
+    }
   })
 });
 
@@ -75,7 +75,7 @@ app.use(session({
   store: sessionStore,
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     secure: false,
     httpOnly: true,
     maxAge: 1800000 //밀리초 단위
@@ -94,7 +94,7 @@ const isAuthenticated = (req, res, next) => {
 //회원가입 요청에 대한 처리와 응답.
 app.post('/user/register', async (req, res) => {
   try {
-    let body = {...req.body};
+    let body = { ...req.body };
 
     // Salt and hash the password
     const saltRounds = 10; // the cost of processing the data
@@ -104,21 +104,21 @@ app.post('/user/register', async (req, res) => {
     let sql = 'INSERT INTO USER(userId,password,nickname,email,wideRegion,detailRegion) VALUES(?,?,?,?,?,?)'
     let params = [body.userId, hashedPassword, body.nickname, body.email, body.wideRegion, body.detailRegion];
 
-    pool.getConnection((error, connection)=>{
-      if(error) {
+    pool.getConnection((error, connection) => {
+      if (error) {
         console.log(error);
-        res.status(500).json({message: 'db 커넥션 가져오기 실패.'});
+        res.status(500).json({ message: 'db 커넥션 가져오기 실패.' });
         connection.release();
       }
       else {
-        connection.query(sql, params, (error)=>{
-          if(error) {
-            console.error('Error executing the query: '+ error.stack);
-            res.status(500).json({message: 'db 저장 실패.'});
+        connection.query(sql, params, (error) => {
+          if (error) {
+            console.error('Error executing the query: ' + error.stack);
+            res.status(500).json({ message: 'db 저장 실패.' });
             connection.release();
           }
           else {
-            res.status(200).json({message: '회원정보 저장 성공.'})
+            res.status(200).json({ message: '회원정보 저장 성공.' })
             connection.release();
           }
         })
@@ -132,20 +132,20 @@ app.post('/user/register', async (req, res) => {
 
 //로그인 요청에 대한 처리와 응답.
 app.post('/user/login', (req, res) => {
-  const body = {...req.body};
+  const body = { ...req.body };
 
   let sql = 'SELECT * FROM USER WHERE userId = ?';
   let params = [body.userId];
 
-  pool.getConnection((error, connection)=>{
-    if(error) {
+  pool.getConnection((error, connection) => {
+    if (error) {
       console.log(error);
     }
     else {
-      connection.query(sql, params, (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack)
-          res.status(401).json({message: 'db조회 실패'});
+      connection.query(sql, params, (error, result) => {
+        if (error) {
+          console.error('Error executing the query: ' + error.stack)
+          res.status(401).json({ message: 'db조회 실패' });
           connection.release();
         }
         else {
@@ -155,10 +155,10 @@ app.post('/user/login', (req, res) => {
             connection.release();
             return res.status(401).json({ error: 'Invalid username or password' });
           }
-          
+
           req.session.user = user.userId;
           res.status(200).json({ message: 'Login successful!' });
-          
+
           connection.release();
 
         }
@@ -170,7 +170,7 @@ app.post('/user/login', (req, res) => {
 app.get('/user/logout', (req, res) => {
   req.session.destroy(err => {
     if (err) {
-        return res.status(500).json({ success: false, message: 'Failed to logout' });
+      return res.status(500).json({ success: false, message: 'Failed to logout' });
     }
     res.clearCookie('session-cookie'); // Clear the session cookie
     res.status(200).json({ success: true, message: 'Logged out' });
@@ -187,21 +187,21 @@ app.get('/api/check-session', (req, res) => {
 
 app.get('/api/getUserRegion', isAuthenticated, (req, res) => {
   pool.getConnection((error, connection) => {
-    if(error) {
+    if (error) {
       console.log(error);
-      res.status(500).json({message: 'Database connection error.'});
+      res.status(500).json({ message: 'Database connection error.' });
       connection.release();
     }
     else {
       let sql = `SELECT * FROM user WHERE userId = '${req.session.user}'`
       connection.query(sql, (error, result) => {
-        if(error) {
-          console.error('Error executing the query: '+ error.stack);
-          res.status(500).json({message: 'db 조회 실패.'});
+        if (error) {
+          console.error('Error executing the query: ' + error.stack);
+          res.status(500).json({ message: 'db 조회 실패.' });
           connection.release();
         }
         else {
-          res.status(200).json({message: '조회 성공.', user: result[0]})
+          res.status(200).json({ message: '조회 성공.', user: result[0] })
           connection.release();
         }
       })
@@ -209,27 +209,27 @@ app.get('/api/getUserRegion', isAuthenticated, (req, res) => {
   })
 })
 
-app.get('/posts', isAuthenticated, (req, res) => {
-  
-  const {wideRegion, detailRegion} = req.query;
-  
-  pool.getConnection((error, connection)=>{
-    if(error) {
+app.get('/posts', (req, res) => {
+
+  const { wideRegion, detailRegion } = req.query;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
       console.log(error);
-      res.status(500).json({message: 'Database connection error.'});
+      res.status(500).json({ message: 'Database connection error.' });
       connection.release();
     }
     else {
       let sql = `SELECT * FROM post WHERE wideRegion = '${wideRegion}' AND detailRegion = '${detailRegion}' ORDER BY update_date DESC`;
 
-      connection.query(sql, (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack);
-          res.status(500).json({message: 'db 조회 실패.'});
+      connection.query(sql, (error, result) => {
+        if (error) {
+          console.error('Error executing the query: ' + error.stack);
+          res.status(500).json({ message: 'db 조회 실패.' });
           connection.release();
         }
         else {
-          res.status(200).json({message: '조회 성공.', posts: result})
+          res.status(200).json({ message: '조회 성공.', posts: result })
 
           connection.release();
         }
@@ -239,19 +239,20 @@ app.get('/posts', isAuthenticated, (req, res) => {
 })
 
 app.get('/user/mypage', isAuthenticated, (req, res) => {
-  res.status(200).json({success: true})
+  res.status(200).json({ success: true })
 })
 
 app.get('/posts/upload', isAuthenticated, (req, res) => {
-  res.status(200).json({success: true})
+  res.status(200).json({ success: true })
 })
 
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
-  const { title, content, wideRegion, detailRegion} = {...req.body};
-  
-  pool.getConnection((error, connection)=>{
-    if(error) {
+  const { title, content, wideRegion, detailRegion } = { ...req.body };
+  let postId;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
       console.log(error);
       return res.status(500).json({ message: 'Database connection error.' });
     }
@@ -259,18 +260,19 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
       //post테이블에 게시글 정보 저장.
       let sql = 'INSERT INTO post (userId, title, content, wideRegion, detailRegion) VALUES (?, ?, ?, ?, ?)';
       let params = [req.session.user, title, content, wideRegion, detailRegion];
-      connection.query(sql, params, async (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack)
+      connection.query(sql, params, async (error, result) => {
+        if (error) {
+          console.error('Error executing the query: ' + error.stack)
           connection.release();
-          return res.status(500).json({message: 'db문제 발생.'});
+          return res.status(500).json({ message: 'db문제 발생.' });
         }
         else {
           //image테이블에 이미지 정보 저장.
           const promises = req.files.map(file => {
             return new Promise((resolve, reject) => {
-              sql = 'INSERT INTO image (postId, imageName, imageUrl) VALUES (?, ?, ?)';
-              params = [result.insertId, file.originalname, file.location];
+              sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
+              postId = result.insertId
+              params = [postId, file.originalname, file.location, file.key];
               connection.query(sql, params, (error) => {
                 if (error) {
                   reject(error);
@@ -284,13 +286,159 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           try {
             await Promise.all(promises);
             connection.release();
-            res.status(200).json({ message: '저장완료' });
+            res.status(200).json({ message: '저장완료', postId: postId });
           } catch (error) {
             console.error('Error executing the query: ' + error.stack);
             connection.release();
             return res.status(500).json({ message: 'db문제 발생.' });
           }
 
+        }
+      })
+    }
+  })
+});
+
+//특정 게시글의 모든 이미지 S3에서 삭제하기.
+app.delete('/posts/:postId/imageS3', isAuthenticated, async (req, res) => {
+  const postId = req.params.postId;
+  let s3Keys;
+
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      let sql = 'SELECT s3Key from image WHERE postId = ?';
+      let params = [postId];
+
+      connection.query(sql, params, (error, results) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack)
+          res.status(500).json({message: 'db조회 실패'});
+          connection.release();
+        } else {
+
+            s3Keys = results;
+
+            if(s3Keys.length) {
+              const deletePromises = s3Keys.map((obj) => {
+                const params = {
+                  Bucket: process.env.S3_BUCKET,
+                  Key: obj.s3Key,
+                };
+
+                const command = new DeleteObjectCommand(params);
+                return s3.send(command);
+              });
+
+              Promise.all(deletePromises)
+                .then(() => {
+                  res.status(204).json({ message: 'Drop image successfully.' });
+                })
+                .catch((err) => {
+                  console.error('이미지 삭제 실패:', err);
+                  res.status(404).json({ error: 'Failed to drop s3 image.' });
+                });
+              connection.release();
+            } else {
+              res.status(404).send({ message: 's3Keys not found.' });
+              connection.release();
+            }
+
+        }
+      })
+    }
+  })
+})
+
+//특정 게시글의 모든 이미지 DB에서 삭제하기.
+app.delete('/posts/:postId/imageDB', isAuthenticated, async (req, res) => {
+  const postId = req.params.postId;
+
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      let sql = 'DELETE * from image WHERE postId = ?';
+      let params = [postId];
+
+      connection.query(sql, params, (error, results) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack)
+          res.status(500).json({message: 'db삭제 실패'});
+          connection.release();
+        } else {
+          res.status(204).json({message: '삭제 성공'});
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
+//게시글 수정
+app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, res) => { 
+
+  const postId = req.params.postId;
+  const { title, content, wideRegion, detailRegion} = {...req.body};
+  
+  pool.getConnection((error, connection)=>{
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      //post테이블에 게시글 정보 수정.
+      let sql = 'UPDATE post SET title = ?, content = ?, wideRegion = ?, detailRegion = ?, update_date = NOW() WHERE postId = ?';
+      
+      let params = [title, content, wideRegion, detailRegion, postId];
+      connection.query(sql, params, async (error, result)=>{
+        if(error) {
+          console.error('Error updating the post: '+ error)
+          connection.release();
+          return res.status(500).json({message: 'db문제 발생.'});
+        }
+        else {
+          //기존 image 테이블에 postId로 저장된 기존 이미지들 삭제.
+          sql = 'DELETE FROM image WHERE postId = ?';
+          connection.query(sql, [postId], async (error, results) => {
+            if(error) {
+              console.log(error);
+              res.status(500).json({message: 'image delete 실패.'});
+              connection.release();
+            }
+            else {
+              //image테이블에 이미지 정보 저장.
+              const promises = req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                  sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
+                  params = [postId, file.originalname, file.location, file.key];
+                  connection.query(sql, params, (error) => {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve();
+                    }
+                  });
+                });
+              });
+
+              try {
+                await Promise.all(promises);
+                connection.release();
+                res.status(200).json({ message: '저장완료' });
+              } catch (error) {
+                console.error('Error executing the query: ' + error.stack);
+                connection.release();
+                return res.status(500).json({ message: 'db문제 발생.' });
+              }
+
+            }
+          })
         }
       })
     }
@@ -304,23 +452,24 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
   let params = [postId];
   let isMyPost = false;
 
-  pool.getConnection((error, connection)=>{
-    if(error) {
+  pool.getConnection((error, connection) => {
+    if (error) {
       console.log(error);
     }
     else {
-      connection.query(sql, params, (error, result)=>{
-        if(error) {
-          console.error('Error executing the query: '+ error.stack)
-          res.status(401).json({message: 'db조회 실패'});
+      connection.query(sql, params, (error, result) => {
+        if (error) {
+          console.error('Error executing the query: ' + error.stack)
+          res.status(401).json({ message: 'db조회 실패' });
           connection.release();
         }
         else {
           let post = result[0]
           let images;
-          
-          
-          if(post.userId === req.session.user) {
+          let comments;
+
+
+          if (post.userId === req.session.user) {
             isMyPost = true;
           }
 
@@ -328,39 +477,119 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
           params = [postId];
           connection.query(sql, params, (error, result) => {
             if (error) {
-              console.error('Error executing the query: '+ error.stack)
-              res.status(401).json({message: 'db조회 실패'});
+              console.error('Error executing the query: ' + error.stack)
+              res.status(401).json({ message: 'db조회 실패' });
               connection.release();
             } else {
               images = result;
-
-              sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
-              params = [postId, req.session.user];
-              connection.query(sql, params, (error,results) => {
-                if (error) {
-                  res.status(500).json({ error: 'Failed to update view count.' });
-                  return;
-                }
-          
-                if (results.affectedRows === 0) {
-                  // This means the post was the user's own post and the view_count was not increased
-                  res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost});
-                } else {
-                  // The view_count was increased
-                  res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost});
-                }
-              })
+              console.log(images);
+            
               
-              connection.release();
-            }
-          });
+              //댓글 출력
+              sql = 'SELECT * FROM comment WHERE postId = ?';
+              params = [postId];
+              connection.query(sql, params, (error, results) => {
+                if (error) {
+                  res.status(401).json({ error: '댓글 db조회 실패' });
+                  return;
+                } else {
+                  comments = results;
+                  sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
+                  params = [postId, req.session.user];
+                  connection.query(sql, params, (error, results) => {
+                    if (error) {
+                      res.status(500).json({ error: 'Failed to update view count.' });
+                      return;
+                    }
 
-          
+                    if (results.affectedRows === 0) {
+                      // This means the post was the user's own post and the view_count was not increased
+                      res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                    } else {
+                      // The view_count was increased
+                      res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                    }
+                  });
+                }
+                  connection.release();
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭제 요청
+  const postId = req.params.postId;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'SELECT s3Key FROM image WHERE postId = ?';
+      params = [postId];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: 'Failed to find Key.' });
+          return;
         }
-      })
+        const imageKeyDelete = results.map(row => row.s3Key);
+
+        sql = 'DELETE image FROM image INNER JOIN post ON image.postId=post.postId WHERE post.postId = ?';
+        params = [postId];
+        connection.query(sql, params, (error, results) => {
+          if (error) {
+            res.status(404).json({ error: 'Failed to drop image.' });
+            return;
+          }
+          sql = 'DELETE * FROM likepost WHERE postId = ?';
+          params = [postId];
+          connection.query(sql, params, (error, results) => {
+            if (error) {
+              res.status(404).json({ error: 'Failed to delete likepost.' });
+              return;
+            }
+          })
+          if (results.affectedRows === 0) {
+            res.status(404).json({ message: 'Failed to find post, image.' });
+          } else {
+            sql = 'DELETE post FROM post WHERE post.postId = ?';
+            params = [postId];
+            connection.query(sql, params, (error, results) => {
+              if (error) {
+                res.status(404).json({ error: 'Failed to drop post.' });
+                return;
+              }
+
+              const deletePromises = imageKeyDelete.map((imageKey) => {
+                const params = {
+                  Bucket: process.env.S3_BUCKET,
+                  Key: imageKey,
+                };
+
+                const command = new DeleteObjectCommand(params);
+                return s3.send(command);
+              });
+
+              Promise.all(deletePromises)
+                .then(() => {
+                  res.status(204).json({ message: 'Drop post successfully.' });
+                })
+                .catch((err) => {
+                  console.error('이미지 삭제 실패:', err);
+                  res.status(404).json({ error: 'Failed to drop s3 image.' });
+                  connection.release();
+                });
+            });
+          }
+        });
+      });
     }
   })
-})
+});
 
 app.get('/user/likepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 조회
   let sql = 'SELECT postId FROM likepost WHERE userId = ?';
@@ -440,6 +669,39 @@ app.get('/posts/:postId/likeCount', (req, res) => { //게시글 전체 좋아요
     }
   })
 })
+    
+app.put('', isAuthenticated, (req, res) => { //댓글 수정
+  const commentId = req.body.commentId;
+  const newCommentText = req.body.content;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
+      params = [newCommentText, commentId];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 수정 db연결 실패.' });
+          return;
+        } else {
+          sql = 'SELECT * FROM comment WHERE commentId = ?';
+          params = [commentId];
+          connection.query(sql, params, (error, results) => {
+            if (error) {
+              res.status(404).json({ error: '댓글 조회 db연결 실패.' });
+              return;
+            } else {
+
+              res.status(200).json({ message: 'Update comments successfully.', comments: results });
+            }
+          });
+        }
+      });
+    }
+  })
+});
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
