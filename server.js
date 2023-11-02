@@ -415,6 +415,32 @@ app.post('/user/updateLikepost', isAuthenticated, (req, res) => { //유저 좋�
   })
 })
 
+app.get('/posts/:postId/likeCount', (req, res) => { //게시글 전체 좋아요 개수
+  const postId = req.params.postId;
+  let sql = 'SELECT COUNT(*) AS count FROM likepost WHERE postId=?';
+  let params = [postId];
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json(result);
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
   response.sendFile(path.join(__dirname, '/client/build/index.html'));

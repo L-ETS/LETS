@@ -7,6 +7,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
+import Badge from 'react-bootstrap/Badge';
 
 function PostDetail() {
   const { postId } = useParams();
@@ -17,16 +18,16 @@ function PostDetail() {
   const [isMyPost, setIsMyPost] = useState(false);
   const [loading, setLoading] = useState(true);
   const [likeBtn, setLikeBtn] = useState(false);
+  const [likeCount, setLikeCount] = useState('');
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
 
-  //버튼 클릭시 버튼이 리로드되지 않아서 페이지를 리로드함 -> 리로드된 페이지의 조회수가 증가함
   const clickLikeBtn = async() => {
     try {
       const response = await axios.post('/user/updateLikepost', { pId : postId, isDelete : likeBtn });
       console.log(response.data);
-      window.location.reload();
+      setLikeBtn((prevBtnValue) => !prevBtnValue);
     } catch(error) {
       console.log(error);
       alert('잘못된 접근입니다.');
@@ -51,8 +52,9 @@ function PostDetail() {
 
   useEffect(() => {
     axios.get('/user/likepost')
-      .then((response) => {
+      .then(response => {
         //console.log(response.data[0].postId);
+        console.log('likepost');
         for (let i=0; i<response.data.length; i++) {
           if (response.data[i].postId == postId) setLikeBtn(true);
         }
@@ -61,6 +63,18 @@ function PostDetail() {
         console.error('데이터 가져오기 오류:', error);
       })
   }, [])
+
+  useEffect(() => {
+    axios.get(`/posts/${postId}/likeCount`)
+      .then(res => {
+        console.log('likecount');
+        //console.log(res.data[0].count);
+        setLikeCount(res.data[0].count);
+      })
+      .catch((error) => {
+        console.error('데이터 가져오기 오류:', error);
+      })
+  }, [likeBtn])
   
   if(loading) {
     return (
@@ -98,7 +112,9 @@ function PostDetail() {
                 <div>
                   <span>작성자: {post.userId}</span>
                   <br/>
-                  <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>        
+                  <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>
+                  <br/>
+                  <h5><Badge bg="danger">좋아요 {likeCount}</Badge></h5>
                 </div>  
                 {
                   isMyPost ? 
@@ -127,6 +143,8 @@ function PostDetail() {
                   <span>작성자: {post.userId}</span>
                   <br/>
                   <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
+                  <br/>
+                  <h5><Badge bg="danger">좋아요 {likeCount}</Badge></h5>
                 </div>
                 {
                   isMyPost ? 
