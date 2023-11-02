@@ -209,7 +209,7 @@ app.get('/api/getUserRegion', isAuthenticated, (req, res) => {
   })
 })
 
-app.get('/posts', isAuthenticated, (req, res) => {
+app.get('/posts', (req, res) => {
 
   const { wideRegion, detailRegion } = req.query;
 
@@ -318,6 +318,7 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
         else {
           let post = result[0]
           let images;
+          let comments;
 
 
           if (post.userId === req.session.user) {
@@ -335,20 +336,32 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
               images = result;
               console.log(images);
 
-              sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
-              params = [postId, req.session.user];
+              //댓글 출력
+              sql = 'SELECT * FROM comment WHERE postId = ?';
+              params = [postId];
               connection.query(sql, params, (error, results) => {
                 if (error) {
-                  res.status(500).json({ error: 'Failed to update view count.' });
+                  res.status(401).json({ error: '댓글 db조회 실패' });
                   return;
-                }
-
-                if (results.affectedRows === 0) {
-                  // This means the post was the user's own post and the view_count was not increased
-                  res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost });
                 } else {
-                  // The view_count was increased
-                  res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost });
+                  comments = results;
+
+                  sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
+                  params = [postId, req.session.user];
+                  connection.query(sql, params, (error, results) => {
+                    if (error) {
+                      res.status(500).json({ error: 'Failed to update view count.' });
+                      return;
+                    }
+
+                    if (results.affectedRows === 0) {
+                      // This means the post was the user's own post and the view_count was not increased
+                      res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                    } else {
+                      // The view_count was increased
+                      res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                    }
+                  });
                 }
               });
             }
@@ -417,17 +430,17 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                 res.status(404).json({ error: 'Failed to drop post.' });
                 return;
               }
-              
+
               const deletePromises = imageKeyDelete.map((imageKey) => {
                 const params = {
                   Bucket: process.env.S3_BUCKET,
                   Key: imageKey,
                 };
-              
+
                 const command = new DeleteObjectCommand(params);
                 return s3.send(command);
               });
-              
+
               Promise.all(deletePromises)
                 .then(() => {
                   console.log('모든 이미지 삭제 성공');
@@ -440,6 +453,39 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
             });
           }
         });
+      });
+    }
+  })
+});
+
+app.put('', isAuthenticated, (req, res) => { //댓글 수정
+  const commentId = req.body.commentId;
+  const newCommentText = req.body.content;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
+      params = [newCommentText, commentId];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 수정 db연결 실패.' });
+          return;
+        } else {
+          sql = 'SELECT * FROM comment WHERE commentId = ?';
+          params = [commentId];
+          connection.query(sql, params, (error, results) => {
+            if (error) {
+              res.status(404).json({ error: '댓글 조회 db연결 실패.' });
+              return;
+            } else {
+
+              res.status(200).json({ message: 'Update comments successfully.', comments: results });
+            }
+          });
+        }
       });
     }
   })
