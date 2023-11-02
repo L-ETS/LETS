@@ -9,6 +9,7 @@ import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
 import UserContext from "../contexts/UserContext";
+import '../styles/reply.css';
 
 function PostDetail() {
   const navigate = useNavigate();
@@ -149,6 +150,21 @@ function PostDetail() {
             <p>
               {post.content}
             </p>
+
+            <div className='reply'>
+            <div className='wrapper'>
+              <textarea placeholder='내용을 입력해 주세요.'></textarea>
+              <button className='confirm'style={{borderRadius: '10px'}}>등록</button>
+            </div>
+            <div>
+              <div className='writer'>작성자</div>
+              <button className='revise'style={{borderRadius: '5px'}}>수정</button>
+              <button className='delete'style={{borderRadius: '5px'}}>삭제</button>
+            </div>          
+            
+            <br></br>
+            <div className='content'>내용을 작성했습니다~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ</div>
+             </div>   
           </Col>
         </Row>
       </Container>
