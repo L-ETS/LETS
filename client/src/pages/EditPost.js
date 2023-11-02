@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -7,7 +7,8 @@ import regions from './regionData';
 import '../styles/Upload.css';
 import Form from 'react-bootstrap/Form';
 
-function Upload() {
+function EditPost() {
+  const { postId } = useParams();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [images, setImages] = useState([]);
@@ -18,22 +19,39 @@ function Upload() {
 
   const navigate = useNavigate();
 
-  const getUserRegion = async () => {
+  const getPostData = async () => {
     try {
-      const response = await axios.get('/api/getUserRegion');
-      const userWideRegion = response.data.user.wideRegion;
-      const userDetailRegion = response.data.user.detailRegion;
+      const response = await axios.get(`/posts/${postId}`);
+      console.log(`response.data.images[0].imageUrl: ${JSON.stringify(response.data.images[0].imageUrl)}`);
+      const postWideRegion = response.data.post.wideRegion;
+      const postDetailRegion = response.data.post.detailRegion;
+      const postImages = response.data.images;
+      const postTitle = response.data.post.title;
+      const postContent = response.data.post.content;
+      
+      setWideRegion(postWideRegion);
+      setDetailRegion(postDetailRegion);
+      setTitle(postTitle);
+      setContent(postContent);
 
-      setWideRegion(userWideRegion);
-      setDetailRegion(userDetailRegion);
+      console.log(`postImages:${JSON.stringify(postImages)}`);
 
     } catch (error) {
       console.log(error);
     }
   }
 
+  const deleteOriginalImageFromS3 = async () => {
+    try {
+      const response = await axios.delete(`/posts/${postId}/imageS3`);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
-    getUserRegion();
+    getPostData();
+    deleteOriginalImageFromS3();
   }, [])
 
   const handleTitleChange = (e) => {
@@ -44,17 +62,12 @@ function Upload() {
     setContent(e.target.value);
   };
 
-  const handleImageChange = (e) => {
-    const images = Array.from(e.target.files);
-    setImages(images);
+  const handleNewImageAdd = (e) => {
+    const newImages = Array.from(e.target.files);
+    const newPreviews = newImages.map(image => window.URL.createObjectURL(image));
     
-    const previews = images.map((image) => window.URL.createObjectURL(image));
-    setImagePreviews([...previews]);
-
-    if(!e.target.files[0]){
-      setImages([]);
-      setImagePreviews([]);
-    }
+    setImages(newImages);
+    setImagePreviews(newPreviews);
   };
 
   const handleSubmit = async (e) => {
@@ -91,17 +104,16 @@ function Upload() {
 
 
     try {
-      const response = await axios.post('/posts', formData, {
+      //put요청으로 바꾸기.
+      await axios.put(`/posts/${postId}/edit`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      const postId = response.data.postId;
-      if(response.status === 200) {
-          alert('게시글 업로드 완료')
-          navigate(`/posts/${postId}`);
-      }
+      alert('게시글 수정 완료')
+      navigate(`/posts/${postId}`);
+        
     } catch (error) {
       console.error('서버 요청 오류:', error);
     }
@@ -145,7 +157,7 @@ function Upload() {
           </Dropdown>
         </div>
         <div>
-          <Button variant="success" onClick={handleSubmit}>게시글 작성</Button>
+          <Button variant="success" onClick={handleSubmit}>수정완료</Button>
         </div>
       </div>
 
@@ -178,21 +190,24 @@ function Upload() {
           name="image"
           accept="image/*"
           multiple
-          onChange={handleImageChange}
+          onChange={handleNewImageAdd}
         />
         
       </Form>
       
       <div style={{display: 'flex' }}>
 
-        {imagePreviews.map((image, index) => (
-          <img src={image} key={index} style={{width: '150px'}}/>
-          
-        ))}
+        {imagePreviews.map((image, index) => {
+          return (
+            <div>
+              <img src={image} key={index} style={{width: '150px'}}/>
+            </div>
+          )
+        }
+        )}
       </div>
-      
     </div>
   );
 }
 
-export default Upload;
+export default EditPost;

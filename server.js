@@ -249,6 +249,7 @@ app.get('/posts/upload', isAuthenticated, (req, res) => {
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
   const { title, content, wideRegion, detailRegion } = { ...req.body };
+  let postId;
 
   pool.getConnection((error, connection) => {
     if (error) {
@@ -270,7 +271,8 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           const promises = req.files.map(file => {
             return new Promise((resolve, reject) => {
               sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
-              params = [result.insertId, file.originalname, file.location, file.key];
+              postId = result.insertId
+              params = [postId, file.originalname, file.location, file.key];
               connection.query(sql, params, (error) => {
                 if (error) {
                   reject(error);
@@ -284,13 +286,159 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
           try {
             await Promise.all(promises);
             connection.release();
-            res.status(200).json({ message: '저장완료' });
+            res.status(200).json({ message: '저장완료', postId: postId });
           } catch (error) {
             console.error('Error executing the query: ' + error.stack);
             connection.release();
             return res.status(500).json({ message: 'db문제 발생.' });
           }
 
+        }
+      })
+    }
+  })
+});
+
+//특정 게시글의 모든 이미지 S3에서 삭제하기.
+app.delete('/posts/:postId/imageS3', isAuthenticated, async (req, res) => {
+  const postId = req.params.postId;
+  let s3Keys;
+
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      let sql = 'SELECT s3Key from image WHERE postId = ?';
+      let params = [postId];
+
+      connection.query(sql, params, (error, results) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack)
+          res.status(500).json({message: 'db조회 실패'});
+          connection.release();
+        } else {
+
+            s3Keys = results;
+
+            if(s3Keys.length) {
+              const deletePromises = s3Keys.map((obj) => {
+                const params = {
+                  Bucket: process.env.S3_BUCKET,
+                  Key: obj.s3Key,
+                };
+
+                const command = new DeleteObjectCommand(params);
+                return s3.send(command);
+              });
+
+              Promise.all(deletePromises)
+                .then(() => {
+                  res.status(204).json({ message: 'Drop image successfully.' });
+                })
+                .catch((err) => {
+                  console.error('이미지 삭제 실패:', err);
+                  res.status(404).json({ error: 'Failed to drop s3 image.' });
+                });
+              connection.release();
+            } else {
+              res.status(404).send({ message: 's3Keys not found.' });
+              connection.release();
+            }
+
+        }
+      })
+    }
+  })
+})
+
+//특정 게시글의 모든 이미지 DB에서 삭제하기.
+app.delete('/posts/:postId/imageDB', isAuthenticated, async (req, res) => {
+  const postId = req.params.postId;
+
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      let sql = 'DELETE * from image WHERE postId = ?';
+      let params = [postId];
+
+      connection.query(sql, params, (error, results) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack)
+          res.status(500).json({message: 'db삭제 실패'});
+          connection.release();
+        } else {
+          res.status(204).json({message: '삭제 성공'});
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
+//게시글 수정
+app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, res) => { 
+
+  const postId = req.params.postId;
+  const { title, content, wideRegion, detailRegion} = {...req.body};
+  
+  pool.getConnection((error, connection)=>{
+    if(error) {
+      console.log(error);
+      return res.status(500).json({ message: 'Database connection error.' });
+    }
+    else {
+      //post테이블에 게시글 정보 수정.
+      let sql = 'UPDATE post SET title = ?, content = ?, wideRegion = ?, detailRegion = ?, update_date = NOW() WHERE postId = ?';
+      
+      let params = [title, content, wideRegion, detailRegion, postId];
+      connection.query(sql, params, async (error, result)=>{
+        if(error) {
+          console.error('Error updating the post: '+ error)
+          connection.release();
+          return res.status(500).json({message: 'db문제 발생.'});
+        }
+        else {
+          //기존 image 테이블에 postId로 저장된 기존 이미지들 삭제.
+          sql = 'DELETE FROM image WHERE postId = ?';
+          connection.query(sql, [postId], async (error, results) => {
+            if(error) {
+              console.log(error);
+              res.status(500).json({message: 'image delete 실패.'});
+              connection.release();
+            }
+            else {
+              //image테이블에 이미지 정보 저장.
+              const promises = req.files.map(file => {
+                return new Promise((resolve, reject) => {
+                  sql = 'INSERT INTO image (postId, imageName, imageUrl, s3Key) VALUES (?, ?, ?, ?)';
+                  params = [postId, file.originalname, file.location, file.key];
+                  connection.query(sql, params, (error) => {
+                    if (error) {
+                      reject(error);
+                    } else {
+                      resolve();
+                    }
+                  });
+                });
+              });
+
+              try {
+                await Promise.all(promises);
+                connection.release();
+                res.status(200).json({ message: '저장완료' });
+              } catch (error) {
+                console.error('Error executing the query: ' + error.stack);
+                connection.release();
+                return res.status(500).json({ message: 'db문제 발생.' });
+              }
+
+            }
+          })
         }
       })
     }
@@ -363,36 +511,15 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
                     }
                   });
                 }
-              });
-            }
-          });
-        }
-      });
-    }
-    // const post_id = [1, 2, 3]; // 특정 postid 배열 (임의)
-
-    //   // 배열 루프 and 각 id마다 쿼리 실행
-    //   post_id.forEach((postId) => {
-    //   // 특정 postId count + 1 하는 쿼리
-    //     const sqlQuery = `
-    //       INSERT INTO UserPostCounts (post_id, count)
-    //       VALUES (?, 1)
-    //       ON DUPLICATE KEY UPDATE count = count + 1
-    //     `;
-
-    //     const values = [postId];
-
-    //     connection.query(sqlQuery, values, (error, results, fields) => {
-    //       if (error) {
-    //         console.error('Error executing query:', error);
-    //       } else {
-    //         console.log('Query executed successfully');
-    //       }
-    //     });
-    //   });
-    connection.release();
+                  connection.release();
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   });
-});
 
 app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭제 요청
   const postId = req.params.postId;
@@ -410,7 +537,6 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
           return;
         }
         const imageKeyDelete = results.map(row => row.s3Key);
-        console.log(imageKeyDelete);
 
         sql = 'DELETE image FROM image INNER JOIN post ON image.postId=post.postId WHERE post.postId = ?';
         params = [postId];
@@ -443,12 +569,12 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
 
               Promise.all(deletePromises)
                 .then(() => {
-                  console.log('모든 이미지 삭제 성공');
                   res.status(204).json({ message: 'Drop post successfully.' });
                 })
                 .catch((err) => {
                   console.error('이미지 삭제 실패:', err);
-                  res.status(204).json({ message: 'Drop post successfully.' });
+                  res.status(404).json({ error: 'Failed to drop s3 image.' });
+                  connection.release();
                 });
             });
           }
@@ -457,7 +583,40 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
     }
   })
 });
+  app.post('/user/likeposts',isAuthenticated, (req,res) => {
+    
+    const userId = req.query.userId;
+    const insertQuery = 'INSERT INTO (userId) VALUES (?)';
+    
+    connection.query(insertQuery, [userId], (err, result)=>{
+      if(err){
+        console.error('insert error'+err.message);
+        res.status(500).send('좋아요 처리 중 오류');
+        return;
+      }
+      console.log('likeposts table에 userid 저장 성공');
+      res.status(200).send('좋아요 처리 완료');
+    });
+    connection.end();
+  });
+  app.get('/user/likeposts',(req,res)=>{
 
+    const countQuery = 'SELECT COUNT(userId) AS likeCount FROM likeposts';
+    
+    connection.query(countQuery, (err, results)=> {
+      if(err){
+        console.error('count query error' + err.message);
+        res.status(500).send('error');
+        return;
+      }
+      const likeCount = results[0].likeCount;
+      console.log('likeposts table의 사용자 id 개수'+ likeCount);
+
+      connection.end();
+      res.status(200).send('좋아요 처리 완료');
+    });
+  });
+    
 app.put('', isAuthenticated, (req, res) => { //댓글 수정
   const commentId = req.body.commentId;
   const newCommentText = req.body.content;

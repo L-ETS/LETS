@@ -10,9 +10,10 @@ import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
 
 function PostDetail() {
-  const { postId } = useParams();
   const navigate = useNavigate();
-
+  const { postId } = useParams();
+  const [likeCount,setLikeCount] = useState(0);
+  const [likeBtn, setLikeBtn] = useState(false);
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
   const [mainImageSrc, setMainImageSrc] = useState('');
@@ -22,11 +23,28 @@ function PostDetail() {
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
+  
+  const clickLikeBtn = async() => {
+    try {
+      setLikeBtn(!likeBtn);
+      const response = await axios.get('/user/likeposts');
+        if (response.status === 200) {
+          // 요청이 성공하면 좋아요 개수를 업데이트
+          setLikeCount(response.data);
+        } else {
+          console.log('요청 실패');
+          alert('서버에서 "좋아요" 정보를 불러오지 못했습니다.');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('서버와 통신 중 오류가 발생했습니다.');
+      }
+  }
 
   useEffect(() => {
     axios.get(`/posts/${postId}`)
       .then(response => {
-
+        
         setImages(response.data.images);
         setPost(response.data.post);
         setMainImageSrc(response.data.images[0].imageUrl);
@@ -108,21 +126,23 @@ function PostDetail() {
             <div style={{margin: '10px 0', borderBottom: '1px solid'}}>
               {
                 create < update ?
-                <div>
+                <div style={{display: "flex", justifyContent: "space-between"}}>   
                   <div>
                     <span>작성자: {post.userId}</span>
                     <br/>
-                    <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>        
-                  </div>  
+                    <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span> 
+                  </div>    
                   {
                     isMyPost ? 
                     <div>
-                      <Button variant="success">수정</Button>
+                      <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
+                      <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
+                    <p>좋아요 개수: {likeCount}</p>
                     </div>
                     : 
                     null
-                  }  
+                  }
                 </div>
                 :
                 <div style={{display: "flex", justifyContent: "space-between"}}>
@@ -134,8 +154,10 @@ function PostDetail() {
                   {
                     isMyPost ? 
                     <div>
-                      <Button variant="success">수정</Button>
+                      <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
+                      <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
+                    <p>좋아요 개수: {likeCount}</p>
                     </div>
                     : 
                     null
