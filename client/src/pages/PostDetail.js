@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
@@ -8,6 +8,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
+import UserContext from "../contexts/UserContext";
 
 function PostDetail() {
   const navigate = useNavigate();
@@ -20,6 +21,7 @@ function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
 
+  const { userId } = useContext(UserContext);
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
 

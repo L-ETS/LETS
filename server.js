@@ -179,7 +179,7 @@ app.get('/user/logout', (req, res) => {
 
 app.get('/api/check-session', (req, res) => {
   if (req.session.user) {
-    res.json({ loggedIn: true });
+    res.json({ loggedIn: true, userId: req.session.user });
   } else {
     res.json({ loggedIn: false });
   }
