@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
@@ -11,7 +11,8 @@ import Modal from 'react-bootstrap/Modal';
 import Badge from 'react-bootstrap/Badge';
 import '../styles/reply.css';
 import Comment from "../components/Comment";
-import UserContext from "../contexts/UserContext";
+import CommentCreate from "../components/CommentCreate";
+import CommentEdit from "../components/CommentEdit";
 
 
 function PostDetail() {
@@ -26,8 +27,6 @@ function PostDetail() {
   const [likeCount, setLikeCount] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
   const [comments, setComments] = useState([]);
-  const [commentContent, setCommentContent] = useState('');
-  const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
@@ -100,32 +99,6 @@ function PostDetail() {
       navigate('/');
 
     } catch (error) {
-      console.log(error);
-    }
-    
-  }
-
-  // 댓글 '등록' 버튼 눌렀을 때 실행할 내용.
-  const handleCommentSubmit = async (e) => {
-    e.preventDefault();
-    
-    try {
-      const response = await axios.post('/comment', {
-        postId: postId,
-        userId: logginedUserId,
-        content: commentContent
-      });
-
-      const comment = response.data.comment;
-
-      if (!comment) throw new Error('서버에서 댓글 가져오기 실패');
-
-      setComments(prev => [...prev, comment]);
-      alert('댓글이 작성되었습니다.');
-      setCommentContent('');
-      
-    } catch (error) {
-      alert('댓글 작성 실패');
       console.log(error);
     }
   }
@@ -246,23 +219,12 @@ function PostDetail() {
             </p>
 
             {/* 댓글 입력폼 */}
-            <form onSubmit={handleCommentSubmit}>
-              <div className='wrapper'>
-                <textarea 
-                  placeholder='내용을 입력해 주세요.' 
-                  value={commentContent}
-                  onChange={(e)=>setCommentContent(e.target.value)}
-                ></textarea>
-                <button className='confirm' type="submit" style={{borderRadius: '10px'}}>등록</button>
-              </div>
-            </form>
+              <CommentCreate /><CommentEdit />
 
             {/* 댓글 항목 출력 */}
             {
               comments.map(comment=><Comment comment={comment} key={comment.commentId}/>)
             }
-            
-
           </Col>
         </Row>
       </Container>

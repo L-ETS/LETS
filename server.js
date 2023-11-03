@@ -701,7 +701,7 @@ app.post('/comment', async (req, res) => {
   }
 });
 
-app.get('', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 정보 출력
+app.get('/posts/:postId/comment', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 정보 출력
   const {commentId} = req.body;
 
   pool.getConnection((error, connection) => {
@@ -723,8 +723,8 @@ app.get('', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 �
   })
 });
     
-app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
-  const {commentId, commentContent} = req.body;
+app.put('/posts/:postId/comment', isAuthenticated, (req, res) => { //댓글 수정
+  const {commentId, content} = req.params;
 
   pool.getConnection((error, connection) => {
     if (error) {
@@ -732,7 +732,7 @@ app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
     }
     else {
       sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
-      params = [commentId, commentContent];
+      params = [commentId, content];
       connection.query(sql, params, (error, results) => {
         if (error) {
           res.status(404).json({ error: '댓글 수정 db연결 실패.' });
@@ -755,25 +755,44 @@ app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
   })
 });
 
-app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 삭제
-  const {commentId} = req.body;
+app.delete('/posts/:postId/comment', isAuthenticated, async (req, res) => { //댓글 삭제
+  const {commentId} = req.params;
 
-  try {
-    const deleteQuery = 'DELETE * FROM comment WHERE commentId = ?';
-    const deleteResult = await pool2.execute(deleteQuery, [commentId]);
-  
-    console.log('Delete Result:', deleteResult);
-  
-    if (deleteResult && deleteResult.affectedRows > 0) {
-      res.status(200).json({ message: 'deleted' });
-    } else {
-      res.status(404).json({ message: 'failed delete.' });
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.error('The error is:', error);
-    res.status(500).json({ error: error.message });
-  }
+    else {
+      sql = 'DELETE FROM comment WHERE commentId = ? AND userID = ?';
+      params = [commentId, req.session.user];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 삭제 실패.' });
+          return;
+        } else {
+          res.status(200).json({ message: 'DELETE comments successfully.', comments: results });
+        }
+      });
+    }
+  });
 });
+    
+// try {
+// const deleteQuery = 'DELETE FROM comment WHERE commentId = ?';
+// const deleteResult = await pool2.execute(deleteQuery, [commentId]);
+
+// console.log('Delete Result:', deleteResult);
+
+// if (deleteResult.affectedRows === 0) {
+// res.status(404).json({ message: 'failed delete' });
+// } else {
+// res.status(200).json({ message: 'deleted.' });
+// }
+// } catch (error) {
+// console.error('The error is:', error);
+// res.status(500).json({ error: error.message });``
+// }
+
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
