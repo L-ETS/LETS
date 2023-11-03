@@ -726,16 +726,12 @@ app.get('/comment/:commentId', (req, res) => {
   });
 });
     
-app.put('/comment/:commentId', async (req, res) => {
-  const { content } = req.body;
-
-  if (!content) {
-    return res.status(400).json({ error: 'Missing required parameters.' });
-  }
+app.put('/comment/update', async (req, res) => {
+  const { commentId, content } = req.body;
 
   try {
     const sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
-    const params = [content];
+    const params = [content, commentId];
 
     const [results] = await pool2.execute(sql, params);
 

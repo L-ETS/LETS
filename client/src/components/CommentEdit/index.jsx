@@ -5,16 +5,11 @@ import { useNavigate, useParams } from 'react-router-dom'
 function CommentEdit({comment}) {
 
   const { postId } = useParams();
-  const [commentContent, setCommentContent] = useState('')
+  const [commentContent, setCommentContent] = useState(comment.content);
+  const [comments, setComments] = useState([]);
   const navigate = useNavigate();
   
-  useEffect(() => {
-    setCommentContent(comment.content);
-  },[comment.content]);
-  
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    
+  const handleEdit = async () => {
     const { commentId } = comment;
     
     if(commentContent.length === 0) {
@@ -23,11 +18,24 @@ function CommentEdit({comment}) {
     }
 
     try{
-      const response = await axios.put(`/comment/${commentId}`, {content: commentContent})
+      const response = await axios.put(`/comment/update`, { 
+        data: {
+          content: commentContent,
+          commentId: commentId
+        }
+      });
 
+      const updatedComment = response.data.comments;
+
+    setComments((prevComments) =>
+      prevComments.map((prevComment) =>
+        prevComment.commentId === updatedComment.commentId
+          ? { ...prevComment, content: updatedComment.content }
+          : prevComment
+      )
+    );
       alert('댓글 수정 완료')
       console.log(response.data);
-      navigate(`/posts/${postId}`);
     } catch (error) {
       console.error(error)
     }

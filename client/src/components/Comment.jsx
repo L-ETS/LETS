@@ -19,12 +19,13 @@ const handleDelete = async () => {
     const response = await axios.delete(`/comment/delete`, {
       data: {
         commentId: commentId,
-      },
+      }
     });
+    
+    const deletedComment = response.data.comments;
 
     if (response.status === 200) {
-      const comment = response.data.comments;
-      setComments(prev => prev.filter(prevComment => prevComment.commentId !== comment.CommentId));
+      setComments(prev => prev.filter(prevComment => prevComment.commentId !== deletedComment.CommentId));
       alert('댓글 삭제 성공');
     } window.location.reload();
   } catch (error) {
