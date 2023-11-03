@@ -3,9 +3,9 @@ import axios from 'axios';
 import UserContext from '../contexts/UserContext';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 
-function CommentCreate() {
+function CommentCreate({comment}) {
   
-  const { postId, commentId } = useParams();
+  const { postId } = useParams();
   const {logginedUserId} = useContext(UserContext);
   const [commentContent, setCommentContent] = useState('');
   const [comments, setComments] = useState([]);
@@ -21,15 +21,16 @@ function CommentCreate() {
       userId: logginedUserId,
       content: commentContent
     });
-
-    const comment = response.data.comment;
+    
+    const comment = response.data.comments;
 
     if (!comment) throw new Error('서버에서 댓글 가져오기 실패');
-    setComments(prev => [...prev, comment]);    
-    alert('댓글이 작성되었습니다.');
-    setCommentContent('');
-    
-  } catch (error) {
+      setComments(prev => [...prev, comment]);
+      alert('댓글이 작성되었습니다.');
+      setCommentContent('');
+      navigate(`/posts/${postId}`) 
+    } 
+  catch (error) {
     alert('댓글 작성 실패');
     console.log(error);
   }

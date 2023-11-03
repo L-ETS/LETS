@@ -77,7 +77,7 @@ function PostDetail() {
     axios.get(`/posts/${postId}/likeCount`)
       .then(res => {
         console.log('likecount');
-        //console.log(res.data[0].count);
+        console.log(res.data[0].count);
         setLikeCount(res.data[0].count);
       })
       .catch((error) => {
@@ -217,13 +217,12 @@ function PostDetail() {
             <p>
               {post.content}
             </p>
-
             {/* 댓글 입력폼 */}
-              <CommentCreate /><CommentEdit />
+              <CommentCreate />
 
             {/* 댓글 항목 출력 */}
             {
-              comments.map(comment=><Comment comment={comment} key={comment.commentId}/>)
+              comments.map((comment) => <Comment comment={comment} key={comment.commentId} />)
             }
           </Col>
         </Row>
