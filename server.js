@@ -179,7 +179,7 @@ app.get('/user/logout', (req, res) => {
 
 app.get('/api/check-session', (req, res) => {
   if (req.session.user) {
-    res.json({ loggedIn: true });
+    res.json({ loggedIn: true, userId: req.session.user });
   } else {
     res.json({ loggedIn: false });
   }
@@ -483,7 +483,8 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
             } else {
               images = result;
               console.log(images);
-
+            
+              
               //댓글 출력
               sql = 'SELECT * FROM comment WHERE postId = ?';
               params = [postId];
@@ -493,7 +494,6 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
                   return;
                 } else {
                   comments = results;
-
                   sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
                   params = [postId, req.session.user];
                   connection.query(sql, params, (error, results) => {
@@ -545,7 +545,14 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
             res.status(404).json({ error: 'Failed to drop image.' });
             return;
           }
-
+          sql = 'DELETE * FROM likepost WHERE postId = ?';
+          params = [postId];
+          connection.query(sql, params, (error, results) => {
+            if (error) {
+              res.status(404).json({ error: 'Failed to delete likepost.' });
+              return;
+            }
+          })
           if (results.affectedRows === 0) {
             res.status(404).json({ message: 'Failed to find post, image.' });
           } else {
@@ -601,17 +608,16 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
   });
   app.get('/user/likeposts',(req,res)=>{
 
-    const userId = req.query.userId;
     const countQuery = 'SELECT COUNT(userId) AS likeCount FROM likeposts';
     
-    connection.query(userId,countQuery, (err, results)=> {
+    connection.query(countQuery, (err, results)=> {
       if(err){
         console.error('count query error' + err.message);
         res.status(500).send('error');
         return;
       }
-      // const likeCount = results[0].likeCount;
-      // console.log('likeposts table의 사용자 id 개수'+ likeCount);
+      const likeCount = results[0].likeCount;
+      console.log('likeposts table의 사용자 id 개수'+ likeCount);
 
       connection.end();
       res.status(200).send('좋아요 처리 완료');

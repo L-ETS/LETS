@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
@@ -7,48 +7,47 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
-import Modal from 'react-bootstrap/Modal';
+import Modal from 'react-bootstrap/Modal';  
+import Badge from 'react-bootstrap/Badge';
+import '../styles/reply.css';
+import Comment from "../components/Comment";
+
 
 function PostDetail() {
   const navigate = useNavigate();
   const { postId } = useParams();
-  const [likeCount,setLikeCount] = useState(0);
-  const [likeBtn, setLikeBtn] = useState(false);
   const [post, setPost] = useState({});
   const [images, setImages] = useState([]);
   const [mainImageSrc, setMainImageSrc] = useState('');
   const [isMyPost, setIsMyPost] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [likeBtn, setLikeBtn] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
+  const [comments, setComments] = useState([]);
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
-  
+
   const clickLikeBtn = async() => {
     try {
-      setLikeBtn(!likeBtn);
-      const response = await axios.get('/user/likeposts');
-        if (response.status === 200) {
-          // 요청이 성공하면 좋아요 개수를 업데이트
-          setLikeCount(response.data);
-        } else {
-          console.log('요청 실패');
-          alert('서버에서 "좋아요" 정보를 불러오지 못했습니다.');
-        }
-      } catch (error) {
-        console.error(error);
-        alert('서버와 통신 중 오류가 발생했습니다.');
-      }
+      const response = await axios.post('/user/updateLikepost', { pId : postId, isDelete : likeBtn });
+      console.log(response.data);
+      setLikeBtn((prevBtnValue) => !prevBtnValue);
+    } catch(error) {
+      console.log(error);
+      alert('잘못된 접근입니다.');
+    }
   }
 
   useEffect(() => {
     axios.get(`/posts/${postId}`)
       .then(response => {
-        
         setImages(response.data.images);
         setPost(response.data.post);
         setMainImageSrc(response.data.images[0].imageUrl);
         setIsMyPost(response.data.isMyPost);
+        setComments(response.data.comments);
       })
       .catch(error => {
         console.log(error);
@@ -57,7 +56,33 @@ function PostDetail() {
         setLoading(false);
       })
   }, [postId]);
-  
+
+  useEffect(() => {
+    axios.get('/user/likepost')
+      .then(response => {
+        //console.log(response.data[0].postId);
+        console.log('likepost');
+        for (let i=0; i<response.data.length; i++) {
+          if (response.data[i].postId == postId) setLikeBtn(true);
+        }
+      })
+      .catch((error) => {
+        console.error('데이터 가져오기 오류:', error);
+      })
+  }, [])
+
+  useEffect(() => {
+    axios.get(`/posts/${postId}/likeCount`)
+      .then(res => {
+        console.log('likecount');
+        //console.log(res.data[0].count);
+        setLikeCount(res.data[0].count);
+      })
+      .catch((error) => {
+        console.error('데이터 가져오기 오류:', error);
+      })
+  }, [likeBtn])
+
   const handleDelete = async () => {
     try {
       const response = await axios.delete(`/posts/${postId}`);
@@ -77,6 +102,11 @@ function PostDetail() {
     
   }
 
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    // 이곳에 댓글 '등록' 버튼 눌렀을 때 실행할 내용 작성.
+  }
+  
   if(loading) {
     return (
       <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}>
@@ -130,18 +160,29 @@ function PostDetail() {
                   <div>
                     <span>작성자: {post.userId}</span>
                     <br/>
-                    <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span> 
+                    <span>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</span>
+                    <br/>
+                    <h5><Badge bg="danger">좋아요 {likeCount}</Badge></h5> 
                   </div>    
                   {
                     isMyPost ? 
                     <div>
                       <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
-                      <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
-                    <p>좋아요 개수: {likeCount}</p>
                     </div>
                     : 
-                    null
+                    <div>
+                      {
+                        likeBtn ?
+                        <div>
+                          <Button variant="danger" onClick={clickLikeBtn}>취소</Button>
+                        </div>
+                        :
+                        <div>
+                          <Button variant="outline-danger" onClick={clickLikeBtn}>좋아요</Button>
+                        </div>
+                      }
+                    </div>
                   }
                 </div>
                 :
@@ -150,17 +191,28 @@ function PostDetail() {
                     <span>작성자: {post.userId}</span>
                     <br/>
                     <span>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</span>
+                    <br/>
+                    <h5><Badge bg="danger">좋아요 {likeCount}</Badge></h5>
                   </div>
                   {
                     isMyPost ? 
                     <div>
                       <Button variant="success" onClick={()=>{navigate(`/posts/${postId}/edit`)}}>수정</Button>
                       <Button variant="danger" onClick={()=>{setShowAlert(true)}}>삭제</Button>
-                      <button onClick={clickLikeBtn}>{likeBtn ? '좋아요 취소' : '좋아요'}</button>
-                    <p>좋아요 개수: {likeCount}</p>
                     </div>
                     : 
-                    null
+                    <div>
+                      {
+                        likeBtn ?
+                        <div>
+                          <Button variant="danger" onClick={clickLikeBtn}>취소</Button>
+                        </div>
+                        :
+                        <div>
+                          <Button variant="outline-danger" onClick={clickLikeBtn}>좋아요</Button>
+                        </div>
+                      }
+                    </div>
                   } 
                 </div>
               }
@@ -169,11 +221,27 @@ function PostDetail() {
             <p>
               {post.content}
             </p>
+
+            {/* 댓글 입력폼 */}
+            <form onSubmit={handleCommentSubmit}>
+              <div className='wrapper'>
+                <textarea placeholder='내용을 입력해 주세요.'></textarea>
+                <button className='confirm' type="submit" style={{borderRadius: '10px'}}>등록</button>
+              </div>
+            </form>
+
+            {/* 댓글 항목 출력 */}
+            {
+              comments.map(comment=><Comment comment={comment}/>)
+            }
+            
+
           </Col>
         </Row>
       </Container>
     </>
   )
 }
+
 
 export default PostDetail;
