@@ -7,22 +7,50 @@ import regions from "./regionData";
 import UserContext from "../contexts/UserContext";
 
 function EditMyInform({...user}) {
-    const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디    
+    const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디
+    const [password, setPassword] = useState('');
+    const [passwordCheck, setPasswordCheck] = useState('');    
     const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
     const [wideRegion, setWideRegion] = useState('');
     const [detailRegion, setDetailRegion] = useState('');
+
+    const [passwordError, setPasswordError] = useState('');
+    const [passwordCheckError, setPasswordCheckError] = useState('');
     const [nicknameError, setNicknameError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [regionError, setRegionError] = useState('');
     const routing =  useNavigate();
     
+    const requestData = {
+        password: password,
+        nickname: nickname,
+        email: email,
+        wideRegion: wideRegion,
+        detailRegion: detailRegion
+      };
+    
     const goEditMyPage = async (e) => {
     e.preventDefault();
 
+    const passwordRegex = /^[a-zA-Z0-9]{8,20}$/;
     const nicknameRegex = /^[가-힣a-zA-Z]{2,10}$/;
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     
+    if (!passwordRegex.test(password)) {
+        setPasswordError('올바른 비밀번호 형식이 아닙니다. [대소문자, 숫자로 8 ~ 20자]');
+        return;
+      } else {
+        setPasswordError('');
+      }
+  
+      if (passwordCheck !== password) {
+        setPasswordCheckError('비밀번호가 일치하지 않습니다.');
+        return;
+      } else {
+        setPasswordCheckError('');
+      }
+
     if (!nicknameRegex.test(nickname)) {
         setNicknameError('올바른 닉네임 형식이 아닙니다. [한글, 영문 대소문자로 2 ~ 10자]');
         return;
@@ -38,13 +66,9 @@ function EditMyInform({...user}) {
     }
     
     try {
-        const response = await axios.put(`/user/editmyinform`, {
-            email: email,
-            nickname: nickname,
-            wideRegion: wideRegion,
-            detailRegion: detailRegion
-        });
+        const response = await axios.put(`/user/editmyinform`,requestData);
         
+        setPassword(password);
         setEmail(email);
         setNickname(nickname);
         setWideRegion(wideRegion);
@@ -68,11 +92,25 @@ function EditMyInform({...user}) {
                 </tr>
                 <tr>
                     <td className={styles.tableBold}>비밀번호</td>
-                    <td><input type="password" placeholder="비밀번호를 입력하세요."/></td>
+                <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    placeholder="비밀번호를 입력하세요."
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                {passwordError && <p>{passwordError}</p>}
                 </tr>
                 <tr>
                     <td className={styles.tableBold}>비밀번호 확인</td>
-                    <td><input type="passwordCheck" placeholder="비밀번호를 확인하세요."/></td>
+                <input
+                    type="password"
+                    id="passwordCheck"
+                    value={passwordCheck}
+                    placeholder="비밀번호를 확인하세요."
+                    onChange={(e) => setPasswordCheck(e.target.value)}
+                />
+                {passwordCheckError && <p>{passwordCheckError}</p>}
                 </tr>
 
               <tr className={styles.input_group}>
@@ -114,7 +152,7 @@ function EditMyInform({...user}) {
                         }
                     }}
                     >
-                  <option value="">선택</option>
+                  <option value={wideRegion}>선택</option>
                   {Object.keys(regions).map(region => (
                       <option key={region} value={region}>{region}</option>
                       ))}
@@ -134,7 +172,7 @@ function EditMyInform({...user}) {
                         }
                     }}
                     disabled={!wideRegion}>
-                  <option value="">선택</option>
+                  <option value={detailRegion}>선택</option>
                   {
                       wideRegion ?
                       regions[wideRegion].map(region => (
