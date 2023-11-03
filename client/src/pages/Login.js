@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from 'react-router-dom'
 import '../styles/login.css'; 
 import axios from "axios";
 import Button from 'react-bootstrap/Button';
+import UserContext from "../contexts/UserContext";
 
 function Login({setIsLogin}) {
   
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
+  const { setLogginedUserId } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -25,6 +27,7 @@ function Login({setIsLogin}) {
       // For example, you might store the JWT token in local storage and redirect the user to the home page
       if(response.status === 200) {
         setIsLogin(true);
+        setLogginedUserId(userId);
         navigate('/');
       }
 

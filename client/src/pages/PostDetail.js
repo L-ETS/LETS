@@ -24,6 +24,7 @@ function PostDetail() {
   const [likeBtn, setLikeBtn] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
+  const [comments, setComments] = useState([]);
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
@@ -46,6 +47,7 @@ function PostDetail() {
         setPost(response.data.post);
         setMainImageSrc(response.data.images[0].imageUrl);
         setIsMyPost(response.data.isMyPost);
+        setComments(response.data.comments);
       })
       .catch(error => {
         console.log(error);
@@ -98,6 +100,11 @@ function PostDetail() {
       console.log(error);
     }
     
+  }
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    // 이곳에 댓글 '등록' 버튼 눌렀을 때 실행할 내용 작성.
   }
   
   if(loading) {
@@ -216,12 +223,17 @@ function PostDetail() {
             </p>
 
             {/* 댓글 입력폼 */}
-            <div className='wrapper'>
-              <textarea placeholder='내용을 입력해 주세요.'></textarea>
-              <button className='confirm'style={{borderRadius: '10px'}}>등록</button>
-            </div>
+            <form onSubmit={handleCommentSubmit}>
+              <div className='wrapper'>
+                <textarea placeholder='내용을 입력해 주세요.'></textarea>
+                <button className='confirm' type="submit" style={{borderRadius: '10px'}}>등록</button>
+              </div>
+            </form>
 
-            {/* 댓글 항목 */}
+            {/* 댓글 항목 출력 */}
+            {
+              comments.map(comment=><Comment comment={comment}/>)
+            }
             
 
           </Col>
