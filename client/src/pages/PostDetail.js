@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
@@ -9,6 +9,9 @@ import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';  
 import Badge from 'react-bootstrap/Badge';
+import '../styles/reply.css';
+import Comment from "../components/Comment";
+
 
 function PostDetail() {
   const navigate = useNavigate();
@@ -211,6 +214,16 @@ function PostDetail() {
             <p>
               {post.content}
             </p>
+
+            {/* 댓글 입력폼 */}
+            <div className='wrapper'>
+              <textarea placeholder='내용을 입력해 주세요.'></textarea>
+              <button className='confirm'style={{borderRadius: '10px'}}>등록</button>
+            </div>
+
+            {/* 댓글 항목 */}
+            
+
           </Col>
         </Row>
       </Container>

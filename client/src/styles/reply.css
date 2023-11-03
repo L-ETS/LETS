@@ -1,0 +1,64 @@
+textarea {
+    margin-right: 20px;
+    width: 90%;
+    height: 50px;  
+    border: none;
+    resize: none;
+    padding: 10px;
+    border-radius: 15px;
+  }
+  
+  .confirm {
+    background-color: green;
+    color: white;
+    padding: 12px;
+    border: green;
+    width: 80px;
+  }
+  
+  .writer {
+    font: serif;
+    font-weight: bold;
+    text-align: left;
+    margin-top: 70px;
+  }
+  
+  .content {
+    border-bottom: 2px solid lightgray;
+    width: 100%;
+    text-align: left;
+    padding-bottom: 10px;
+  }
+  
+  .wrapper {
+    display: flex;
+    margin-top: 50px;
+    width: 100%;
+    border-radius:15px;
+    border: 3px solid green;
+  }
+  
+  textarea, button {
+    vertical-align: middle;
+  }
+
+  .revise {
+    background-color: grey;
+    color: white;
+    border: green;
+    width: 50px;
+    height: 25px;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+  }
+  
+  .delete {
+    background-color: rgb(100, 98, 98);
+    color: white;
+    border: red;
+    width: 50px;
+    height: 25px;
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+    
+  }
