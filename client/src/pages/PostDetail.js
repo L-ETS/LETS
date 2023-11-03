@@ -8,8 +8,8 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';
-import UserContext from "../contexts/UserContext";
 import '../styles/reply.css';
+import Comment from "../components/Comment";
 
 function PostDetail() {
   const navigate = useNavigate();
@@ -22,7 +22,6 @@ function PostDetail() {
   const [loading, setLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
 
-  const { userId } = useContext(UserContext);
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
 
@@ -151,20 +150,15 @@ function PostDetail() {
               {post.content}
             </p>
 
-            <div className='reply'>
+            {/* 댓글 입력폼 */}
             <div className='wrapper'>
               <textarea placeholder='내용을 입력해 주세요.'></textarea>
               <button className='confirm'style={{borderRadius: '10px'}}>등록</button>
             </div>
-            <div>
-              <div className='writer'>작성자</div>
-              <button className='revise'style={{borderRadius: '5px'}}>수정</button>
-              <button className='delete'style={{borderRadius: '5px'}}>삭제</button>
-            </div>          
+
+            {/* 댓글 항목 */}
             
-            <br></br>
-            <div className='content'>내용을 작성했습니다~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ</div>
-             </div>   
+
           </Col>
         </Row>
       </Container>
