@@ -17,6 +17,14 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
 
+    const chatRoomData = async () => { 
+    try {
+        const response = await axios.get(`/chat/:user1/:user2/:postId`);
+        console.log(response.data);
+    } catch(error) {
+        console.error('Error on chatroom data',error);
+    }
+}
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (newMessage == "") return;

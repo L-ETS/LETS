@@ -843,15 +843,15 @@ app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 �
   }
 });
 
-app.get('', isAuthenticated, async (req, res) => { //채팅방 목록 출력
+app.get('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
-    const query = 'SELECT bin_to_uuid(room_uuid) AS room_uuid FROM chatroom WHERE user1 = ? OR user2 = ?';
-    const [result] = await pool2.execute(query, [req.session.user, req.session.user]);
+    const { user1, user2, postId } = req.params;
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
+    const [result] = await pool2.execute(query, [user1, user2, postId]);
 
     if (result.length > 0) {
       res.status(200).json({ message: 'Chat load successfully', chatList: result });
-    }
-     else {
+    } else {
       res.status(404).json({ message: 'Room not found.' });
     }
   } catch (error) {
@@ -860,25 +860,10 @@ app.get('', isAuthenticated, async (req, res) => { //채팅방 목록 출력
   }
 });
 
-async function CreateChatRoom(user1, user2, postId) {
-  const query = 'INSERT INTO chatroom(user1, user2, postId) VALUES (?, ?, ?)';
-  const values = [user1, user2, postId];
-
-  try {
-    const [results] = await pool2.execute(query, values);
-    console.log('Chat Room Create Successfully');
-    return { message: 'Chat Room created successfully', results };
-  } catch (error) {
-    console.error('Error executing MySQL query:', error);
-    throw error;
-  }
-}
-
-app.get('/chat/enterChat/:user1/:user2/:postId', async (req, res) => {
+app.post('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
     const { user1, user2, postId } = req.params;
-
-    const query = 'SELECT BIN_TO_UUID(room_uuid) AS room_uuid FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
     const [result] = await pool2.execute(query, [user1, user2, postId]);
 
     if (result.length === 0) {
@@ -888,13 +873,15 @@ app.get('/chat/enterChat/:user1/:user2/:postId', async (req, res) => {
 
       res.status(200).json({ message: 'Room created' });
     } else {
-      res.status(404).json({ message: 'Room already exists.' });
+      res.status(200).json({ message: 'Room already exists.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
