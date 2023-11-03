@@ -5,7 +5,6 @@ import axios from "axios";
 
 function MyPost() {
     const beforeTrade = '거래 가능';
-    const reserved = '예약 중';
     const tradeComplete = '거래 완료';
     const [postList, setPostList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +31,6 @@ function MyPost() {
             <div className={styles.postStatus}>
                 <Button variant="outline-success">전체 글</Button>{' '}
                 <Button variant="outline-success" onClick={()=>fetchPosts(beforeTrade)}>거래 가능</Button>{' '}
-                <Button variant="outline-success" onClick={()=>fetchPosts(reserved)}>예약 중</Button>{' '}
                 <Button variant="outline-success" onClick={()=>fetchPosts(tradeComplete)}>거래 완료</Button>{' '}  
             </div>
             {

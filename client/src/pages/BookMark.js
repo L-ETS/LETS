@@ -1,27 +1,34 @@
-import react from "react";
+import react, { useEffect, useState } from "react";
+import axios from "axios";
 import styles from '../styles/BookMark.module.css';
-
+import { useNavigate } from "react-router-dom";
 
 function BookMark() {
+    const navigate = useNavigate();
+    const [likeposts, SetLikeposts] = useState([]);
 
+    useEffect(() => {
+      axios.get('/user/getlikeposts')
+      .then(response => {
+        console.log(response.data.postData);
+        SetLikeposts(response.data.postData);
+      })
+      .catch((error) => {
+        console.error('데이터 가져오기 오류:', error);
+      })
+    }, []);
+//onClick={navigate(`/posts/${post.postId}`)}
     return (
-        <div className={styles.container}>
-
-            <div className={styles.content}>
-                <div style={{fontWeight:700}}>글 제목</div>
-                <br></br>
-                <div>작성자</div>
-                <div>글 내용은~~~ 상위 div 반복으로 붙여넣기!</div>
+        <div>
+        {likeposts.map((post, index) => (
+            <div className={styles.content} key={index}>
+                <div style={{fontWeight:700}}>{post.title}</div><br/>
+                <div>{post.userId}</div>
+                <div>{post.content}</div>
             </div>
-
-            <div className={styles.content}>
-                <div style={{fontWeight:700}}>글 제목</div>
-                <br></br>
-                <div>작성자</div>
-                <div>글 내용은~~~ 상위 div 반복으로 붙여넣기!</div>
-            </div>
+        ))}
         </div>
-    ) 
+    )
 }
 
 export default BookMark;
