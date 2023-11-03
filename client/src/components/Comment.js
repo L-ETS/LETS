@@ -6,7 +6,7 @@ import UserContext from "../contexts/UserContext";
 
 function Comment({comment, postId}) {
   const navigate = useNavigate();
-  const { commentId } = useParams();
+  const { commentId } = useParams();  
   const [commentContent, setCommentContent] = useState('');
   const [comments, setComments] = useState([]);
   const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
@@ -61,7 +61,7 @@ function Comment({comment, postId}) {
 
     try {
       const response = await axios.get(`/chat/enterChat/${user1}/${user2}/${postId}`);
-      const uuid = response.data.uuid;
+            const uuid = response.data.uuid;
 
       if(!uuid) {
         throw new Error('uuid 값이 없음.');
