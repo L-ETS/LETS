@@ -669,6 +669,28 @@ app.get('/posts/:postId/likeCount', (req, res) => { //게시글 전체 좋아요
     }
   })
 })
+
+app.get('', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 정보 출력
+  const commentId = req.body.commentId;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'SELECT * FROM comment WHERE commentId = ?';
+      params = [commentId];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 db조회 실패' });
+          return;
+        } else {
+          res.status(200).json({ message: '댓글 정보 전송 완료', comments: results });
+        }
+      });
+    }
+  })
+});
     
 app.put('', isAuthenticated, (req, res) => { //댓글 수정
   const commentId = req.body.commentId;
@@ -697,6 +719,28 @@ app.put('', isAuthenticated, (req, res) => { //댓글 수정
               res.status(200).json({ message: 'Update comments successfully.', comments: results });
             }
           });
+        }
+      });
+    }
+  })
+});
+
+app.delete('', isAuthenticated, (req, res) => { //댓글 삭제
+  const commentId = req.body.commentId;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'DELETE FROM comment WHERE commentId = ? AND userID = ?';
+      params = [commentId, req.session.user];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 삭제 실패.' });
+          return;
+        } else {
+          res.status(200).json({ message: 'DELETE comments successfully.', comments: results });
         }
       });
     }
