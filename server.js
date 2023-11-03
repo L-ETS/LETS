@@ -624,9 +624,9 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
     });
   });
     
-app.put('', isAuthenticated, (req, res) => { //댓글 수정
+app.put('/comment/:commentId/edit', isAuthenticated, (req, res) => { //댓글 수정
   const commentId = req.body.commentId;
-  const newCommentText = req.body.content;
+  const commentContent = req.body.content;
 
   pool.getConnection((error, connection) => {
     if (error) {
@@ -634,7 +634,7 @@ app.put('', isAuthenticated, (req, res) => { //댓글 수정
     }
     else {
       sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
-      params = [newCommentText, commentId];
+      params = [commentContent, commentId];
       connection.query(sql, params, (error, results) => {
         if (error) {
           res.status(404).json({ error: '댓글 수정 db연결 실패.' });
