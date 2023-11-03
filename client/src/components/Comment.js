@@ -60,7 +60,7 @@ function Comment({comment, postId}) {
     if(!user1 || !user2) throw new Error('user1 또는 user2 정보 없음.');
 
     try {
-      const response = await axios.get(`/chat/${user1}/${user2}/${postId}`);
+      const response = await axios.post(`/chat/${user1}/${user2}/${postId}`);
       const uuid = response.data.uuid;
       if(!uuid) {
         throw new Error('uuid 값이 없음.');
