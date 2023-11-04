@@ -114,11 +114,15 @@ function PostDetail() {
         postId: postId,
         userId: logginedUserId,
         content: commentContent
-      })
+      });
 
+      const comment = response.data.comment;
+
+      if (!comment) throw new Error('서버에서 댓글 가져오기 실패');
+
+      setComments(prev => [...prev, comment]);
       alert('댓글이 작성되었습니다.');
       setCommentContent('');
-      setComments([...comments, response.data.comment]);
       
     } catch (error) {
       alert('댓글 작성 실패');
