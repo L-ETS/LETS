@@ -11,6 +11,7 @@ import Modal from 'react-bootstrap/Modal';
 import Badge from 'react-bootstrap/Badge';
 import '../styles/reply.css';
 import Comment from "../components/Comment";
+import UserContext from "../contexts/UserContext";
 
 
 function PostDetail() {
@@ -25,6 +26,8 @@ function PostDetail() {
   const [likeCount, setLikeCount] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
   const [comments, setComments] = useState([]);
+  const [commentContent, setCommentContent] = useState('');
+  const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디
 
   const create = new Date(post.create_date);
   const update = new Date(post.update_date);
@@ -102,9 +105,25 @@ function PostDetail() {
     
   }
 
-  const handleCommentSubmit = (e) => {
+  // 댓글 '등록' 버튼 눌렀을 때 실행할 내용.
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
-    // 이곳에 댓글 '등록' 버튼 눌렀을 때 실행할 내용 작성.
+    
+    try {
+      const response = await axios.post('/comment', {
+        postId: postId,
+        userId: logginedUserId,
+        content: commentContent
+      })
+
+      alert('댓글이 작성되었습니다.');
+      setCommentContent('');
+      setComments([...comments, response.data.comment]);
+      
+    } catch (error) {
+      alert('댓글 작성 실패');
+      console.log(error);
+    }
   }
   
   if(loading) {
@@ -225,14 +244,18 @@ function PostDetail() {
             {/* 댓글 입력폼 */}
             <form onSubmit={handleCommentSubmit}>
               <div className='wrapper'>
-                <textarea placeholder='내용을 입력해 주세요.'></textarea>
+                <textarea 
+                  placeholder='내용을 입력해 주세요.' 
+                  value={commentContent} 
+                  onChange={(e)=>setCommentContent(e.target.value)}
+                ></textarea>
                 <button className='confirm' type="submit" style={{borderRadius: '10px'}}>등록</button>
               </div>
             </form>
 
             {/* 댓글 항목 출력 */}
             {
-              comments.map(comment=><Comment comment={comment}/>)
+              comments.map(comment=><Comment comment={comment} key={comment.commentId}/>)
             }
             
 
