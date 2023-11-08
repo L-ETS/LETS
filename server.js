@@ -599,6 +599,43 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
   })
 });
 
+app.get('', async (req, res) => { //게시글 상태 정보 조회
+  const postId = req.body.postId;
+
+  try{
+    const query = 'SELECT p_state FROM post WHERE postId = ?';
+    const result = await pool2.execute(query, [postId]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post State successfully', p_state: result[0] });
+    } else {
+      res.status(404).json({ message: 'Post State not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.put('', async (req, res) => { //게시글 상태 전환
+  const postId = req.body.postId;
+  const p_state = req.body.p_state;
+
+  try{
+    const query = 'UPDATE post SET p_state = ? WHERE postId = ?';
+    const result = await pool2.execute(query, [p_state, postId]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Update State successfully' });
+    } else {
+      res.status(404).json({ message: 'Post State not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
 app.get('/user/likepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 조회
   let sql = 'SELECT postId FROM likepost WHERE userId = ?';
   let params = [req.session.user];
