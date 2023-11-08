@@ -1,0 +1,30 @@
+.container {
+    display: grid;
+    place-items: center;
+  }
+  
+  table {
+    border: 2px solid lightgrey;
+    width: 40%;
+    height: 450px;
+    margin: 50px;
+    margin-left: 30%;
+    margin-right: 30%;
+    margin-bottom: 70px;
+    border-radius: 10px;
+  }
+  
+  td {
+    padding-left: 70px;
+  }
+  
+  .tableBold {
+    font-size: 20px;
+    font-weight: 700;
+  }
+  
+  input {
+    border: 1px solid green;
+    border-radius: 5px;
+    width: 230px;
+  }
