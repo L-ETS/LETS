@@ -1,10 +1,19 @@
 import React from "react";
 import Button from 'react-bootstrap/Button';
-
 import styles from '../styles/MyPage.module.css'; 
+import { useNavigate } from 'react-router-dom';
 
-function MyPage2() {
-    
+
+
+
+function EditMyPage() {
+
+    const routing =  useNavigate();
+
+    function goMyPage() {
+		routing('/user/mypage');
+	}
+
     return (
         <div className={styles.container}>
             <table>
@@ -35,11 +44,13 @@ function MyPage2() {
 
                 <tr>
                     <td className={styles.tableBold}>거래 희망 지역</td>
-                    <td>**경기 수원**</td>
+                    <td>**select 버튼 수정 예정**</td>
                 </tr>
             </table>
 
-            <Button variant="outline-success">회원정보 수정</Button>{' '}
+            <Button variant="outline-success" onClick={goMyPage}>회원정보 수정</Button>{' '}
         </div>
     )
 }
+
+export default EditMyPage;

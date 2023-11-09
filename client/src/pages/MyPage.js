@@ -1,9 +1,16 @@
 import React from "react";
 import Button from 'react-bootstrap/Button';
+import styles from '../styles/MyPage.module.css';
+import { useNavigate } from 'react-router-dom';
 
-import styles from '../styles/MyPage.module.css'; 
 
 function MyPage() {
+
+  const routing =  useNavigate();
+
+  function goEditMyPage() {
+		routing('/posts/editmypage');
+	}
 
   return (
     <div className={styles.container}>
@@ -36,7 +43,7 @@ function MyPage() {
         </tbody>
       </table>
 
-      <Button variant="outline-success">회원정보 수정</Button>{' '}  
+      <Button variant="outline-success" onClick={goEditMyPage}>회원정보 수정</Button>{' '}  
       
     </div>
   )

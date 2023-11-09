@@ -7,6 +7,8 @@ import Upload from './pages/Upload';
 import PostDetail from './pages/PostDetail';
 import EditPost from './pages/EditPost';
 import React from 'react';
+import EditMyPage from './pages/EditMyPage';
+
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
       <Route path='/posts/upload' element={<Upload/>} />
       <Route path='/posts/:postId' element={<PostDetail/>}/>
       <Route path='/posts/:postId/edit' element={<EditPost/>}/>
+      <Route path='/posts/editmypage' element={<EditMyPage/>}/>
     </Routes>
   );
 }
