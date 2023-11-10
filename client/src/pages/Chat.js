@@ -3,6 +3,7 @@ import { addDoc, collection, serverTimestamp, query, onSnapshot, where, orderBy 
 import { db } from "../config/firebase";
 import UserContext from "../contexts/UserContext";
 
+ //댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [newMessage, setNewMessage] = useState(""); // 입력받은 메시지
     const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
@@ -22,7 +23,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         
         setNewMessage("");
     };
-
+   // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
+   //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
         const queryMessage = query(messageRef, where("room", "==", "room1"), orderBy("createAt", "asc"));
