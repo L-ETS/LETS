@@ -3,7 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import axios from "axios";
 import '../styles/reply.css';
 import UserContext from "../contexts/UserContext";
-import { response } from "express";
 
 function Comment({comment}) {
   const navigate = useNavigate();
