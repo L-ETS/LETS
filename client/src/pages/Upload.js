@@ -4,7 +4,8 @@ import axios from 'axios';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
 import regions from './regionData';
-import '../styles/Upload.css';
+// import styles from '../styles/Upload.module.css';
+import styles from '../styles/Upload.module.css';
 import Form from 'react-bootstrap/Form';
 
 function Upload() {
@@ -108,7 +109,7 @@ function Upload() {
   };
 
   return (
-    <div className="container">
+    <div className={styles.container}>
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         <div style={{display: 'flex'}}>
           <Dropdown style={{marginRight: '10px'}}>
@@ -163,11 +164,12 @@ function Upload() {
     
         <Form.Label htmlFor="content">내용</Form.Label>
         <Form.Control 
-          as="textarea" rows={15}
+          as="textarea"
           id="content"
           name="content"
           value={content}
           onChange={handleContentChange}
+          style={{ height: '300px' }}
           required
         />
 
