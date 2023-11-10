@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from 'react-router-dom'
-import '../styles/login.css'; 
+import styles from '../styles/login.module.css'; 
 import axios from "axios";
 import Button from 'react-bootstrap/Button';
 import UserContext from "../contexts/UserContext";
@@ -43,10 +43,10 @@ function Login({setIsLogin}) {
   };
 
   return (
-    <div className="login-page">
+    <div className={styles.login_page}>
       <h2>로그인</h2>
       <form onSubmit={handleSubmit}>
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="userId">아이디</label>
           <input
             type="text"
@@ -57,7 +57,7 @@ function Login({setIsLogin}) {
             required
           />
         </div>
-        <div className="input-group">
+        <div className={styles.input_group}>
         <label htmlFor="password">비밀번호</label>
           <input
             type="password"
@@ -68,8 +68,6 @@ function Login({setIsLogin}) {
             required
           />
         </div>
-        {/* <button type="submit">로그인</button>
-        <button type="button" onClick={()=>navigate('/user/register')}>회원가입</button> */}
         <Button variant="success" type="submit">로그인</Button>
         <Button variant="success" type="button" onClick={()=>navigate('/user/register')}>회원가입</Button>
       </form>

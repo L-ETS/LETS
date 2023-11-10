@@ -1,4 +1,4 @@
-.login-page {
+.login_page {
   max-width: 400px;
   margin: 50px auto;
   padding: 20px;
@@ -6,7 +6,7 @@
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.input-group {
+.input_group {
   margin-bottom: 20px;
 }
 
@@ -36,11 +36,6 @@ button {
 
 button:last-child {
   margin-right: 0; /* Ensures the last button doesn't have extra margin */
-}
-
-.button-group {
-  display: flex;
-  justify-content: space-between;
 }
 
 button:hover {
