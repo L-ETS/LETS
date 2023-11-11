@@ -13,15 +13,20 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (newMessage == "") return;
-
-        await addDoc(messageRef, {
-            text: newMessage,
-            createAt: serverTimestamp(),
-            user: logginedUserId,
-            room: "room1"
-        });
         
-        setNewMessage("");
+        try {
+            await addDoc(messageRef, {
+                text: newMessage,
+                createAt: serverTimestamp(),
+                user: logginedUserId,
+                room: "room1"
+            });
+        } catch (error) {
+            console.error("Error adding document: ", error);
+        } finally {
+            setNewMessage("");
+        }
+        
     };
    // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
    //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
@@ -45,8 +50,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
                 <button type="submit">Send</button>
             </form>
             <div>
-                {messageList.map((msg) => (
-                    <h2>{msg.user} : {msg.text}</h2>
+                {messageList.map((msg, idx) => (
+                    <h2 key={idx}>{msg.user} : {msg.text}</h2>
                 ))}
             </div>
         </div>
