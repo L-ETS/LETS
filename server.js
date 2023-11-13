@@ -247,8 +247,39 @@ app.get('/posts', (req, res) => {
   })
 })
 
-app.get('/user/mypage', isAuthenticated, (req, res) => {
-  res.status(200).json({ success: true })
+app.get('/user/mypage', async (req, res) => { //마이페이지 조회
+  try {
+    const query = 'SELECT * FROM user WHERE userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
+
+    if (result.length > 0) {
+      res.status(200).json({ message: 'MyPage load successfully', p_state: result[0] });
+    } else {
+      res.status(404).json({ message: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('', isAuthenticated, async (req, res) => { //마이페이지 수정
+  const { password, nickname, email, wideRegion, detailRegion} = {...req.body};
+
+  try{
+    const query = 'UPDATE user SET password = ?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
+    const [result] = await pool2.execute(password, nickname, email, wideRegion, detailRegion, [req.session.user]);
+
+    if (result.length > 0) {
+      res.status(200).json({ message: 'MyPage update successfully', p_state: result[0] });
+    } else {
+      res.status(404).json({ message: 'User not found.' });
+    }
+  }
+  catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
 })
 
 app.get('/posts/upload', isAuthenticated, (req, res) => {
@@ -811,6 +842,39 @@ app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 �
     res.status(500).json({ error: error.message });
   }
 });
+
+app.get('/mypage/123', async (res, req) => { //채팅방 출력
+  try {
+    const query = 'SELECT bin_to_uuid(room_uuid, 1) FROM chatroom WHERE user1 = ? OR user2 = ?';
+    const [result] = await pool2.execute(query, ["user1", "user1"]);
+
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Chat load successfully', chatList: result[0] });
+    } else {
+      res.status(404).json({ message: 'Room not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+function CreateChatRoom(user1, user2) {
+  const query = 'INSERT INTO chatroom(user1, user2) VALUES (?, ?)';
+  const values = [user1, user2];
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    connection.query(query, values, (error, results) => {
+      if (error) {
+        console.error('Error executing MySQL query:', error);
+      } else {
+        console.log('Chat Room Create Successfully');
+      }
+    });
+  })
+}
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
