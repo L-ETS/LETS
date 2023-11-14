@@ -41,15 +41,6 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
-const mysqlPromise = require('mysql2/promise');
-const pool2 = mysqlPromise.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  connectionLimit: 10
-});
-
 const s3 = new S3Client({
   region: process.env.S3_REGION,
   credentials: {
@@ -247,39 +238,8 @@ app.get('/posts', (req, res) => {
   })
 })
 
-app.get('/user/mypage', async (req, res) => { //마이페이지 조회
-  try {
-    const query = 'SELECT * FROM user WHERE userId = ?';
-    const [result] = await pool2.execute(query, [req.session.user]);
-
-    if (result.length > 0) {
-      res.status(200).json({ message: 'MyPage load successfully', p_state: result[0] });
-    } else {
-      res.status(404).json({ message: 'User not found.' });
-    }
-  } catch (error) {
-    console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
-  }
-})
-
-app.get('', isAuthenticated, async (req, res) => { //마이페이지 수정
-  const { password, nickname, email, wideRegion, detailRegion} = {...req.body};
-
-  try{
-    const query = 'UPDATE user SET password = ?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
-    const [result] = await pool2.execute(password, nickname, email, wideRegion, detailRegion, [req.session.user]);
-
-    if (result.length > 0) {
-      res.status(200).json({ message: 'MyPage update successfully', p_state: result[0] });
-    } else {
-      res.status(404).json({ message: 'User not found.' });
-    }
-  }
-  catch (error) {
-    console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
-  }
+app.get('/user/mypage', isAuthenticated, (req, res) => {
+  res.status(200).json({ success: true })
 })
 
 app.get('/posts/upload', isAuthenticated, (req, res) => {
@@ -522,6 +482,7 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
               connection.release();
             } else {
               images = result;
+              console.log(images);
             
               
               //댓글 출력
@@ -629,170 +590,43 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
     }
   })
 });
-
-app.get('', async (req, res) => { //게시글 상태 정보 조회
-  const postId = req.body.postId;
-
-  try{
-    const query = 'SELECT p_state FROM post WHERE postId = ?';
-    const result = await pool2.execute(query, [postId]);
+  app.post('/user/likeposts',isAuthenticated, (req,res) => {
     
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Post State successfully', p_state: result[0] });
-    } else {
-      res.status(404).json({ message: 'Post State not found.' });
-    }
-  } catch (error) {
-    console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
-  }
-})
-
-app.put('', async (req, res) => { //게시글 상태 전환
-  const postId = req.body.postId;
-  const p_state = req.body.p_state;
-
-  try{
-    const query = 'UPDATE post SET p_state = ? WHERE postId = ?';
-    const result = await pool2.execute(query, [p_state, postId]);
+    const userId = req.query.userId;
+    const insertQuery = 'INSERT INTO (userId) VALUES (?)';
     
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Update State successfully' });
-    } else {
-      res.status(404).json({ message: 'Post State not found.' });
-    }
-  } catch (error) {
-    console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
-  }
-})
+    connection.query(insertQuery, [userId], (err, result)=>{
+      if(err){
+        console.error('insert error'+err.message);
+        res.status(500).send('좋아요 처리 중 오류');
+        return;
+      }
+      console.log('likeposts table에 userid 저장 성공');
+      res.status(200).send('좋아요 처리 완료');
+    });
+    connection.end();
+  });
+  app.get('/user/likeposts',(req,res)=>{
 
-app.get('/user/likepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 조회
-  let sql = 'SELECT postId FROM likepost WHERE userId = ?';
-  let params = [req.session.user];
-  pool.getConnection((error, connection) => {
-    if(error) {
-      console.log(error);
-      res.status(500).json({message: 'Database connection error.'});
-      connection.release();
-    }
-    else {
-      connection.query(sql, params, (error, result) => {
-        if(error) {
-          console.error('Error executing the query: '+ error.stack);
-          res.status(500).json({message: 'db 조회 실패.'});
-          connection.release();
-        }
-        else {
-          res.status(200).json(result);
-          connection.release();
-        }
-      })
-    }
-  })
-})
-
-app.post('/user/updateLikepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 업데이트 (추가, 삭제)
-  const { pId, isDelete } = {...req.body};
-  //string, boolean
-  let sql;
-  isDelete ? sql = 'DELETE FROM likepost WHERE userId=? AND postId=?' : sql = 'INSERT INTO likepost (userId, postId) VALUES (?, ?)';
-  let params = [req.session.user, Number(pId)]
-  pool.getConnection((error, connection) => {
-    if(error) {
-      console.log(error);
-      res.status(500).json({message: 'Database connection error.'});
-      connection.release();
-    }
-    else {
-      connection.query(sql, params, (error, result) => {
-        if(error) {
-          console.error('Error executing the query: '+ error.stack);
-          res.status(500).json({message: 'db 조회 실패.'});
-          connection.release();
-        }
-        else {
-          res.status(200).json({message: "success"});
-          connection.release();
-        }
-      })
-    }
-  })
-})
-
-app.get('/posts/:postId/likeCount', (req, res) => { //게시글 전체 좋아요 개수
-  const postId = req.params.postId;
-  let sql = 'SELECT COUNT(*) AS count FROM likepost WHERE postId=?';
-  let params = [postId];
-  pool.getConnection((error, connection) => {
-    if(error) {
-      console.log(error);
-      res.status(500).json({message: 'Database connection error.'});
-      connection.release();
-    }
-    else {
-      connection.query(sql, params, (error, result) => {
-        if(error) {
-          console.error('Error executing the query: '+ error.stack);
-          res.status(500).json({message: 'db 조회 실패.'});
-          connection.release();
-        }
-        else {
-          res.status(200).json(result);
-          connection.release();
-        }
-      })
-    }
-  })
-})
-
-//댓글 작성 후 작성한 댓글 데이터 전송
-app.post('/comment', async (req, res) => {
-  const {postId, userId, content} = req.body;
-
-  try {
-    const insertQuery = 'INSERT INTO comment (postId, userId, content) VALUES (?, ?, ?)';
-    const [insertResult] = await pool2.execute(insertQuery, [postId, userId, content]);
-
-    const commentId = insertResult.insertId; //삽입된 데이터의 id값.
-    const selectQuery = 'SELECT * FROM comment WHERE commentId = ?';
-    const [selectResults] = await pool2.execute(selectQuery, [commentId]);
+    const countQuery = 'SELECT COUNT(userId) AS likeCount FROM likeposts';
     
-    if (selectResults.length > 0) {
-      res.status(201).json({ message: 'Comment successfully added!', comment: selectResults[0] });
-    } else {
-      res.status(404).json({ message: 'Inserted comment not found.' });
-    }
-  } catch (error) {
-    console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+    connection.query(countQuery, (err, results)=> {
+      if(err){
+        console.error('count query error' + err.message);
+        res.status(500).send('error');
+        return;
+      }
+      const likeCount = results[0].likeCount;
+      console.log('likeposts table의 사용자 id 개수'+ likeCount);
 
-app.get('', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 정보 출력
-  const {commentId} = req.body;
-
-  pool.getConnection((error, connection) => {
-    if (error) {
-      console.log(error);
-    }
-    else {
-      sql = 'SELECT * FROM comment WHERE commentId = ?';
-      params = [commentId];
-      connection.query(sql, params, (error, results) => {
-        if (error) {
-          res.status(404).json({ error: '댓글 db조회 실패' });
-          return;
-        } else {
-          res.status(200).json({ message: '댓글 정보 전송 완료', comments: results });
-        }
-      });
-    }
-  })
-});
+      connection.end();
+      res.status(200).send('좋아요 처리 완료');
+    });
+  });
     
-app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
-  const {commentId, commentContent} = req.body;
+app.put('/comment/:commentId/edit', isAuthenticated, (req, res) => { //댓글 수정
+  const commentId = req.body.commentId;
+  const commentContent = req.body.content;
 
   pool.getConnection((error, connection) => {
     if (error) {
@@ -800,7 +634,7 @@ app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
     }
     else {
       sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
-      params = [commentId, commentContent];
+      params = [commentContent, commentId];
       connection.query(sql, params, (error, results) => {
         if (error) {
           res.status(404).json({ error: '댓글 수정 db연결 실패.' });
@@ -843,15 +677,15 @@ app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 �
   }
 });
 
-app.get('', isAuthenticated, async (req, res) => { //채팅방 목록 출력
+app.get('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
-    const query = 'SELECT bin_to_uuid(room_uuid) AS room_uuid FROM chatroom WHERE user1 = ? OR user2 = ?';
-    const [result] = await pool2.execute(query, [req.session.user, req.session.user]);
+    const { user1, user2, postId } = req.params;
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
+    const [result] = await pool2.execute(query, [user1, user2, postId]);
 
     if (result.length > 0) {
       res.status(200).json({ message: 'Chat load successfully', chatList: result });
-    }
-     else {
+    } else {
       res.status(404).json({ message: 'Room not found.' });
     }
   } catch (error) {
@@ -860,25 +694,10 @@ app.get('', isAuthenticated, async (req, res) => { //채팅방 목록 출력
   }
 });
 
-async function CreateChatRoom(user1, user2, postId) {
-  const query = 'INSERT INTO chatroom(user1, user2, postId) VALUES (?, ?, ?)';
-  const values = [user1, user2, postId];
-
-  try {
-    const [results] = await pool2.execute(query, values);
-    console.log('Chat Room Create Successfully');
-    return { message: 'Chat Room created successfully', results };
-  } catch (error) {
-    console.error('Error executing MySQL query:', error);
-    throw error;
-  }
-}
-
-app.get('/chat/enterChat/:user1/:user2/:postId', async (req, res) => {
+app.post('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
     const { user1, user2, postId } = req.params;
-
-    const query = 'SELECT BIN_TO_UUID(room_uuid) AS room_uuid FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
     const [result] = await pool2.execute(query, [user1, user2, postId]);
 
     if (result.length === 0) {
@@ -888,13 +707,15 @@ app.get('/chat/enterChat/:user1/:user2/:postId', async (req, res) => {
 
       res.status(200).json({ message: 'Room created' });
     } else {
-      res.status(404).json({ message: 'Room already exists.' });
+      res.status(200).json({ message: 'Room already exists.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
   }
 });
+
+
 
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
