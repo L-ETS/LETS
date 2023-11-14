@@ -259,7 +259,7 @@ function PostDetail() {
 
             {/* 댓글 항목 출력 */}
             {
-              comments.map(comment=><Comment comment={comment} key={comment.commentId}/>)
+              comments.map(comment=><Comment postId={postId} comment={comment} key={comment.commentId}/>)
             }
             
 
