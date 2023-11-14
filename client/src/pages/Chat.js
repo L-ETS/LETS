@@ -3,6 +3,8 @@ import { addDoc, collection, serverTimestamp, query, onSnapshot, where, orderBy 
 import { db } from "../config/firebase";
 import UserContext from "../contexts/UserContext";
 import PostPreview from "../components/PostPreview";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
  //댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
@@ -10,6 +12,9 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
     const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
     const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
+    const { uuid } = useParams();
+    const [postTitle, setPostTitle] = useState('');
+    const [postP_state, setPostP_state] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,9 +34,21 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         }
         
     };
+
+    const fetchPostData = async () => {
+        try {
+            const response = await axios.get(`/posts/${uuid}`);
+            setPostTitle(response.data.title);
+            setPostP_state(response.data.p_state);
+        } catch (error) {
+            console.log(error);
+            alert('에러 발생. 다시 시도해주세요.');
+        }
+    }
    // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
    //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
+        fetchPostData();
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
         const queryMessage = query(messageRef, where("room", "==", "room1"), orderBy("createAt", "asc"));
         onSnapshot(queryMessage, (snapshot) => {
