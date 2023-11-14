@@ -876,6 +876,29 @@ function CreateChatRoom(user1, user2) {
   })
 }
 
+//logginedUserId와 uuid로 이루어진 chatroom이 있는지 검사.
+app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
+  const logginedUserId = req.params.logginedUserId;
+  const uuid = req.params.uuid;
+
+  try {
+    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND room_uuid = ?';
+    const [rows] = await pool2.execute(selectQuery, [logginedUserId, logginedUserId, uuid]);
+    
+    if (rows.length > 0) {
+      res.status(200).json({ exist: true });
+    } else {
+      res.status(401).json({ exist: false });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+})
+
+
+
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
   response.sendFile(path.join(__dirname, '/client/build/index.html'));
