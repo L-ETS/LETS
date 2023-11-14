@@ -897,7 +897,41 @@ app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
 
 })
 
+//uuid로 chatroom에 등록된 post 정보 보내주기.
+app.get('/posts/uuid/:uuid', async (req, res) => {
 
+  const uuid = req.params.uuid;
+  let resultPostId;
+
+  try {
+    const selectQuery = 'SELECT postId FROM chatroom WHERE room_uuid = ?';
+    const [chatRoomRows] = await pool2.execute(selectQuery, [uuid]);
+    
+    if (chatRoomRows.length === 0) {
+      res.status(404);
+    } else {
+      resultPostId = chatRoomRows[0];
+
+      try {
+        const selectQuery = 'SELECT * FROM post WHERE postId = ?';
+        const [postRows] = await pool2.execute(selectQuery, [resultPostId]);
+
+        if(postRows > 0) {
+          res.status(200).json({post: postRows[0]});
+        } else {
+          res.status(400);
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+      }
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+})
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {

@@ -18,6 +18,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
     const [isShow, setIsShow] = useState(false);    //해당 페이지 보여줄지 여부를 결정.
+    const [isLoading, setisLoding] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -63,6 +64,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         } catch (error) {
             console.log(error);
             alert('에러 발생. 다시 시도해주세요.');
+        } finally {
+            setisLoding(false);
         }
     }
    // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
@@ -81,7 +84,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             setMessageList(messages);
         });
     }, []);
-    if(isShow) 
+    if(isShow && isLoading) 
         return(
             <div style={{
                 margin: "0 10%",
