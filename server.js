@@ -843,7 +843,7 @@ app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 �
   }
 });
 
-app.get('', isAuthenticated, async (req, res) => { //채팅방 출력
+app.get('', isAuthenticated, async (req, res) => { //채팅방 목록 출력
   try {
     const query = 'SELECT bin_to_uuid(room_uuid, 1) FROM chatroom WHERE user1 = ? OR user2 = ?';
     const [result] = await pool2.execute(query, [req.session.user, req.session.user]);
