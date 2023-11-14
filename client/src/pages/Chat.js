@@ -2,6 +2,7 @@ import React, { useEffect, useState, useContext } from "react";
 import { addDoc, collection, serverTimestamp, query, onSnapshot, where, orderBy } from 'firebase/firestore'
 import { db } from "../config/firebase";
 import UserContext from "../contexts/UserContext";
+import PostPreview from "../components/PostPreview";
 
  //댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
@@ -44,16 +45,25 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     }, []);
 
     return(
-        <div>
-            <form onSubmit={handleSubmit}>
-                <input onChange={(e) => setNewMessage(e.target.value)} value={newMessage}/>
-                <button type="submit">Send</button>
-            </form>
-            <div>
+        <div style={{
+            margin: "0 10%",
+            height: '80vh'
+        }}>
+            <PostPreview/>
+            <div style={{
+                overflow: 'auto', top: '0', 
+                height:"100%", 
+                backgroundColor: "skyblue"
+            }}>
                 {messageList.map((msg, idx) => (
                     <h2 key={idx}>{msg.user} : {msg.text}</h2>
                 ))}
             </div>
+            <form onSubmit={handleSubmit} style={{display: "flex"}}>
+                <input onChange={(e) => setNewMessage(e.target.value)} value={newMessage}/>
+                <button type="submit" style={{whiteSpace:"nowrap"}}>전송</button>
+            </form>
+            
         </div>
     )
 }
