@@ -13,6 +13,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
     const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
     const { uuid } = useParams();
+    const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
 
@@ -37,9 +38,11 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
 
     const fetchPostData = async () => {
         try {
-            const response = await axios.get(`/posts/${uuid}`);
-            setPostTitle(response.data.title);
-            setPostP_state(response.data.p_state);
+            const response = await axios.get(`/posts/uuid/${uuid}`);
+            const postData = response.data.post;
+            setPostId(postData.postId);
+            setPostTitle(postData.title);
+            setPostP_state(postData.p_state);
         } catch (error) {
             console.log(error);
             alert('에러 발생. 다시 시도해주세요.');
@@ -66,14 +69,14 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             margin: "0 10%",
             height: '80vh'
         }}>
-            <PostPreview/>
+            <PostPreview title={postTitle} p_state={postP_state} postId={postId}/>
             <div style={{
                 overflow: 'auto', top: '0', 
                 height:"100%", 
                 backgroundColor: "skyblue"
             }}>
                 {messageList.map((msg, idx) => (
-                    <h2 key={idx}>{msg.user} : {msg.text}</h2>
+                    <p key={idx}>{msg.user} : {msg.text}</p>
                 ))}
             </div>
             <form onSubmit={handleSubmit} style={{display: "flex"}}>
