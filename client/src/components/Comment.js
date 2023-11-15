@@ -81,13 +81,14 @@ function Comment({comment, postId}) {
       <div>
         <div className='writer'>{comment.userId}</div>
         {
-          comment.userId === logginedUserId && //comment.userId는 댓글 작성자의 id
+          comment.userId === logginedUserId ? //comment.userId는 댓글 작성자의 id
           <div>
             <button className='edit'onClick={handleEdit} style={{borderRadius: '5px'}}>수정</button>
             <button className='delete'onClick={handleDelete} style={{borderRadius: '5px'}}>삭제</button>
           </div>
+          :
+          <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button>
         }
-        <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button>
       </div>          
       
       <br></br>
