@@ -18,7 +18,7 @@ function App() {
       <Route path='/posts/upload' element={<Upload/>} />
       <Route path='/posts/:postId' element={<PostDetail/>}/>
       <Route path='/posts/:postId/edit' element={<EditPost/>}/>
-      <Route path='/chat/:uuid' element={<Chat/>}/>
+      <Route path='/chat/:room_uuid' element={<Chat/>}/>
     </Routes>
   );
 }

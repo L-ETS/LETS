@@ -41,6 +41,15 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
+const mysqlPromise = require('mysql2/promise');
+const pool2 = mysqlPromise.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  connectionLimit: 10
+});
+
 const s3 = new S3Client({
   region: process.env.S3_REGION,
   credentials: {
@@ -705,15 +714,16 @@ app.post('/chat/:user1/:user2/:postId', async (req, res) => {
       const values = [user1, user2, postId];
       await pool2.execute(query2, values);
 
-      res.status(200).json({ message: 'Room created' });
+      res.status(200).json({ message: 'Room created', room_uuid: ''});
     } else {
-      res.status(200).json({ message: 'Room already exists.' });
+      res.status(200).json({ message: 'Room already exists', room_uuid: result[0].room_uuid });
     }
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 
 

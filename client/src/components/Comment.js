@@ -48,30 +48,33 @@ function Comment({comment, postId}) {
   //채팅방으로 이동.
   const handleChat = async () => {
     let user1, user2;
-
-    if(logginedUserId < comment.userId) {
+  
+    if (logginedUserId < comment.userId) {
       user1 = logginedUserId;
       user2 = comment.userId;
     } else {
       user1 = comment.userId;
       user2 = logginedUserId;
     }
-
-    if(!user1 || !user2) throw new Error('user1 또는 user2 정보 없음.');
-
+  
+    if (!user1 || !user2) throw new Error('user1 또는 user2 정보 없음.');
+  
     try {
       const response = await axios.post(`/chat/${user1}/${user2}/${postId}`);
-      const uuid = response.data.uuid;
-      if(!uuid) {
-        throw new Error('uuid 값이 없음.');
+      const { message, room_uuid } = response.data;
+      
+      if (message === 'Room created' || message === 'Room already exists') {
+        // Assuming `navigate` is a function to navigate to a new page
+        navigate(`/chat/${room_uuid}`);
+      } else {
+        throw new Error('Unexpected response from the server.');
       }
-      navigate(`/chat/${uuid}`);
     } catch (error) {
       alert('문제가 발생했습니다. 다시 시도해주세요.');
-      console.log(error);
+      console.error(error);
     }
-    
-  }
+  };
+  
 
   return (
     <div className='reply'>
