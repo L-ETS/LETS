@@ -630,7 +630,30 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
       res.status(200).send('좋아요 처리 완료');
     });
   });
+
+//댓글 작성 후 작성한 댓글 데이터 전송
+app.post('/comment', async (req, res) => {
+  const {postId, userId, content} = req.body;
+
+  try {
+    const insertQuery = 'INSERT INTO comment (postId, userId, content) VALUES (?, ?, ?)';
+    const [insertResult] = await pool2.execute(insertQuery, [postId, userId, content]);
+
+    const commentId = insertResult.insertId; //삽입된 데이터의 id값.
+    const selectQuery = 'SELECT * FROM comment WHERE commentId = ?';
+    const [selectResults] = await pool2.execute(selectQuery, [commentId]);
     
+    if (selectResults.length > 0) {
+      res.status(201).json({ message: 'Comment successfully added!', comment: selectResults[0] });
+    } else {
+      res.status(404).json({ message: 'Inserted comment not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.put('/comment/:commentId/edit', isAuthenticated, (req, res) => { //댓글 수정
   const commentId = req.body.commentId;
   const commentContent = req.body.content;
