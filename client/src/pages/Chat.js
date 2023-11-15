@@ -17,7 +17,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
-    const [isShow, setIsShow] = useState(false);    //해당 페이지 보여줄지 여부를 결정.
+    const [isShow, setIsShow] = useState(true);    //해당 페이지 보여줄지 여부를 결정.
     const [isLoading, setisLoding] = useState(true);
 
     const handleSubmit = async (e) => {

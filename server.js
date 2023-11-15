@@ -686,6 +686,23 @@ app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 �
   }
 });
 
+app.get('/chat/:room_uuid', async (req, res) => {
+  try {
+    const { room_uuid } = req.params;
+    const query = 'SELECT * FROM chatroom WHERE BIN_TO_UUID(room_uuid,0) = ?';
+    const [result] = await pool2.execute(query, [room_uuid]);
+
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Chat load successfully', chatList: result });
+    } else {
+      res.status(404).json({ message: 'Room not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
     const { user1, user2, postId } = req.params;
