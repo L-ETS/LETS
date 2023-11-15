@@ -490,9 +490,7 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
               res.status(401).json({ message: 'db조회 실패' });
               connection.release();
             } else {
-              images = result;
-              console.log(images);
-            
+              images = result;            
               
               //댓글 출력
               sql = 'SELECT * FROM comment WHERE postId = ?';
