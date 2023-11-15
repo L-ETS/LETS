@@ -86,7 +86,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             setMessageList(messages);
         });
     }, []);
-    if(isShow && isLoading) 
+    if(isShow && !isLoading) 
         return(
             <div style={{
                 margin: "0 10%",
