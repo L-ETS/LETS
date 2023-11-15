@@ -4,18 +4,25 @@ import axios from "axios";
 import '../styles/reply.css';
 import UserContext from "../contexts/UserContext";
 
-function Comment({comment, postId}) {
+function Comment({comment, post}) {
   const navigate = useNavigate();
   const { commentId } = useParams();  
   const [commentContent, setCommentContent] = useState('');
   const [comments, setComments] = useState([]);
+  const [showChatBtn, setShowChatBtn] = useState(false);
   const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
+
+  useEffect(()=>{
+    if (logginedUserId === post.userId) {
+      setShowChatBtn(true);
+    }
+  },[])
 
   const handleEdit = async (e) => {
     setCommentContent(e.target.value);
      try {
        const response = await axios.put(`/comment/edit`,{
-        postId: postId,
+        postId: post.postId,
         userId: logginedUserId,
         content: commentContent
     });
@@ -60,7 +67,7 @@ function Comment({comment, postId}) {
     if (!user1 || !user2) throw new Error('user1 또는 user2 정보 없음.');
   
     try {
-      const response = await axios.post(`/chat/${user1}/${user2}/${postId}`);
+      const response = await axios.post(`/chat/${user1}/${user2}/${post.postId}`);
       const { message, room_uuid } = response.data;
       
       if (message === 'Room created' || message === 'Room already exists') {
@@ -87,7 +94,7 @@ function Comment({comment, postId}) {
             <button className='delete'onClick={handleDelete} style={{borderRadius: '5px'}}>삭제</button>
           </div>
           :
-          <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button>
+          showChatBtn ? <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button> : null
         }
       </div>          
       
