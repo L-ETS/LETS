@@ -735,7 +735,7 @@ app.put('/comment/update', async (req, res) => {
 
     const [results] = await pool2.execute(sql, params);
 
-    if (results.length > 0) {
+    if (results.affectedRows > 0) {
       res.status(200).json({ message: '댓글 수정 성공.', comments: results[0] });
     }
    else {
