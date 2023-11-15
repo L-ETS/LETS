@@ -40,14 +40,6 @@ const pool = mysql.createPool({
   database: process.env.DB_NAME,
   connectionLimit: 10
 });
-const mysqlPromise = require('mysql2/promise');
-const pool2 = mysqlPromise.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  connectionLimit: 10
-});
 
 const mysqlPromise = require('mysql2/promise');
 const pool2 = mysqlPromise.createPool({
@@ -749,7 +741,62 @@ app.post('/chat/:user1/:user2/:postId', async (req, res) => {
   }
 });
 
+//logginedUserId와 uuid로 이루어진 chatroom이 있는지 검사.
+app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
+  const logginedUserId = req.params.logginedUserId;
+  const uuid = req.params.uuid;
 
+  try {
+    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND room_uuid = ?';
+    const [rows] = await pool2.execute(selectQuery, [logginedUserId, logginedUserId, uuid]);
+    
+    if (rows.length > 0) {
+      res.status(200).json({ exist: true });
+    } else {
+      res.status(401).json({ exist: false });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+})
+
+//uuid로 chatroom에 등록된 post 정보 보내주기.
+app.get('/posts/uuid/:uuid', async (req, res) => {
+
+  const uuid = req.params.uuid;
+  let resultPostId;
+
+  try {
+    const selectQuery = 'SELECT postId FROM chatroom WHERE room_uuid = ?';
+    const [chatRoomRows] = await pool2.execute(selectQuery, [uuid]);
+    
+    if (chatRoomRows.length === 0) {
+      res.status(404);
+    } else {
+      resultPostId = chatRoomRows[0];
+
+      try {
+        const selectQuery = 'SELECT * FROM post WHERE postId = ?';
+        const [postRows] = await pool2.execute(selectQuery, [resultPostId]);
+
+        if(postRows > 0) {
+          res.status(200).json({post: postRows[0]});
+        } else {
+          res.status(400);
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+      }
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+})
 
 
 
