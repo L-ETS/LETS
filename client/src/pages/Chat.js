@@ -72,8 +72,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
    // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
    //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
-        // chatAuthenticate();
-        // fetchPostData();
+        chatAuthenticate();
+        fetchPostData();
         
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
         const queryMessage = query(messageRef, where("room", "==", "room1"), orderBy("createAt", "asc"));
