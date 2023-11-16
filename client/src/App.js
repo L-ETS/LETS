@@ -8,6 +8,7 @@ import PostDetail from './pages/PostDetail';
 import EditPost from './pages/EditPost';
 import Chat from './pages/Chat';
 import React from 'react';
+import ChatList from './pages/ChatList';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
       <Route path='/posts/:postId' element={<PostDetail/>}/>
       <Route path='/posts/:postId/edit' element={<EditPost/>}/>
       <Route path='/chat/:room_uuid' element={<Chat/>}/>
+      <Route path='/user/chatlist' element={<ChatList/>}/>
     </Routes>
   );
 }
