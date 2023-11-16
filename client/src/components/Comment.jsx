@@ -20,7 +20,7 @@ function Comment({comment, comments, setComments}) {
       
       setShowModifyUi(false);
       setComments(comments.map(c => c.commentId === comment.commentId ? {...c, content: commentContent} : c));
-      
+
       alert('수정완료');
     } catch (error) {
       alert('수정 실패.');
@@ -86,7 +86,8 @@ function Comment({comment, comments, setComments}) {
         showModifyUi ?
         <div style={{display: 'flex'}}>
           <input type="text" value={commentContent} onChange={(e)=>{setCommentContent(e.target.value)}}/>
-          <button style={{whiteSpace: 'nowrap'}} onClick={handleEdit}>수정완료</button>
+          <button style={{whiteSpace: 'nowrap'}} onClick={handleEdit}>등록</button>
+          <button style={{whiteSpace: 'nowrap'}} onClick={()=>setShowModifyUi(false)}>취소</button>
         </div>
         :
         <div className='content'>
