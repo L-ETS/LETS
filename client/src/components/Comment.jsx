@@ -1,36 +1,37 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import '../styles/reply.css';
 import UserContext from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom";
 import Modal from 'react-bootstrap/Modal';  
 import Button from 'react-bootstrap/Button';
 
 function Comment({comment, comments, setComments}) {
   const [commentContent, setCommentContent] = useState('');  
   const [showAlert, setShowAlert] = useState(false);
+  const [showModifyUi, setShowModifyUi] = useState(false);
   const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
-  const navigate = useNavigate();
-
-  const handleEdit = async (e) => {
-  //   setCommentContent(e.target.value);
-  //    try {
-  //      const response = await axios.put(`/comment/edit`,{
-  //       postId: postId,
-  //       userId: logginedUserId,
-  //       content: commentContent
-  //   });
-  //   const comment = response.data.comment;
-
-  //   if(!comment) throw new Error('서버에서 댓글 가져오기 실패');
-  //   setComments(prev => [...prev, comment]);
-  //   alert('댓글 수정 완료');
-  //   setCommentContent('');
-  // } catch(error){
-  //   console.error('서버 요청 오류', error);
-  // }
-};
   
+  const handleEdit = async () => {
+    try {
+      const response = await axios.put('/comment/update', {
+        commentId: comment.commentId,
+        content: commentContent
+      });
+      //수정된 comment를 comments에 넣어줘야함. 근데 기존에 comments에 있던 comment는 없애고 그 자리에 수정된 comment 넣어야함.
+      // const updatedComments = comments.map((c)=> {
+      //   if(c.commentId === comment.commentId) {
+      //     comment.content = commentContent;
+      //   }
+      // });
+      // setComments(updatedComments);
+      setShowModifyUi(false);
+      setComments(comments.map(c => c.commentId === comment.commentId ? {...c, content: commentContent} : c));
+      alert('수정완료');
+    } catch (error) {
+      alert('수정 실패.');
+    }
+  }
+
   const handleDelete = async () => {
     
     try {
@@ -67,19 +68,36 @@ function Comment({comment, comments, setComments}) {
       <div>
         <div className='writer'>{comment.userId}</div>
         {
-          comment.userId === logginedUserId ? //comment.userId는 댓글 작성자의 id
+          showModifyUi ?
+          null
+          :
           <div>
-            <button className='edit'onClick={handleEdit} style={{borderRadius: '5px'}}>수정</button>
-            <button className='delete'onClick={()=>setShowAlert(true)} style={{borderRadius: '5px'}}>삭제</button>
+            {
+              comment.userId === logginedUserId ? //comment.userId는 댓글 작성자의 id
+              <div>
+                <button className='edit'onClick={()=>{
+                  setShowModifyUi(true);
+                  setCommentContent(comment.content);
+                }} style={{borderRadius: '5px'}}>수정</button>
+                <button className='delete'onClick={()=>setShowAlert(true)} style={{borderRadius: '5px'}}>삭제</button>
+              </div>
+              : null
+            } 
           </div>
-          : null
-        }        
+        }
+        
       </div>          
-      
-      <br></br>
-      <div className='content'>
-        {comment.content}
-      </div>
+      {
+        showModifyUi ?
+        <div style={{display: 'flex'}}>
+          <input type="text" value={commentContent} onChange={(e)=>{setCommentContent(e.target.value)}}/>
+          <button style={{whiteSpace: 'nowrap'}} onClick={handleEdit}>수정완료</button>
+        </div>
+        :
+        <div className='content'>
+          {comment.content}
+        </div>
+      }
     </div> 
   )
 }
