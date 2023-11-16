@@ -17,15 +17,10 @@ function Comment({comment, comments, setComments}) {
         commentId: comment.commentId,
         content: commentContent
       });
-      //수정된 comment를 comments에 넣어줘야함. 근데 기존에 comments에 있던 comment는 없애고 그 자리에 수정된 comment 넣어야함.
-      // const updatedComments = comments.map((c)=> {
-      //   if(c.commentId === comment.commentId) {
-      //     comment.content = commentContent;
-      //   }
-      // });
-      // setComments(updatedComments);
+      
       setShowModifyUi(false);
       setComments(comments.map(c => c.commentId === comment.commentId ? {...c, content: commentContent} : c));
+      
       alert('수정완료');
     } catch (error) {
       alert('수정 실패.');
