@@ -12,7 +12,8 @@ import Badge from 'react-bootstrap/Badge';
 import '../styles/reply.css';
 import Comment from "../components/Comment";
 import UserContext from "../contexts/UserContext";
-
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
 function PostDetail() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ function PostDetail() {
   const [showAlert, setShowAlert] = useState(false);
   const [comments, setComments] = useState([]);
   const [commentContent, setCommentContent] = useState('');
+  const [dropdownBtnTitle, setDropdownBtnTitle] = useState('');
   const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디
 
   const create = new Date(post.create_date);
@@ -51,6 +53,7 @@ function PostDetail() {
         setMainImageSrc(response.data.images[0].imageUrl);
         setIsMyPost(response.data.isMyPost);
         setComments(response.data.comments);
+        setDropdownBtnTitle(response.data.post.p_state);
       })
       .catch(error => {
         console.log(error);
@@ -129,6 +132,21 @@ function PostDetail() {
       console.log(error);
     }
   }
+
+  const handlePstate = async (eventKey) => {
+    
+    try {
+      const response = await axios.put(`/post/edit/pstate`, {
+        postId: postId,
+        p_state: eventKey
+      });
+      setDropdownBtnTitle(eventKey);
+      
+    } catch (error) {
+      alert('거래 상태 바꾸기에 실패했습니다.');
+      console.log(error);
+    }
+  }
   
   if(loading) {
     return (
@@ -158,8 +176,21 @@ function PostDetail() {
       <Container className="container">
         <Row>
           <Col>
-            <h2>{post.title}</h2>
-            
+            <div style={{display: 'flex'}}>
+              {
+                logginedUserId === post.userId ?
+                <DropdownButton id="dropdown-basic-button" title={dropdownBtnTitle} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
+                  <Dropdown.Item eventKey="거래 가능">거래 가능</Dropdown.Item>
+                  <Dropdown.Item eventKey="예약 중">예약 중</Dropdown.Item>
+                  <Dropdown.Item eventKey="거래 완료">거래 완료</Dropdown.Item>
+                </DropdownButton>
+                :
+                <h4><Badge bg="success">{post.p_state}</Badge></h4>
+
+              }
+              <h2>{post.title}</h2>
+            </div>
+
             <div >
               <img style={{maxWidth: '100%', height: '410px'}} src={mainImageSrc} alt="Main Preview" fluid />
             </div>

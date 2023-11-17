@@ -617,7 +617,7 @@ app.get('', async (req, res) => { //게시글 상태 정보 조회
   }
 })
 
-app.put('', async (req, res) => { //게시글 상태 전환
+app.put('/post/edit/pstate', async (req, res) => { //게시글 상태 전환
   const postId = req.body.postId;
   const p_state = req.body.p_state;
 
