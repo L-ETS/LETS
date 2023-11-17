@@ -1,52 +1,33 @@
 import React from "react";
-import Button from 'react-bootstrap/Button';
-import styles from '../styles/MyPage.module.css';
-import { useNavigate } from 'react-router-dom';
+import styles from '../styles/MyPage.module.css'; 
+import { Link, Outlet} from 'react-router-dom';
 
 
 function MyPage() {
 
-  const routing =  useNavigate();
+    return(
+        
+        <div className={styles.container}>
 
-  function goEditMyPage() {
-		routing('/posts/editmypage');
-	}
+            
+            <div className={styles.item}>
+                
+                <button className={styles.tab}><Link to ="/mypost">내 글</Link></button>
+                <button className={styles.tab}><Link to ="/othertrade">다른 거래</Link></button>
+                <button className={styles.tab}><Link to ="/bookmark">북마크</Link></button>
+                <button className={styles.tab}><Link to ="/myinform">회원정보</Link></button>
+            </div>
 
-  return (
-    <div className={styles.container}>
-      <table>
-        <tbody>
-          <tr>
-            <td className={styles.tableBold}>아이디</td>
-            <td>test</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>비밀번호</td>
-            <td>Test1234</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>비밀번호 확인</td>
-            <td>Test1234</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>닉네임</td>
-            <td>Test</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>이메일</td>
-            <td>test123@gmail.com</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>거래 희망 지역</td>
-            <td>경기 수원</td>
-          </tr>
-        </tbody>
-      </table>
+            <div className={styles.content}>
+                <Outlet/>
+            </div>
 
-      <Button variant="outline-success" onClick={goEditMyPage}>회원정보 수정</Button>{' '}  
-      
-    </div>
-  )
+
+        </div>
+
+          
+    )
 }
+
 
 export default MyPage;

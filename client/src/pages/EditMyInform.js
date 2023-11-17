@@ -1,17 +1,17 @@
 import React from "react";
 import Button from 'react-bootstrap/Button';
-import styles from '../styles/MyPage.module.css'; 
+import styles from '../styles/MyInform.module.css'; 
 import { useNavigate } from 'react-router-dom';
 
 
 
 
-function EditMyPage() {
+function EditMyInform() {
 
     const routing =  useNavigate();
 
-    function goMyPage() {
-		routing('/user/mypage');
+    function goMyInform() {
+		routing('/user/myinform');
 	}
 
     return (
@@ -48,9 +48,9 @@ function EditMyPage() {
                 </tr>
             </table>
 
-            <Button variant="outline-success" onClick={goMyPage}>회원정보 수정</Button>{' '}
+            <Button variant="outline-success" onClick={goMyInform}>회원정보 수정</Button>{' '}
         </div>
     )
 }
 
-export default EditMyPage;
+export default EditMyInform;
