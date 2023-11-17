@@ -8,6 +8,7 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import regions from './regionData';
 import Spinner from 'react-bootstrap/Spinner';
 import styles from '../styles/Barter.module.css';
+import Badge from 'react-bootstrap/Badge';
 
 function Barter({setIsLogin}) {
 
@@ -164,6 +165,7 @@ function Barter({setIsLogin}) {
                 //수정일을 표기하기.
                 return (
                   <ListGroup.Item key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
+                    <Badge bg="secondary">{post.p_state}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</p>
                     <p>작성자: {post.userId}</p>
@@ -176,6 +178,7 @@ function Barter({setIsLogin}) {
                 //작성일을 표기하기.
                 return (
                   <ListGroup.Item key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
+                    <Badge bg="secondary">{post.p_state}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</p>
                     <p>작성자: {post.userId}</p>
