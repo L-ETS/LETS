@@ -1,13 +1,17 @@
 import './App.css';
 import Home from './pages/Home';
 import MyPage from './pages/MyPage';
-import { Routes, Route } from 'react-router-dom';
+import {Routes, Route} from 'react-router-dom';
 import Register from './pages/Register';
 import Upload from './pages/Upload';
 import PostDetail from './pages/PostDetail';
 import EditPost from './pages/EditPost';
 import React from 'react';
-import EditMyPage from './pages/EditMyPage';
+import EditMyInform from './pages/EditMyInform';
+import MyPost from './pages/MyPost';
+import MyInform from './pages/MyInform';
+import OtherTrade from './pages/OtherTrade';
+import BookMark from './pages/BookMark';
 
 
 function App() {
@@ -15,11 +19,17 @@ function App() {
     <Routes>
       <Route path='/' element={<Home/>} />
       <Route path='/user/register' element={<Register/>} />
-      <Route path='/user/mypage' element={<MyPage/>} />
+      <Route path='/mypage' element={<MyPage/>}>
+        <Route path='/mypost' element={<MyPost/>}/>
+        <Route path='/othertrade' element={<OtherTrade/>}/>
+        <Route path='/bookmark' element={<BookMark/>}/>
+        <Route path='/myinform' element={<MyInform/>}/>
+      </Route> 
       <Route path='/posts/upload' element={<Upload/>} />
       <Route path='/posts/:postId' element={<PostDetail/>}/>
       <Route path='/posts/:postId/edit' element={<EditPost/>}/>
-      <Route path='/posts/editmypage' element={<EditMyPage/>}/>
+      <Route path='/posts/editmyinform' element={<EditMyInform/>}/>
+
     </Routes>
   );
 }
