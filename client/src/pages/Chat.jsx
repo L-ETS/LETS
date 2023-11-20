@@ -6,6 +6,7 @@ import PostPreview from "../components/PostPreview";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import Spinner from 'react-bootstrap/Spinner';
+import '../styles/Chat.css';
 
  //댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
@@ -17,12 +18,12 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
-    const [isShow, setIsShow] = useState(false);    //해당 페이지 보여줄지 여부를 결정.
-    const [isLoading, setisLoding] = useState(true);
+    const [isShow, setIsShow] = useState(true);    //해당 페이지 보여줄지 여부를 결정.
+    const [isLoading, setisLoding] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (newMessage == "") return;
+        if (newMessage === "") return;
         
         try {
             await addDoc(messageRef, {
@@ -31,14 +32,12 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
                 user: logginedUserId,
                 room: "room1"
             });
+            setNewMessage("");
         } catch (error) {
             console.error("Error adding document: ", error);
             alert('에러 발생. 다시 시도해주세요.');
-        } finally {
-            setNewMessage("");
         }
-        
-    };
+    }
 
     const chatAuthenticate = async () => {
         try {
@@ -72,8 +71,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
    // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
    //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
-        chatAuthenticate();
-        fetchPostData();
+        // chatAuthenticate();
+        // fetchPostData();
         
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
         const queryMessage = query(messageRef, where("room", "==", "room1"), orderBy("createAt", "asc"));
@@ -85,38 +84,32 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             //console.log(messages);
             setMessageList(messages);
         });
-    }, []);
-    if(isShow && !isLoading) 
+    },[]);
+    if(isShow && !isLoading)
         return(
-            <div style={{
-                margin: "0 10%",
-                height: '80vh'
-            }}>
+            <div class="message">
                 <PostPreview title={postTitle} p_state={postP_state} postId={postId}/>
-                <div style={{
-                    overflow: 'auto', top: '0', 
-                    height:"100%", 
-                    backgroundColor: "skyblue"
-                }}>
-                    {messageList.map((msg, idx) => (
-                        <p key={idx}>{msg.user} : {msg.text}</p>
-                    ))}
-                </div>
-                <form onSubmit={handleSubmit} style={{display: "flex"}}>
+                <main>
+                    {messageList.map((msg,idx) => (
+                        <div key={idx} className={`messageList ${msg.user === logginedUserId ? 'sent' : 'received'}`}>
+                        <p>{msg.user} : {msg.text}</p>
+                        </div>
+                        ))}
+                </main>
+                <form onSubmit={handleSubmit}>
                     <input onChange={(e) => setNewMessage(e.target.value)} value={newMessage}/>
-                    <button type="submit" style={{whiteSpace:"nowrap"}}>전송</button>
+                    <button type="submit">전송</button>
                 </form>
                 
             </div>
         )
     else {
         return (
-            <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}>
+            <div>
                 <Spinner animation="border" />
             </div>
         )
     }
-    
 }
 
 export default Chat;

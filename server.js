@@ -768,7 +768,7 @@ app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
   const uuid = req.params.uuid;
 
   try {
-    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND room_uuid = ?';
+    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND BIN_TO_UUID(room_uuid,0) = ?';
     const [rows] = await pool2.execute(selectQuery, [logginedUserId, logginedUserId, uuid]);
     
     if (rows.length > 0) {
@@ -790,7 +790,7 @@ app.get('/posts/uuid/:uuid', async (req, res) => {
   let resultPostId;
 
   try {
-    const selectQuery = 'SELECT postId FROM chatroom WHERE room_uuid = ?';
+    const selectQuery = 'SELECT postId FROM chatroom WHERE BIN_TO_UUID(room_uuid,0) = ?';
     const [chatRoomRows] = await pool2.execute(selectQuery, [uuid]);
     
     if (chatRoomRows.length === 0) {
