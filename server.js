@@ -728,7 +728,7 @@ app.post('/comment', async (req, res) => {
     const [selectResults] = await pool2.execute(selectQuery, [commentId]);
     
     if (selectResults.length > 0) {
-      res.status(201).json({ message: 'Comment successfully added!', comment: selectResults[0] });
+      res.status(201).json({ message: 'Comment successfully added!', comments: selectResults[0] });
     } else {
       res.status(404).json({ message: 'Inserted comment not found.' });
     }
@@ -738,79 +738,70 @@ app.post('/comment', async (req, res) => {
   }
 });
 
-app.get('', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 정보 출력
-  const {commentId} = req.body;
+app.get('/comment/:commentId', (req, res) => {
+  const { commentId } = req.params;
 
-  pool.getConnection((error, connection) => {
+  pool2.getConnection((error, connection) => {
     if (error) {
       console.log(error);
+      res.status(500).json({ error: 'Internal Server Error.' });
+      return;
     }
-    else {
-      sql = 'SELECT * FROM comment WHERE commentId = ?';
-      params = [commentId];
-      connection.query(sql, params, (error, results) => {
-        if (error) {
-          res.status(404).json({ error: '댓글 db조회 실패' });
-          return;
-        } else {
-          res.status(200).json({ message: '댓글 정보 전송 완료', comments: results });
-        }
-      });
-    }
-  })
+
+    const sql = 'SELECT * FROM comment WHERE commentId = ?';
+    const params = [commentId];
+
+    connection.query(sql, params, (error, results) => {
+      connection.release();
+
+      if (error) {
+        res.status(404).json({ error: '댓글 db조회 실패' });
+      } else {
+        res.status(200).json({ message: '댓글 정보 전송 완료', comments: results });
+      }
+    });
+  });
 });
     
-app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
-  const {commentId, commentContent} = req.body;
-
-  pool.getConnection((error, connection) => {
-    if (error) {
-      console.log(error);
-    }
-    else {
-      sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
-      params = [commentId, commentContent];
-      connection.query(sql, params, (error, results) => {
-        if (error) {
-          res.status(404).json({ error: '댓글 수정 db연결 실패.' });
-          return;
-        } else {
-          sql = 'SELECT * FROM comment WHERE commentId = ?';
-          params = [commentId];
-          connection.query(sql, params, (error, results) => {
-            if (error) {
-              res.status(404).json({ error: '댓글 조회 db연결 실패.' });
-              return;
-            } else {
-
-              res.status(200).json({ message: 'Update comments successfully.', comments: results });
-            }
-          });
-        }
-      });
-    }
-  })
-});
-
-app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 삭제
-  const {commentId} = req.body;
+app.put('/comment/update', async (req, res) => {
+  const { commentId, content } = req.body;
 
   try {
-    const deleteQuery = 'DELETE * FROM comment WHERE commentId = ?';
-    const deleteResult = await pool2.execute(deleteQuery, [commentId]);
-  
-    console.log('Delete Result:', deleteResult);
-  
-    if (deleteResult && deleteResult.affectedRows > 0) {
-      res.status(200).json({ message: 'deleted' });
-    } else {
-      res.status(404).json({ message: 'failed delete.' });
+    const sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
+    const params = [content, commentId];
+
+    const [results] = await pool2.execute(sql, params);
+
+    if (results.affectedRows > 0) {
+      res.status(200).json({ message: '댓글 수정 성공.', comments: results[0] });
     }
-  } catch (error) {
-    console.error('The error is:', error);
-    res.status(500).json({ error: error.message });
+   else {
+      res.status(404).json({ error: '댓글을 찾을 수 없습니다.' });
+  }} catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error.' });
   }
 });
+
+app.delete('/comment/delete', async (req, res) => {
+  const { commentId } = req.body;
+
+  try {
+    const deleteQuery = 'DELETE FROM comment WHERE commentId = ?';
+    const [deleteResult] = await pool2.execute(deleteQuery, [commentId]);
+
+    if (deleteResult.affectedRows === 0) {
+      res.status(404).json({ error: '댓글 삭제 실패. 댓글을 찾을 수 없습니다.' });
+    } else {
+      res.status(200).json({ message: 'DELETE comment successfully.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: 'Internal Server Error.' });
+  }
+});
+
+
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {

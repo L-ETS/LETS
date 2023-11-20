@@ -15,6 +15,7 @@ import UserContext from "../contexts/UserContext";
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 
+
 function PostDetail() {
   const navigate = useNavigate();
   const { postId } = useParams();
@@ -26,7 +27,7 @@ function PostDetail() {
   const [likeBtn, setLikeBtn] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [showAlert, setShowAlert] = useState(false);
-  const [comments, setComments] = useState([]);
+  const [comments, setComments] = useState([]); //전체 댓글목록.
   const [commentContent, setCommentContent] = useState('');
   const [dropdownBtnTitle, setDropdownBtnTitle] = useState('');
   const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디
@@ -81,7 +82,7 @@ function PostDetail() {
     axios.get(`/posts/${postId}/likeCount`)
       .then(res => {
         console.log('likecount');
-        //console.log(res.data[0].count);
+        console.log(res.data[0].count);
         setLikeCount(res.data[0].count);
       })
       .catch((error) => {
@@ -105,7 +106,6 @@ function PostDetail() {
     } catch (error) {
       console.log(error);
     }
-    
   }
 
   // 댓글 '등록' 버튼 눌렀을 때 실행할 내용.
@@ -113,21 +113,21 @@ function PostDetail() {
     e.preventDefault();
     
     try {
-      const response = await axios.post('/comment', {
+      const response = await axios.post(`/comment`, {
         postId: postId,
         userId: logginedUserId,
         content: commentContent
       });
-
-      const comment = response.data.comment;
+      
+      const comment = response.data.comments;
 
       if (!comment) throw new Error('서버에서 댓글 가져오기 실패');
-
-      setComments(prev => [...prev, comment]);
-      alert('댓글이 작성되었습니다.');
-      setCommentContent('');
-      
-    } catch (error) {
+        setComments(prev => [...prev, comment]);
+        alert('댓글이 작성되었습니다.');
+        setCommentContent('');
+        navigate(`/posts/${postId}`) 
+      } 
+    catch (error) {
       alert('댓글 작성 실패');
       console.log(error);
     }
@@ -275,7 +275,6 @@ function PostDetail() {
             <p>
               {post.content}
             </p>
-
             {/* 댓글 입력폼 */}
             <form onSubmit={handleCommentSubmit}>
               <div className='wrapper'>
@@ -290,10 +289,8 @@ function PostDetail() {
 
             {/* 댓글 항목 출력 */}
             {
-              comments.map(comment=><Comment comment={comment} key={comment.commentId}/>)
+              comments.map((comment, idx)=><Comment comment={comment} comments={comments} setComments={setComments} key={idx}/>)
             }
-            
-
           </Col>
         </Row>
       </Container>
