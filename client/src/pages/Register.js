@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../styles/register.css';
+import styles from '../styles/register.module.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
@@ -96,11 +96,11 @@ function Register() {
   }
 
   return (
-    <div className="register-page">
+    <div className={styles.register_page}>
       <h2>회원가입</h2>
       <form onSubmit={handleSubmit}>
 
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="userId">아이디</label>
           <input
             type="text"
@@ -112,7 +112,7 @@ function Register() {
           {userIdError && <p>{userIdError}</p>}
         </div>
 
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="password">비밀번호</label>
           <input
             type="password"
@@ -124,7 +124,7 @@ function Register() {
           {passwordError && <p>{passwordError}</p>}
         </div>
 
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="passwordCheck">비밀번호 확인</label>
           <input
             type="password"
@@ -136,7 +136,7 @@ function Register() {
           {passwordCheckError && <p>{passwordCheckError}</p>}
         </div>
 
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="nickname">닉네임</label>
           <input
             type="text"
@@ -148,7 +148,7 @@ function Register() {
           {nicknameError && <p>{nicknameError}</p>}
         </div>
 
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="email">이메일</label>
           <input
             type="email"
@@ -160,7 +160,7 @@ function Register() {
            {emailError && <p>{emailError}</p>}
         </div>
 
-        <div className="input-group">
+        <div className={styles.input_group}>
           <label htmlFor="region">거래 희망 지역</label>
 
           {/* <RegionSelector wideRegion = {wideRegion}  setWideRegion = {setWideRegion} detailRegion ={detailRegion} setDetailRegion = {setDetailRegion}/> */}

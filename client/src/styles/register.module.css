@@ -1,4 +1,4 @@
-.login-page {
+.register_page {
   max-width: 400px;
   margin: 50px auto;
   padding: 20px;
@@ -6,7 +6,7 @@
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.input-group {
+.input_group {
   margin-bottom: 20px;
 }
 
@@ -23,24 +23,13 @@ input {
 }
 
 button {
+  margin-top: 10px;
   padding: 8px 15px;
   background-color: #007bff;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 10px;
-  flex-grow: 1; /* This allows the buttons to grow and occupy available space */
-  margin-right: 5px; /* Spacing between buttons */
-}
-
-button:last-child {
-  margin-right: 0; /* Ensures the last button doesn't have extra margin */
-}
-
-.button-group {
-  display: flex;
-  justify-content: space-between;
 }
 
 button:hover {

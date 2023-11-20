@@ -41,6 +41,15 @@ const pool = mysql.createPool({
   connectionLimit: 10
 });
 
+const mysqlPromise = require('mysql2/promise');
+const pool2 = mysqlPromise.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  connectionLimit: 10
+});
+
 const s3 = new S3Client({
   region: process.env.S3_REGION,
   credentials: {
@@ -209,7 +218,7 @@ app.get('/api/getUserRegion', isAuthenticated, (req, res) => {
   })
 })
 
-app.get('/posts', isAuthenticated, (req, res) => {
+app.get('/posts', (req, res) => {
 
   const { wideRegion, detailRegion } = req.query;
 
@@ -466,6 +475,7 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
         else {
           let post = result[0]
           let images;
+          let comments;
 
 
           if (post.userId === req.session.user) {
@@ -481,52 +491,43 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
               connection.release();
             } else {
               images = result;
-
-              sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
-              params = [postId, req.session.user];
+            
+              
+              //댓글 출력
+              sql = 'SELECT * FROM comment WHERE postId = ?';
+              params = [postId];
               connection.query(sql, params, (error, results) => {
                 if (error) {
-                  res.status(500).json({ error: 'Failed to update view count.' });
+                  res.status(401).json({ error: '댓글 db조회 실패' });
                   return;
-                }
-
-                if (results.affectedRows === 0) {
-                  // This means the post was the user's own post and the view_count was not increased
-                  res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost });
                 } else {
-                  // The view_count was increased
-                  res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost });
+                  comments = results;
+                  sql = 'UPDATE post SET view_count = view_count + 1 WHERE postId = ? AND userId != ?';
+                  params = [postId, req.session.user];
+                  connection.query(sql, params, (error, results) => {
+                    if (error) {
+                      res.status(500).json({ error: 'Failed to update view count.' });
+                      return;
+                    }
+
+                    if (results.affectedRows === 0) {
+                      // This means the post was the user's own post and the view_count was not increased
+                      res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                    } else {
+                      // The view_count was increased
+                      res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                    }
+                  });
                 }
-              });
-            }
-          });
-        }
-      });
-    }
-    // const post_id = [1, 2, 3]; // 특정 postid 배열 (임의)
-
-    //   // 배열 루프 and 각 id마다 쿼리 실행
-    //   post_id.forEach((postId) => {
-    //   // 특정 postId count + 1 하는 쿼리
-    //     const sqlQuery = `
-    //       INSERT INTO UserPostCounts (post_id, count)
-    //       VALUES (?, 1)
-    //       ON DUPLICATE KEY UPDATE count = count + 1
-    //     `;
-
-    //     const values = [postId];
-
-    //     connection.query(sqlQuery, values, (error, results, fields) => {
-    //       if (error) {
-    //         console.error('Error executing query:', error);
-    //       } else {
-    //         console.log('Query executed successfully');
-    //       }
-    //     });
-    //   });
-    connection.release();
+                  connection.release();
+                });
+              }
+            });
+          }
+        });
+      }
+    });
   });
-});
 
 app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭제 요청
   const postId = req.params.postId;
@@ -552,7 +553,14 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
             res.status(404).json({ error: 'Failed to drop image.' });
             return;
           }
-
+          sql = 'DELETE * FROM likepost WHERE postId = ?';
+          params = [postId];
+          connection.query(sql, params, (error, results) => {
+            if (error) {
+              res.status(404).json({ error: 'Failed to delete likepost.' });
+              return;
+            }
+          })
           if (results.affectedRows === 0) {
             res.status(404).json({ message: 'Failed to find post, image.' });
           } else {
@@ -563,17 +571,17 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                 res.status(404).json({ error: 'Failed to drop post.' });
                 return;
               }
-              
+
               const deletePromises = imageKeyDelete.map((imageKey) => {
                 const params = {
                   Bucket: process.env.S3_BUCKET,
                   Key: imageKey,
                 };
-              
+
                 const command = new DeleteObjectCommand(params);
                 return s3.send(command);
               });
-              
+
               Promise.all(deletePromises)
                 .then(() => {
                   res.status(204).json({ message: 'Drop post successfully.' });
@@ -581,6 +589,7 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
                 .catch((err) => {
                   console.error('이미지 삭제 실패:', err);
                   res.status(404).json({ error: 'Failed to drop s3 image.' });
+                  connection.release();
                 });
             });
           }
@@ -588,6 +597,219 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
       });
     }
   })
+});
+
+app.get('', async (req, res) => { //게시글 상태 정보 조회
+  const postId = req.body.postId;
+
+  try{
+    const query = 'SELECT p_state FROM post WHERE postId = ?';
+    const result = await pool2.execute(query, [postId]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post State successfully', p_state: result[0] });
+    } else {
+      res.status(404).json({ message: 'Post State not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.put('', async (req, res) => { //게시글 상태 전환
+  const postId = req.body.postId;
+  const p_state = req.body.p_state;
+
+  try{
+    const query = 'UPDATE post SET p_state = ? WHERE postId = ?';
+    const result = await pool2.execute(query, [p_state, postId]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Update State successfully' });
+    } else {
+      res.status(404).json({ message: 'Post State not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('/user/likepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 조회
+  let sql = 'SELECT postId FROM likepost WHERE userId = ?';
+  let params = [req.session.user];
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json(result);
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
+app.post('/user/updateLikepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 업데이트 (추가, 삭제)
+  const { pId, isDelete } = {...req.body};
+  //string, boolean
+  let sql;
+  isDelete ? sql = 'DELETE FROM likepost WHERE userId=? AND postId=?' : sql = 'INSERT INTO likepost (userId, postId) VALUES (?, ?)';
+  let params = [req.session.user, Number(pId)]
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json({message: "success"});
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
+app.get('/posts/:postId/likeCount', (req, res) => { //게시글 전체 좋아요 개수
+  const postId = req.params.postId;
+  let sql = 'SELECT COUNT(*) AS count FROM likepost WHERE postId=?';
+  let params = [postId];
+  pool.getConnection((error, connection) => {
+    if(error) {
+      console.log(error);
+      res.status(500).json({message: 'Database connection error.'});
+      connection.release();
+    }
+    else {
+      connection.query(sql, params, (error, result) => {
+        if(error) {
+          console.error('Error executing the query: '+ error.stack);
+          res.status(500).json({message: 'db 조회 실패.'});
+          connection.release();
+        }
+        else {
+          res.status(200).json(result);
+          connection.release();
+        }
+      })
+    }
+  })
+})
+
+//댓글 작성 후 작성한 댓글 데이터 전송
+app.post('/comment', async (req, res) => {
+  const {postId, userId, content} = req.body;
+
+  try {
+    const insertQuery = 'INSERT INTO comment (postId, userId, content) VALUES (?, ?, ?)';
+    const [insertResult] = await pool2.execute(insertQuery, [postId, userId, content]);
+
+    const commentId = insertResult.insertId; //삽입된 데이터의 id값.
+    const selectQuery = 'SELECT * FROM comment WHERE commentId = ?';
+    const [selectResults] = await pool2.execute(selectQuery, [commentId]);
+    
+    if (selectResults.length > 0) {
+      res.status(201).json({ message: 'Comment successfully added!', comment: selectResults[0] });
+    } else {
+      res.status(404).json({ message: 'Inserted comment not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('', isAuthenticated, (req, res) => { //특정 댓글 수정 시 댓글 정보 출력
+  const {commentId} = req.body;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'SELECT * FROM comment WHERE commentId = ?';
+      params = [commentId];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 db조회 실패' });
+          return;
+        } else {
+          res.status(200).json({ message: '댓글 정보 전송 완료', comments: results });
+        }
+      });
+    }
+  })
+});
+    
+app.put('/comment/edit', isAuthenticated, (req, res) => { //댓글 수정
+  const {commentId, commentContent} = req.body;
+
+  pool.getConnection((error, connection) => {
+    if (error) {
+      console.log(error);
+    }
+    else {
+      sql = 'UPDATE comment SET content = ? WHERE commentId = ?';
+      params = [commentId, commentContent];
+      connection.query(sql, params, (error, results) => {
+        if (error) {
+          res.status(404).json({ error: '댓글 수정 db연결 실패.' });
+          return;
+        } else {
+          sql = 'SELECT * FROM comment WHERE commentId = ?';
+          params = [commentId];
+          connection.query(sql, params, (error, results) => {
+            if (error) {
+              res.status(404).json({ error: '댓글 조회 db연결 실패.' });
+              return;
+            } else {
+
+              res.status(200).json({ message: 'Update comments successfully.', comments: results });
+            }
+          });
+        }
+      });
+    }
+  })
+});
+
+app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 삭제
+  const {commentId} = req.body;
+
+  try {
+    const deleteQuery = 'DELETE * FROM comment WHERE commentId = ?';
+    const deleteResult = await pool2.execute(deleteQuery, [commentId]);
+  
+    console.log('Delete Result:', deleteResult);
+  
+    if (deleteResult && deleteResult.affectedRows > 0) {
+      res.status(200).json({ message: 'deleted' });
+    } else {
+      res.status(404).json({ message: 'failed delete.' });
+    }
+  } catch (error) {
+    console.error('The error is:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.

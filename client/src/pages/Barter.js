@@ -7,6 +7,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import ListGroup from 'react-bootstrap/ListGroup';
 import regions from './regionData';
 import Spinner from 'react-bootstrap/Spinner';
+import styles from '../styles/Barter.module.css';
 
 function Barter({setIsLogin}) {
 
@@ -106,7 +107,7 @@ function Barter({setIsLogin}) {
   }
 
   return (
-    <div className='container'>
+    <div className={styles.container}>
       <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
         <div style={{display: 'flex'}}>
           <Dropdown style={{marginRight: '10px'}}>
