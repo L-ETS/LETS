@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import axios from "axios";
-import '../styles/reply.css';
+import styles from '../styles/reply.module.css';
 import UserContext from "../contexts/UserContext";
 import Modal from 'react-bootstrap/Modal';  
 import Button from 'react-bootstrap/Button';
@@ -45,7 +45,7 @@ function Comment({comment, comments, setComments}) {
   }
 
   return (
-    <div className='reply'>
+    <div className={styles.reply}>
       <Modal show={showAlert} onHide={()=>{setShowAlert(false)}}>
         <Modal.Header closeButton>
           <Modal.Title>정말로 삭제하시겠습니까?</Modal.Title>
@@ -61,7 +61,7 @@ function Comment({comment, comments, setComments}) {
         </Modal.Footer>
       </Modal>
       <div>
-        <div className='writer'>{comment.userId}</div>
+        <div className={styles.writer}>{comment.userId}</div>
         {
           showModifyUi ?
           null
@@ -70,11 +70,11 @@ function Comment({comment, comments, setComments}) {
             {
               comment.userId === logginedUserId ? //comment.userId는 댓글 작성자의 id
               <div>
-                <button className='edit'onClick={()=>{
+                <button className={styles.revise}onClick={()=>{
                   setShowModifyUi(true);
                   setCommentContent(comment.content);
                 }} style={{borderRadius: '5px'}}>수정</button>
-                <button className='delete'onClick={()=>setShowAlert(true)} style={{borderRadius: '5px'}}>삭제</button>
+                <button className={styles.delete} onClick={()=>setShowAlert(true)} style={{borderRadius: '5px'}}>삭제</button>
               </div>
               : null
             } 
@@ -90,7 +90,7 @@ function Comment({comment, comments, setComments}) {
           <button style={{whiteSpace: 'nowrap'}} onClick={()=>setShowModifyUi(false)}>취소</button>
         </div>
         :
-        <div className='content'>
+        <div className={styles.content}>
           {comment.content}
         </div>
       }

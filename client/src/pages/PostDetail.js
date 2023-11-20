@@ -9,7 +9,7 @@ import Col from 'react-bootstrap/Col';
 import Spinner from 'react-bootstrap/Spinner';
 import Modal from 'react-bootstrap/Modal';  
 import Badge from 'react-bootstrap/Badge';
-import '../styles/reply.css';
+import styles from '../styles/reply.module.css';
 import Comment from "../components/Comment";
 import UserContext from "../contexts/UserContext";
 import Dropdown from 'react-bootstrap/Dropdown';
@@ -277,13 +277,13 @@ function PostDetail() {
             </p>
             {/* 댓글 입력폼 */}
             <form onSubmit={handleCommentSubmit}>
-              <div className='wrapper'>
+              <div className={styles.wrapper}>
                 <textarea 
                   placeholder='내용을 입력해 주세요.' 
                   value={commentContent}
                   onChange={(e)=>setCommentContent(e.target.value)}
                 ></textarea>
-                <button className='confirm' type="submit" style={{borderRadius: '10px'}}>등록</button>
+                <button className={styles.confirm} type="submit" style={{borderRadius: '10px'}}>등록</button>
               </div>
             </form>
 
