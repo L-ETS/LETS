@@ -8,7 +8,7 @@ function OtherTrade() {
         <div className={styles.container}>
             <div className={styles.postStatus}>
                 <Button variant="outline-success">전체 글</Button>{' '}
-                <Button variant="outline-success">거래중</Button>{' '}
+                <Button variant="outline-success">예약중</Button>{' '}
                 <Button variant="outline-success">거래 완료</Button>{' '}  
             </div>
             

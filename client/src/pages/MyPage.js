@@ -1,6 +1,6 @@
 import React from "react";
 import styles from '../styles/MyPage.module.css'; 
-import { Link, Outlet} from 'react-router-dom';
+import {Link, Outlet} from 'react-router-dom';
 
 
 function MyPage() {
