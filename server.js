@@ -247,7 +247,7 @@ app.get('/posts', (req, res) => {
   })
 })
 
-app.get('/user/mypage', async (req, res) => { //마이페이지 조회
+app.get('/user/mypage', isAuthenticated, async (req, res) => { //마이페이지 조회
   try {
     const query = 'SELECT * FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
@@ -283,7 +283,7 @@ app.put('', isAuthenticated, async (req, res) => { //마이페이지 수정
   }
 })
 
-app.post('', async (req, res) => { //비밀번호 체크
+app.post('', isAuthenticated, async (req, res) => { //비밀번호 체크
   try {
     const query = 'SELECT password FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
@@ -303,7 +303,7 @@ app.post('', async (req, res) => { //비밀번호 체크
   }
 })
 
-app.delete('', async (req, res)=>{ //회원 탈퇴
+app.delete('', isAuthenticated, async (req, res)=>{ //회원 탈퇴
   try {
     const query = 'DELETE FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
@@ -697,6 +697,40 @@ app.put('/post/edit/pstate', async (req, res) => { //게시글 상태 전환
       res.status(200).json({ message: 'Update State successfully' });
     } else {
       res.status(404).json({ message: 'Post State not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
+  try{
+    const query = 'SELECT p.*, l.* FROM post AS p JOIN likepost AS l ON p.postId = l.postId AND l.userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post list successfully', postData : result });
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
+  const p_state = req.body.p_state;
+
+  try{
+    const query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
+    const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post list successfully', postData : result });
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
