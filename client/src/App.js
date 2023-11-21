@@ -8,9 +8,9 @@ import PostDetail from './pages/PostDetail';
 import EditPost from './pages/EditPost';
 import React from 'react';
 import EditMyInform from './pages/EditMyInform';
+import MyProfile from './pages/MyProfile';
 import MyPost from './pages/MyPost';
 import MyInform from './pages/MyInform';
-import OtherTrade from './pages/OtherTrade';
 import BookMark from './pages/BookMark';
 
 
@@ -20,8 +20,8 @@ function App() {
       <Route path='/' element={<Home/>} />
       <Route path='/user/register' element={<Register/>} />
       <Route path='/mypage' element={<MyPage/>}>
+        <Route path='myprofile' element={<MyProfile/>}/>
         <Route path='mypost' element={<MyPost/>}/>
-        <Route path='othertrade' element={<OtherTrade/>}/>
         <Route path='bookmark' element={<BookMark/>}/>
         <Route path='myinform' element={<MyInform/>}/>
       </Route> 

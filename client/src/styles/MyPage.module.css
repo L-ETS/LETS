@@ -46,8 +46,9 @@
   .content {
     width: 740px;
     height: 1150px;
-    border: 1px solid green;
+    border: 1px solid white;
     margin-left: 20px;
+    border-left: medium solid lightgrey;
   }
 
   .postbox {
@@ -60,6 +61,7 @@
     border: 1px solid lightgrey;
     margin-top: 20px;
   }
+
 
 
 

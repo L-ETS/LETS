@@ -1,6 +1,6 @@
 import React from "react";
 import Button from 'react-bootstrap/Button';
-import styles from '../styles/MyInform.module.css'; 
+import styles from '../styles/EditMyInform.module.css'; 
 import { useNavigate } from 'react-router-dom';
 
 
@@ -11,12 +11,12 @@ function EditMyInform() {
     const routing =  useNavigate();
 
     function goMyInform() {
-		routing('/user/myinform');
+		routing('/mypage/myinform');
 	}
 
     return (
         <div className={styles.container}>
-            <table>
+            <table className={styles.table}>
                 <tr>
                     <td className={styles.tableBold}>아이디</td>
                     <td>test</td>

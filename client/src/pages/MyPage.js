@@ -6,7 +6,6 @@ import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import axios from "axios";
-import {Link, Outlet} from 'react-router-dom';
 
 
 function MyPage() {
@@ -18,11 +17,10 @@ function MyPage() {
             <WithdrawalModal showWithDrawalModal={showWithDrawalModal} setShowWithDrawalModal={setShowWithDrawalModal}/>
             
             <div className={styles.item}>
-                
-                <button className={styles.tab}><Link to ="/mypage/mypost">내 글</Link></button>
-                <button className={styles.tab}><Link to ="/mypage/othertrade">다른 거래</Link></button>
-                <button className={styles.tab}><Link to ="/mypage/bookmark">북마크</Link></button>
-                <button className={styles.tab}><Link to ="/mypage/myinform">회원정보</Link></button>
+                <Link to ="/mypage/myprofile" style={{textDecoration: "none"}}><button className={styles.tab}>프로필</button></Link>
+                <Link to ="/mypage/mypost" style={{textDecoration: "none"}}><button className={styles.tab}>내 글</button></Link>
+                <Link to ="/mypage/bookmark" style={{textDecoration: "none"}}><button className={styles.tab}>북마크</button></Link>
+                <Link to ="/mypage/myinform" style={{textDecoration: "none"}}><button className={styles.tab}>회원정보</button></Link>
                 <button className={styles.tab} onClick={()=>setShowWithDrawalModal(true)}>회원탈퇴</button>
             </div>
 

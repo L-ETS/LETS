@@ -40,7 +40,7 @@ function MyInform() {
 
   return (
     <div className={styles.container}>
-      <table>
+      <table className={styles.table}>
         <tbody>
           <tr>
             <td className={styles.tableBold}>아이디</td>
@@ -65,6 +65,10 @@ function MyInform() {
           <tr>
             <td className={styles.tableBold}>거래 희망 지역</td>
             <td>경기 수원</td>
+          </tr>
+          <tr>
+            <td className={styles.tableBold}>회원 탈퇴</td>
+            <td><Button variant="secondary">회원 탈퇴</Button>{' '}</td>
           </tr>
         </tbody>
       </table>

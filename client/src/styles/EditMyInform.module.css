@@ -4,10 +4,10 @@
   }
   
   .table {
-    border: 1px solid rgb(17, 150, 17);
-    width:90%;
+    border: 2px solid lightgrey;
+    width: 50%;
     height: 450px;
-    margin-bottom: 50px;
+    margin: 50px;
     border-radius: 10px;
   }
   
