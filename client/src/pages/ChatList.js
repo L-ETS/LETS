@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { collection, query, onSnapshot, where, orderBy } from 'firebase/firestore'
 import { db } from "../config/firebase";
+import { useNavigate } from "react-router-dom";
 
 function ChatList() {
   const [myRoomuuid, setMyRoomuuid] = useState([]);
@@ -11,6 +12,7 @@ function ChatList() {
   const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
   const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
   const currentTimeInSeconds = Math.floor(Date.now() / 1000); // 현재 시간 초
+  const navigate = useNavigate();
 
   function getTimeDifference(messageTime, currentTime) { // [마지막으로 보낸 메시지 시간]과 [현재 시간]을 비교하는 함수
     const timeDifference = currentTime - messageTime;
@@ -88,7 +90,7 @@ function ChatList() {
             <p class="h5 mb-0 py-1">채팅 목록</p>
           </div>
           {messageList.map((msg, index) => (
-          <div class="chat-box" key={index}>
+          <div class="chat-box" key={index} onClick={() => {navigate(`/chat/${msg.room}/`)}}>
             <div class="list-group rounded-0">
               <a href="#" class="list-group-item list-group-item-action list-group-item-light rounded-0">
                 <div class="media"><img src={myImageList[index]}
