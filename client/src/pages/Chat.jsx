@@ -14,7 +14,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
     const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
     const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
-    const { uuid } = useParams();
+    const { room_uuid } = useParams();
     const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
@@ -30,7 +30,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
                 text: newMessage,
                 createAt: serverTimestamp(),
                 user: logginedUserId,
-                room: "room1"
+                room: room_uuid
             });
             setNewMessage("");
         } catch (error) {
@@ -41,7 +41,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
 
     const chatAuthenticate = async () => {
         try {
-            const response = await axios.get(`/chat/authenticate/${logginedUserId}/${uuid}`);
+            const response = await axios.get(`/chat/authenticate/${logginedUserId}/${room_uuid}`);
             const exist = response.data.exist;
 
             if(exist) setIsShow(true);
@@ -55,7 +55,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
 
     const fetchPostData = async () => {
         try {
-            const response = await axios.get(`/posts/uuid/${uuid}`);
+            const response = await axios.get(`/posts/uuid/${room_uuid}`);
             const postData = response.data.post;
             setPostId(postData.postId);
             setPostTitle(postData.title);
@@ -73,9 +73,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     useEffect(() => {
         // chatAuthenticate();
         // fetchPostData();
-        
-        // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
-        const queryMessage = query(messageRef, where("room", "==", "room1"), orderBy("createAt", "asc"));
+        const queryMessage = query(messageRef, where("room", "==", room_uuid), orderBy("createAt", "asc"));     
         onSnapshot(queryMessage, (snapshot) => {
             let messages = [];
             snapshot.forEach((doc) => {
@@ -84,6 +82,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             //console.log(messages);
             setMessageList(messages);
         });
+        // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
     },[]);
     if(isShow && !isLoading)
         return(
