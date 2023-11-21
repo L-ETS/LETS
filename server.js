@@ -247,8 +247,76 @@ app.get('/posts', (req, res) => {
   })
 })
 
-app.get('/user/mypage', isAuthenticated, (req, res) => {
-  res.status(200).json({ success: true })
+app.get('/user/mypage', async (req, res) => { //마이페이지 조회
+  try {
+    const query = 'SELECT * FROM user WHERE userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
+
+    if (result.length > 0) {
+      res.status(200).json({ message: 'MyPage load successfully', p_state: result[0] });
+    } else {
+      res.status(404).json({ message: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.put('', isAuthenticated, async (req, res) => { //마이페이지 수정
+  const { password, nickname, email, wideRegion, detailRegion} = {...req.body};
+  const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+
+  try{
+    const query = 'UPDATE user SET password = ?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
+    const [result] = await pool2.execute(hashedPassword, nickname, email, wideRegion, detailRegion, [req.session.user]);
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'MyPage update successfully', p_state: result[0] });
+    } else {
+      res.status(404).json({ message: 'User not found.' });
+    }
+  }
+  catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.post('', async (req, res) => { //비밀번호 체크
+  try {
+    const query = 'SELECT password FROM user WHERE userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
+
+    if (result.length > 0) {
+      if (!bcrypt.compareSync(body.password, result[0].password)) {
+        connection.release();
+        return res.status(401).json({ error: 'Invalid username or password' });
+      }
+      res.status(200).json({ message: 'Password check successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.delete('', async (req, res)=>{ //회원 탈퇴
+  try {
+    const query = 'DELETE FROM user WHERE userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
+
+    if (result.affectedRows > 0) {
+      res.status(200).json({ message: 'User delete successfully' });
+    } else {
+      res.status(404).json({ message: 'User not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
 })
 
 app.get('/posts/upload', isAuthenticated, (req, res) => {
