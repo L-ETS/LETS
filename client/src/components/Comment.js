@@ -16,7 +16,7 @@ function Comment({comment, post}) {
     if (logginedUserId === post.userId) {
       setShowChatBtn(true);
     }
-  },[])
+  })
 
   const handleEdit = async (e) => {
     setCommentContent(e.target.value);
@@ -68,17 +68,19 @@ function Comment({comment, post}) {
   
     try {
       const response = await axios.post(`/chat/${user1}/${user2}/${post.postId}`);
-      const { message, room_uuid } = response.data;
+      const { message, UUID } = response.data;
       
-      if (message === 'Room created' || message === 'Room already exists') {
-        // Assuming `navigate` is a function to navigate to a new page
-        navigate(`/chat/${room_uuid}`);
+      if (message === 'Room already exists') {
+        console.log(response.data.UUID);
+        navigate(`/chat/${UUID}`);
+      } else if (message === 'Room created') {
+        console.log('room created',response.data.UUID);
+        alert('Room created');
       } else {
         throw new Error('Unexpected response from the server.');
       }
-    } catch (error) {
-      alert('문제가 발생했습니다. 다시 시도해주세요.');
-      console.error(error);
+    } catch(error) {
+      console.error('Error creating chat:', error);
     }
   };
   

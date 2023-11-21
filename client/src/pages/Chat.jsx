@@ -86,7 +86,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     },[]);
     if(isShow && !isLoading)
         return(
-            <div class="message">
+            <div className="message">
                 <PostPreview title={postTitle} p_state={postP_state} postId={postId}/>
                 <main>
                     {messageList.map((msg,idx) => (

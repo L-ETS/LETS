@@ -707,16 +707,17 @@ app.delete(`/comment/delete`, isAuthenticated, async (req, res) => { //댓글 �
   }
 });
 
-app.get('/chat/:room_uuid', async (req, res) => {
+app.get('/chat/:getUUID', async (req, res) => {
   try {
-    const { room_uuid } = req.params;
-    const query = 'SELECT * FROM chatroom WHERE BIN_TO_UUID(room_uuid,0) = ?';
-    const [result] = await pool2.execute(query, [room_uuid]);
+    const { getUUID } = req.params;
 
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Chat load successfully', chatList: result });
-    } else {
+    const query = 'SELECT BIN_TO_UUID(room_uuid, 0) AS getUUID FROM chatroom WHERE BIN_TO_UUID(room_uuid, 0) = ?';
+    const [result] = await pool2.execute(query, [getUUID]);
+
+    if (result.length === 0) {
       res.status(404).json({ message: 'Room not found.' });
+    } else {
+      res.status(200).json({ message: 'Chat load successfully', getUUID: result[0].getUUID});
     }
   } catch (error) {
     console.error('The error is: ', error);
@@ -744,7 +745,7 @@ app.get('/chat/:user1/:user2/:postId', async (req, res) => {
 app.post('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
     const { user1, user2, postId } = req.params;
-    const query = 'SELECT BIN_TO_UUID(room_uuid,0) FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) AS UUID FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
     const [result] = await pool2.execute(query, [user1, user2, postId]);
 
     if (result.length === 0) {
@@ -752,9 +753,10 @@ app.post('/chat/:user1/:user2/:postId', async (req, res) => {
       const values = [user1, user2, postId];
       await pool2.execute(query2, values);
 
-      res.status(200).json({ message: 'Room created', room_uuid: ''});
+      res.status(200).json({ message: 'Room created' });
     } else {
-      res.status(200).json({ message: 'Room already exists', room_uuid: result[0].room_uuid });
+      const roomUUID = result[0] ? result[0].UUID : null;
+      res.status(200).json({ message: 'Room already exists', UUID: roomUUID });
     }
   } catch (error) {
     console.error('The error is: ', error);
