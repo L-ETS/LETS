@@ -22,7 +22,7 @@ function PostPreview({title, p_state, post}) {
       
       <div>
         <h4>제목: {title}</h4>
-        <p>거래상태: {p_state}</p>
+        <span>거래상태: {p_state}</span>
       </div>
       
     </div>

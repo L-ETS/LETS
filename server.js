@@ -945,6 +945,45 @@ app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
 
 })
 
+//uuid로 chatroom에 등록된 post 정보 보내주기.
+app.get('/posts/uuid/:uuid', async (req, res) => {
+
+  const uuid = req.params.uuid;
+  let resultPostId;
+
+  try {
+    const selectQuery = 'SELECT postId FROM chatroom WHERE BIN_TO_UUID(room_uuid,0) = ?';
+    const [chatRoomRows] = await pool2.execute(selectQuery, [uuid]);
+    
+    if (chatRoomRows.length === 0) {
+      res.status(404);
+    } else {
+      resultPostId = chatRoomRows[0].postId;
+      
+      try {
+        const selectQuery = 'SELECT * FROM post WHERE postId = ?';
+        const [postRows] = await pool2.execute(selectQuery, [resultPostId]);
+
+        if(postRows.length > 0) {
+          res.status(200).json({post: postRows[0]});
+          
+        } else {
+          res.status(400);
+          console.log('400번');
+        }
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+      }
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+})
+
+
 app.get('/user/getChatlist', isAuthenticated, async (req, res) => { // 유저의 채팅방 리스트를 가져오는 코드
   try {
     const user = req.session.user;

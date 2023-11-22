@@ -72,7 +72,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
    //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
         // chatAuthenticate();
-        // fetchPostData();
+        fetchPostData();
         const queryMessage = query(messageRef, where("room", "==", room_uuid), orderBy("createAt", "asc"));     
         onSnapshot(queryMessage, (snapshot) => {
             let messages = [];
