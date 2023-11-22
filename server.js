@@ -842,7 +842,6 @@ app.post('/comment', async (req, res) => {
 
 app.get('/comment/:commentId', (req, res) => {
   const { commentId } = req.params;
-
   pool2.getConnection((error, connection) => {
     if (error) {
       console.log(error);
@@ -903,7 +902,119 @@ app.delete('/comment/delete', async (req, res) => {
   }
 });
 
+app.post('/chat/:user1/:user2/:postId', async (req, res) => {
+  try {
+    const { user1, user2, postId } = req.params;
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) AS UUID FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';
+    const [result] = await pool2.execute(query, [user1, user2, postId]);
 
+    if (result.length === 0) {
+      const query2 = 'INSERT INTO chatroom(user1, user2, postId) VALUES (?, ?, ?)';
+      const values = [user1, user2, postId];
+      await pool2.execute(query2, values);
+
+      res.status(200).json({ message: 'Room created' });
+    } else {
+      const roomUUID = result[0] ? result[0].UUID : null;
+      res.status(200).json({ message: 'Room already exists', UUID: roomUUID });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+//logginedUserId와 uuid로 이루어진 chatroom이 있는지 검사.
+app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
+  const logginedUserId = req.params.logginedUserId;
+  const uuid = req.params.uuid;
+
+  try {
+    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND BIN_TO_UUID(room_uuid,0) = ?';
+    const [rows] = await pool2.execute(selectQuery, [logginedUserId, logginedUserId, uuid]);
+    
+    if (rows.length > 0) {
+      res.status(200).json({ exist: true });
+    } else {
+      res.status(401).json({ exist: false });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+})
+
+app.get('/user/getChatlist', isAuthenticated, async (req, res) => { // 유저의 채팅방 리스트를 가져오는 코드
+  try {
+    const user = req.session.user;
+    //console.log(user);
+    const query = 'SELECT BIN_TO_UUID(room_uuid,0) AS uuid FROM chatroom WHERE user1 = ? OR user2 = ?';
+    const [result] = await pool2.execute(query, [user, user]);
+
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Chat load successfully', chatList: result });
+    } else {
+      res.status(404).json({ message: 'Room not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/posts/get/uuid', isAuthenticated, async (req, res) => { // uuid값으로 포스트 정보 가져오기
+  //console.log(req.query.uuid);
+  //console.log(req.query.uuid.length);
+  const user = req.session.user;
+  let uuid_List = [];
+  let postId_List = [];
+  let image_List = [];
+  let userId_List = [];
+
+  try {
+    //console.log(req.query.uuid);
+    await req.query.uuid.map(async (mychat, index) => {
+      uuid_List.push(mychat);
+      //console.log(mychat);
+      
+      const selectQuery = 'SELECT postId, user1, user2 FROM chatroom WHERE BIN_TO_UUID(room_uuid,0) = ?';
+      const [chatRoomPostId] = await pool2.execute(selectQuery, [mychat]);
+      postId_List[index] = chatRoomPostId[0].postId;
+      //console.log("pi: ", chatRoomPostId[0].postId);
+      //postId_List.push(chatRoomPostId[0].postId);
+
+      chatRoomPostId[0].user1 == user ? userId_List[index] = chatRoomPostId[0].user2 : userId_List[index] = chatRoomPostId[0].user1;
+      //console.log("u1: ", chatRoomPostId[0].user1);
+      //console.log("u2: ", chatRoomPostId[0].user2);
+
+      const selectQuery2 = 'SELECT imageUrl FROM image WHERE postId = ?';
+      const [chatRoomImage] = await pool2.execute(selectQuery2, [chatRoomPostId[0].postId]);
+      //console.log("iu: ", chatRoomImage[0].imageUrl);
+      image_List[index] = chatRoomImage[0].imageUrl;
+      
+      //console.log(mychat, "\n", chatRoomPostId[0], "\n", chatRoomImage[0].imageUrl);
+    });
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+
+  setTimeout(() => {
+    //console.log("ul: ", uuid_List);
+    //console.log("pl: ", postId_List);
+    //console.log("il: ", image_List);
+    if(uuid_List && postId_List && image_List) {
+      res.status(200).json({
+        message: "Load My ChatList!",
+        uuidlist: uuid_List,
+        postIdlist: postId_List,
+        imagelist: image_List,
+        opponentUserIdlist: userId_List});
+    }
+    else res.status(404).json({ message: 'Do not Load My ChatList!' });
+  }, 100); // 0.1초 기다림 - 비동기 문제 해결 방안
+})
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {

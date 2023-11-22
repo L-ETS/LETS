@@ -1,11 +1,13 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from 'react-router-dom'
 import axios from "axios";
 import styles from '../styles/reply.module.css';
 import UserContext from "../contexts/UserContext";
 import Modal from 'react-bootstrap/Modal';  
 import Button from 'react-bootstrap/Button';
 
-function Comment({comment, comments, setComments}) {
+function Comment({comment, comments, setComments, post}) {
+  const navigate = useNavigate();
   const [commentContent, setCommentContent] = useState('');  
   const [showAlert, setShowAlert] = useState(false);
   const [showModifyUi, setShowModifyUi] = useState(false);
@@ -44,6 +46,37 @@ function Comment({comment, comments, setComments}) {
     }
   }
 
+  const handleChat = async () => {
+    let user1, user2;
+    console.log("ppid: ", post.postId);
+    if (logginedUserId < comment.userId) {
+      user1 = logginedUserId;
+      user2 = comment.userId;
+    } else {
+      user1 = comment.userId;
+      user2 = logginedUserId;
+    }
+  
+    if (!user1 || !user2) throw new Error('user1 또는 user2 정보 없음.');
+  
+    try {
+      const response = await axios.post(`/chat/${user1}/${user2}/${post.postId}`);
+      const { message, UUID } = response.data;
+      console.log("uuid: ", UUID);
+      if (message === 'Room already exists') {
+        console.log(response.data.UUID);
+        navigate(`/chat/${UUID}`);
+      } else if (message === 'Room created') {
+        console.log('room created',response.data.UUID);
+        alert('Room created');
+      } else {
+        throw new Error('Unexpected response from the server.');
+      }
+    } catch(error) {
+      console.error('Error creating chat:', error);
+    }
+  };
+
   return (
     <div className={styles.reply}>
       <Modal show={showAlert} onHide={()=>{setShowAlert(false)}}>
@@ -76,7 +109,7 @@ function Comment({comment, comments, setComments}) {
                 }} style={{borderRadius: '5px'}}>수정</button>
                 <button className={styles.delete} onClick={()=>setShowAlert(true)} style={{borderRadius: '5px'}}>삭제</button>
               </div>
-              : null
+              : <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button>
             } 
           </div>
         }
