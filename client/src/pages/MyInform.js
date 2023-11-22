@@ -31,11 +31,10 @@ function MyInform() {
       alert('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
     }
   }
-  /* 백엔드 코드와 연동 후 주석해제.
+  
   useEffect(()=>{
     fetchUserInfo();
   },[])
-  */
 
   function goEditMyPage() {
 		routing('/posts/editmyinform');
@@ -48,27 +47,19 @@ function MyInform() {
         <tbody>
           <tr>
             <td className={styles.tableBold}>아이디</td>
-            <td>test</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>비밀번호</td>
-            <td>Test1234</td>
-          </tr>
-          <tr>
-            <td className={styles.tableBold}>비밀번호 확인</td>
-            <td>Test1234</td>
+            <td>{userId}</td>
           </tr>
           <tr>
             <td className={styles.tableBold}>닉네임</td>
-            <td>Test</td>
+            <td>{nickname}</td>
           </tr>
           <tr>
             <td className={styles.tableBold}>이메일</td>
-            <td>test123@gmail.com</td>
+            <td>{email}</td>
           </tr>
           <tr>
             <td className={styles.tableBold}>거래 희망 지역</td>
-            <td>경기 수원</td>
+            <td>{wideRegion}{' '}{detailRegion}</td>
           </tr>
           <tr>
             <td className={styles.tableBold}>회원 탈퇴</td>
@@ -95,7 +86,7 @@ function WithdrawalModal({showWithDrawalModal, setShowWithDrawalModal}) {
               password: password
           });
 
-          if(response.status === 204) {
+          if(response.status === 200) {
               alert('언젠가 또 만나길,,');
               navigate('/');
           } else {
@@ -103,13 +94,14 @@ function WithdrawalModal({showWithDrawalModal, setShowWithDrawalModal}) {
           }
           
       } catch (error) {
-          if(error.response.status === 401) {
-              alert('비밀번호가 일치하지 않습니다.');
+          if(error.response.status === 404) {
+              alert('회원탈퇴에 실패했습니다.');
               setPassword('');
-          } else if(error.response.status === 500) {
+              console.log(error);
+          } 
+          else {
               alert('회원탈퇴에 실패했습니다.');
-          } else {
-              alert('회원탈퇴에 실패했습니다.');
+              setPassword('');
               console.log(error);
           }
       }

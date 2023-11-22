@@ -247,13 +247,13 @@ app.get('/posts', (req, res) => {
   })
 })
 
-app.get('/user/mypage', isAuthenticated, async (req, res) => { //마이페이지 조회
+app.get('/user/fetchInfo', isAuthenticated, async (req, res) => { //마이페이지 조회
   try {
     const query = 'SELECT * FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
 
     if (result.length > 0) {
-      res.status(200).json({ message: 'MyPage load successfully', p_state: result[0] });
+      res.status(200).json({ message: 'MyPage load successfully', user: result[0] });
     } else {
       res.status(404).json({ message: 'User not found.' });
     }
@@ -303,7 +303,7 @@ app.post('', isAuthenticated, async (req, res) => { //비밀번호 체크
   }
 })
 
-app.delete('', isAuthenticated, async (req, res)=>{ //회원 탈퇴
+app.delete('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈퇴
   try {
     const query = 'DELETE FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
