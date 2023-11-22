@@ -17,7 +17,7 @@ function EditPost() {
   const [wideRegion, setWideRegion] = useState('');
   const [detailRegion, setDetailRegion] = useState('');
   const [manualControl, setManualControl] = useState(false);
-
+  const [a, setA] = useState([]);
   const navigate = useNavigate();
 
   const getPostData = async () => {
@@ -35,6 +35,10 @@ function EditPost() {
       setTitle(postTitle);
       setContent(postContent);
 
+      for (let i=0;i<postImages.length;i++) {
+        a.push(postImages[i].imageUrl);
+      }
+      
       console.log(`postImages:${JSON.stringify(postImages)}`);
 
     } catch (error) {
@@ -52,7 +56,7 @@ function EditPost() {
 
   useEffect(() => {
     getPostData();
-    deleteOriginalImageFromS3();
+    //deleteOriginalImageFromS3();
   }, [])
 
   const handleTitleChange = (e) => {
@@ -103,6 +107,7 @@ function EditPost() {
       formData.append('images', image);
     });
 
+    deleteOriginalImageFromS3();
 
     try {
       //put요청으로 바꾸기.
@@ -196,17 +201,31 @@ function EditPost() {
         />
         
       </Form>
-      
       <div style={{display: 'flex' }}>
-
-        {imagePreviews.map((image, index) => {
+      {
+        imagePreviews.length > 0 ?
+        <div>
+          {imagePreviews.map((image, index) => {
           return (
             <div>
+              <h4>현재 이미지{index+1}</h4>
               <img src={image} key={index} style={{width: '150px'}}/>
             </div>
           )
-        }
-        )}
+        })}
+        </div>
+        :
+        <div>
+        {a.map((imgPreview, aindex) => {
+        return (
+          <div>
+            <h4>이전 이미지{aindex+1}</h4>
+            <img src={imgPreview} key={aindex} style={{width: '100px'}}/>
+          </div>
+        )
+      })}
+      </div>
+      }
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 // 로그인이 되었을 때 보일 물물교환 메인페이지.
-import {React, useEffect, useState} from 'react';
+import {React, useEffect, useState, useContext} from 'react';
 import { useNavigate } from 'react-router-dom'
 import axios from "axios";
 import Button from 'react-bootstrap/Button';
@@ -8,6 +8,8 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import regions from './regionData';
 import Spinner from 'react-bootstrap/Spinner';
 import styles from '../styles/Barter.module.css';
+import Badge from 'react-bootstrap/Badge';
+import UserContext from '../contexts/UserContext';
 
 function Barter({setIsLogin}) {
 
@@ -17,6 +19,7 @@ function Barter({setIsLogin}) {
   const [detailRegion, setDetailRegion] = useState('');
   const [manualControl, setManualControl] = useState(false);
   const [loading, setLoading] = useState(true); //로딩중인지 나타냄.(비동기적 성격 때문에 데이터를 불러오기도 전에
+  const {logginedUserId, setLogginedUserId} = useContext(UserContext);
 
   const getUserRegion = async () => {
     try {
@@ -67,6 +70,7 @@ function Barter({setIsLogin}) {
       const response = await axios.get('/user/logout');
       if(response.status === 200 && response.data.success) {
         setIsLogin(false);
+        setLogginedUserId(null);
         navigate('/');
       }
       else if(response.status === 500 && !response.data.success) {
@@ -164,6 +168,7 @@ function Barter({setIsLogin}) {
                 //수정일을 표기하기.
                 return (
                   <ListGroup.Item key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
+                    <Badge bg="secondary">{post.p_state}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</p>
                     <p>작성자: {post.userId}</p>
@@ -176,6 +181,7 @@ function Barter({setIsLogin}) {
                 //작성일을 표기하기.
                 return (
                   <ListGroup.Item key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
+                    <Badge bg="secondary">{post.p_state}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</p>
                     <p>작성자: {post.userId}</p>
