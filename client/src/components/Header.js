@@ -22,6 +22,7 @@ function Header() {
           >
             {logginedUserId && <Nav.Link href="/mypage/mypost">내정보</Nav.Link>}
             {logginedUserId && <Nav.Link href="/posts/upload">글쓰기</Nav.Link>}
+            {logginedUserId && <Nav.Link href="/user/chatlist">채팅방 목록</Nav.Link>}
           </Nav>
           <Form className="d-flex">
             <Form.Control
