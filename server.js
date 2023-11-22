@@ -969,7 +969,6 @@ app.get('/posts/uuid/:uuid', async (req, res) => {
           
         } else {
           res.status(400);
-          console.log('400번');
         }
       } catch (error) {
         console.error(error);
@@ -981,6 +980,24 @@ app.get('/posts/uuid/:uuid', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 
+})
+
+app.get('/image/:postId', isAuthenticated, async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    const selectQuery = 'SELECT imageUrl FROM image WHERE postId = ?';
+    const [imageUrlRows] = await pool2.execute(selectQuery, [postId]);
+
+    if(imageUrlRows.length > 0) {
+      res.status(200).json({imageUrl: imageUrlRows[0].imageUrl});
+    } else {
+      res.status(400);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 })
 
 
