@@ -1,12 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function PostPreview({title, p_state, post, imageUrl, isLoading}) {
+function PostPreview({title, p_state, postId, imageUrl, isLoading}) {
 
   const navigate = useNavigate();
 
   const handleClick = () => {
-    //navigate(`/posts/${postId}`);
+    navigate(`/posts/${postId}`);
   }
 
   return (

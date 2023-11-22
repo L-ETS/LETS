@@ -15,12 +15,12 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
     const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
     const { room_uuid } = useParams();
+    const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [isShow, setIsShow] = useState(true);    //해당 페이지 보여줄지 여부를 결정.
     const [isLoading, setisLoding] = useState(true);
-    let postId = '';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -58,11 +58,10 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         try {
             const response = await axios.get(`/posts/uuid/${room_uuid}`);
             const postData = response.data.post;
-            postId = postData.postId;
+            setPostId(postData.postId);
             setPostTitle(postData.title);
             setPostP_state(postData.p_state);
 
-            fetchImage(postId);
         } catch (error) {
             console.log(error);
             alert('에러 발생. 다시 시도해주세요.');
@@ -98,6 +97,11 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         });
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
     },[]);
+
+    useEffect(() => {
+        fetchImage(postId);
+    }, [postId])
+
     if(isShow && !isLoading)
         return(
             <div className="message">
