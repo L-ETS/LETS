@@ -15,7 +15,6 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
     const { logginedUserId } = useContext(UserContext); //현재 로그인한 유저의 id
     const { room_uuid } = useParams();
-    // const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
     const [imageUrl, setImageUrl] = useState('');
@@ -59,12 +58,11 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         try {
             const response = await axios.get(`/posts/uuid/${room_uuid}`);
             const postData = response.data.post;
-            // setPostId(postData.postId);
             postId = postData.postId;
             setPostTitle(postData.title);
             setPostP_state(postData.p_state);
 
-            await fetchImage(postId);
+            fetchImage(postId);
         } catch (error) {
             console.log(error);
             alert('에러 발생. 다시 시도해주세요.');
