@@ -17,6 +17,9 @@ function MyInform() {
   const [wideRegion, setWideRegion] = useState('');
   const [detailRegion, setDetailRegion] = useState('');
   const [showWithDrawalModal, setShowWithDrawalModal] = useState(false);
+  const [nicknameError, setNicknameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [regionError, setRegionError] = useState('');
 
   const fetchUserInfo = async () => {
     try {
@@ -36,10 +39,127 @@ function MyInform() {
     fetchUserInfo();
   },[])
 
-  function goEditMyPage() {
-		routing('/posts/editmyinform');
-	}
+  const goEditMyPage = async (evt, regions) => {
+    evt.preventDefault();
+    const nicknameRegex = /^[가-힣a-zA-Z]{2,10}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  
+    if (!nicknameRegex.test(nickname)) {
+      setNicknameError('올바른 닉네임 형식이 아닙니다. [한글, 대소문자로 2 ~ 10자]');
+      return;
+    } else {
+      setNicknameError('');
+    }
+  
+    if (!emailRegex.test(email)) {
+      setEmailError('올바른 이메일 형식이 아닙니다. [example@example.com]');
+      return;
+    } else {
+      setEmailError('');
+    }
 
+    const formData = new FormData();
+    formData.append('nickname', nickname);
+    formData.append('email', email);
+    formData.append('wideRegion', wideRegion);
+    formData.append('detailRegion', detailRegion);
+
+    try {
+      const response = await axios.put(`/posts/editmyinform`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      console.log(response.data);
+      alert('회원정보 수정 완료');
+      routing(`/mypage`);
+        
+    } catch (error) {
+      console.error('update info error:', error);
+      alert('update info error');
+    }
+    return (
+    <div className={styles.container}>
+        <form onSubmit={goEditMyPage}>
+          <div className={styles.input_group}>
+            <label htmlFor="userId">아이디 {userId}</label>
+          </div>
+          <div className={styles.input_group}>
+            <label htmlFor="nickname">닉네임 </label>
+            <input
+              type="text"
+              id="nickname"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              />
+            {nicknameError && <p>{nicknameError}</p>}
+          </div>
+  
+          <div className={styles.input_group}>
+            <label htmlFor="email">이메일</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              />
+             {emailError && <p>{emailError}</p>}
+          </div>
+  
+          <div className={styles.input_group}>
+            <label htmlFor="region">거래 희망 지역</label>
+            <select 
+              value={wideRegion}
+              onChange={(e) => {
+                setWideRegion(e.target.value);
+                setDetailRegion('');
+              }}
+              onBlur={()=>{
+                if(!wideRegion || !detailRegion) {
+                  setRegionError('지역을 선택해주세요.')
+                  return;
+                } else {
+                  setRegionError('');
+                }
+              }}
+              >
+              <option value="">선택</option>
+              {Object.keys(regions).map(region => (
+                <option key={region} value={region}>{region}</option>
+                ))}
+            </select>
+  
+            <select 
+              value={detailRegion}
+              onChange={(e) => {
+                setDetailRegion(e.target.value)
+              }}
+              onBlur={()=>{
+                if(!wideRegion || !detailRegion) {
+                  setRegionError('지역을 선택해주세요.')
+                  return;
+                } else {
+                  setRegionError('');
+                }
+              }}
+              disabled={!wideRegion}>
+              <option value="">선택</option>
+              {
+                wideRegion ?
+                regions[wideRegion].map(region => (
+                  <option key={region} value={region}>{region}</option>
+                  )) : null
+                }
+            </select>
+            {regionError && <p>{regionError}</p>}
+          </div>
+          <Button variant="outline-success" type="submit">수정</Button>
+        </form>
+      </div>
+    );
+  }
+   
   return (
     <div className={styles.container}>
       <WithdrawalModal showWithDrawalModal={showWithDrawalModal} setShowWithDrawalModal={setShowWithDrawalModal}/>
@@ -68,7 +188,7 @@ function MyInform() {
         </tbody>
       </table>
 
-      <Button variant="outline-success" onClick={goEditMyPage}>회원정보 수정</Button>{' '}  
+      <Button variant="outline-success" onClick={()=>routing(`/posts/editmyinform`)}>회원정보 수정</Button>
       
     </div>
   )
@@ -135,6 +255,6 @@ function WithdrawalModal({showWithDrawalModal, setShowWithDrawalModal}) {
           </Modal.Footer>
       </Modal>
   )
-}
-
+} 
+  
 export default MyInform;

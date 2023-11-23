@@ -263,16 +263,16 @@ app.get('/user/fetchInfo', isAuthenticated, async (req, res) => { //마이페이
   }
 })
 
-app.put('', isAuthenticated, async (req, res) => { //마이페이지 수정
-  const { password, nickname, email, wideRegion, detailRegion} = {...req.body};
-  const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+app.put('/user/editmyinform',isAuthenticated,  async (req, res) => { //마이페이지 수정
+  const { nickname, email, wideRegion, detailRegion} = req.body;
+  // const hashedPassword = await bcrypt.hash(body.password, saltRounds);
 
   try{
-    const query = 'UPDATE user SET password = ?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
-    const [result] = await pool2.execute(hashedPassword, nickname, email, wideRegion, detailRegion, [req.session.user]);
+    const query = 'UPDATE user SET nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE userId = ?';
+    const [result] = await pool2.execute(nickname, email, wideRegion, detailRegion, [req.session.user]);
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'MyPage update successfully', p_state: result[0] });
+      res.status(200).json({ message: 'MyPage update successfully', user: result[0] });
     } else {
       res.status(404).json({ message: 'User not found.' });
     }
