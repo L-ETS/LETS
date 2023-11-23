@@ -722,18 +722,14 @@ app.get('', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
   }
 })
 
-app.get('', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
-  const p_state = req.body.p_state;
+app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
+  const p_state = req.params.p_state;
 
   try{
     const query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
     const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    res.status(200).json({ message: 'Post list successfully', postData : result });
     
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Post list successfully', postData : result });
-    } else {
-      res.status(404).json({ message: 'Post not found.' });
-    }
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
