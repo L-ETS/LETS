@@ -68,15 +68,17 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         }
     }
 
-    const fetchImage = async (postId) => {
-        try {
-            const response = await axios.get(`/image/${postId}`);
-            setImageUrl(response.data.imageUrl);
-        } catch (error) {
-            console.log(error);
-            alert('에러 발생. 다시 시도해주세요.');
-        } finally {
-            setisLoding(false);
+    const fetchImage = async () => {
+        if(postId) {
+            try {
+                const response = await axios.get(`/image/${postId}`);
+                setImageUrl(response.data.imageUrl);
+            } catch (error) {
+                console.log(error);
+                alert('에러 발생. 다시 시도해주세요.');
+            } finally {
+                setisLoding(false);
+            } 
         }
     }
 
@@ -99,7 +101,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     },[]);
 
     useEffect(() => {
-        fetchImage(postId);
+        fetchImage();
     }, [postId])
 
     if(isShow && !isLoading)
