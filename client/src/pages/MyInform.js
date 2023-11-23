@@ -80,31 +80,31 @@ function WithdrawalModal({showWithDrawalModal, setShowWithDrawalModal}) {
   const [password, setPassword] = useState('');
 
   const handleWithdrawal = async () => {
-      
-      try {
-          const response = await axios.post(`/user/withdrawal`, {
-              password: password
-          });
+    
+    try {
 
-          if(response.status === 200) {
-              alert('언젠가 또 만나길,,');
-              navigate('/');
-          } else {
-              throw Error('처리되지 않은 응답코드');
-          }
-          
-      } catch (error) {
-          if(error.response.status === 404) {
-              alert('회원탈퇴에 실패했습니다.');
-              setPassword('');
-              console.log(error);
-          } 
-          else {
-              alert('회원탈퇴에 실패했습니다.');
-              setPassword('');
-              console.log(error);
-          }
+      const checkPwResopnse = await axios.post('/api/check-password', {password: password});
+      
+      if(checkPwResopnse.status === 200) {
+
+        const withdrawalResponse = await axios.delete('/user/withdrawal');
+        
+        if(withdrawalResponse.status === 200) {
+          alert('언젠간 또 만나길,,');
+          navigate('/');
+        } else {
+          throw Error('처리되지 않은 응답코드');
+        }
+
+      } else {
+        throw Error('처리되지 않은 응답코드');
       }
+      
+    } catch (error) {
+      //DB 수정이 끝나고 코드 잘 돌아갈 때는 자세한 에러메시지는 클라이언트에게 보여주지 않도록 수정할 것.
+      alert(`회원탈퇴 실패: ${JSON.stringify(error.response)}`);
+      console.error(error);
+    }
   }
 
   return (

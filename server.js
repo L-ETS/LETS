@@ -283,23 +283,25 @@ app.put('', isAuthenticated, async (req, res) => { //마이페이지 수정
   }
 })
 
-app.post('', isAuthenticated, async (req, res) => { //비밀번호 체크
+app.post('/api/check-password', isAuthenticated, async (req, res) => { //비밀번호 체크
+
+  const {password} = req.body;
+
   try {
     const query = 'SELECT password FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
 
     if (result.length > 0) {
-      if (!bcrypt.compareSync(body.password, result[0].password)) {
-        connection.release();
-        return res.status(401).json({ error: 'Invalid username or password' });
+      if (!bcrypt.compareSync(password, result[0].password)) {
+        return res.status(401).json({ message: '비밀번호가 일치하지 않거나 해당하는 회원이 없습니다.' });
       }
       res.status(200).json({ message: 'Password check successfully' });
     } else {
-      res.status(404).json({ message: 'User not found.' });
+      res.status(404).json({ message: '해당하는 회원이 없습니다.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'error', error: error.message });
   }
 })
 
@@ -311,7 +313,7 @@ app.delete('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈
     if (result.affectedRows > 0) {
       res.status(200).json({ message: 'User delete successfully' });
     } else {
-      res.status(404).json({ message: 'User not found.' });
+      res.status(404).json({ message: '해당하는 회원을 찾을 수 없습니다.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
