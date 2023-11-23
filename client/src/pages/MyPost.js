@@ -10,7 +10,7 @@ function MyPost() {
             <div className={styles.postStatus}>
                 <Button variant="outline-success">전체 글</Button>{' '}
                 <Button variant="outline-success">거래 대기</Button>{' '}
-                <Button variant="outline-success">거래중</Button>{' '}
+                <Button variant="outline-success">예약 중</Button>{' '}
                 <Button variant="outline-success">거래 완료</Button>{' '}  
             </div>
             
