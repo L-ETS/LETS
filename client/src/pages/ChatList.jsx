@@ -15,7 +15,8 @@ function ChatList() {
   const navigate = useNavigate();
 
   function getTimeDifference(messageTime, currentTime) { // [마지막으로 보낸 메시지 시간]과 [현재 시간]을 비교하는 함수
-    const timeDifference = currentTime - messageTime;
+    if (messageTime === 0) return '지금 바로 채팅해볼까요?';
+    const timeDifference = currentTime - messageTime.seconds;
   
     if (timeDifference < 60) {
       return `${timeDifference} 초 전`;
@@ -71,7 +72,16 @@ function ChatList() {
             snapshot.forEach((doc) => {
               messages.push({...doc.data(), id: doc.id});
             });
-            //console.log(messages);
+            console.log(messages);
+            if(ruuid && messages.length === 0){
+              messages.push({
+                createAt: 0,
+                id: "null",
+                room: ruuid,
+                text: "아직 채팅이 없어요!",
+                user: "null"
+              });
+            }
             setMessageList(prev => [...prev, messages[0]]);
           });
         });
@@ -92,14 +102,14 @@ function ChatList() {
           {messageList.map((msg, index) => (
           <div class="chat-box" key={index} onClick={() => {navigate(`/chat/${msg.room}/`)}}>
             <div class="list-group rounded-0">
-              <a href="#" class="list-group-item list-group-item-action list-group-item-light rounded-0">
+              <a class="list-group-item list-group-item-action list-group-item-light rounded-0">
                 <div class="media"><img src={myImageList[index]}
                   alt="Item" width="100" class="rounded-circle" />
                   <div class="media-body ml-4">
                     <div class="d-flex align-items-center justify-content-between mb-1">
                       <h5 class="mb-0">{userIdList[index]}</h5>
                       <small class="small font-weight-bold">
-                        {getTimeDifference(msg.createAt.seconds, currentTimeInSeconds)}
+                        {getTimeDifference(msg.createAt, currentTimeInSeconds)}
                       </small>
                     </div>
                     <p class="font-italic text-muted mb-0 text-small">{msg.text}</p>
