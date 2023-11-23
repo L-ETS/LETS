@@ -104,7 +104,7 @@ function ChatList() {
             <div class="list-group rounded-0">
               <a class="list-group-item list-group-item-action list-group-item-light rounded-0">
                 <div class="media"><img src={myImageList[index]}
-                  alt="Item" width="100" class="rounded-circle" />
+                  alt="Image" width="100" height="100" class="rounded-circle" />
                   <div class="media-body ml-4">
                     <div class="d-flex align-items-center justify-content-between mb-1">
                       <h5 class="mb-0">{userIdList[index]}</h5>
