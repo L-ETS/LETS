@@ -31,4 +31,15 @@ function MyPost() {
     )
 }
 
+function Post({title, author}) {
+    return (
+        <div className={styles.content}>
+            <div style={{fontWeight:700}}>{title}</div>
+            <br></br>
+            <div>{author}</div>
+            <div>글 내용은~~~ 상위 div 반복으로 붙여넣기!</div>
+        </div>
+    )
+}
+
 export default MyPost;
