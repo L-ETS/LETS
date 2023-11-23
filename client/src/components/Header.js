@@ -20,7 +20,7 @@ function Header() {
             style={{ maxHeight: '100px' }}
             navbarScroll
           >
-            {logginedUserId && <Nav.Link href="/mypage/mypost">내정보</Nav.Link>}
+            {logginedUserId && <Nav.Link href="/mypage/myprofile">내정보</Nav.Link>}
             {logginedUserId && <Nav.Link href="/posts/upload">글쓰기</Nav.Link>}
           </Nav>
           <Form className="d-flex">
