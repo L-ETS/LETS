@@ -67,7 +67,7 @@ function Register() {
     }
 
     if (!nicknameRegex.test(nickname)) {
-      setNicknameError('올바른 닉네임 형식이 아닙니다. [한글, 대소문자로 2 ~ 10자]');
+      setNicknameError('올바른 닉네임 형식이 아닙니다. [한글, 영문 대소문자로 2 ~ 10자]');
       return;
     } else {
       setNicknameError('');
@@ -99,7 +99,6 @@ function Register() {
     <div className={styles.register_page}>
       <h2>회원가입</h2>
       <form onSubmit={handleSubmit}>
-
         <div className={styles.input_group}>
           <label htmlFor="userId">아이디</label>
           <input

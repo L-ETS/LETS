@@ -263,13 +263,16 @@ app.get('/user/fetchInfo', isAuthenticated, async (req, res) => { //마이페이
   }
 })
 
-app.put('/user/editmyinform',isAuthenticated,  async (req, res) => { //마이페이지 수정
+app.put('/user/editmyinform',  async (req, res) => { //마이페이지 수정
+  
+  const {userId} = req.params;
   const { nickname, email, wideRegion, detailRegion} = req.body;
   // const hashedPassword = await bcrypt.hash(body.password, saltRounds);
 
   try{
     const query = 'UPDATE user SET nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE userId = ?';
-    const [result] = await pool2.execute(nickname, email, wideRegion, detailRegion, [req.session.user]);
+    const params = [nickname, email, wideRegion, detailRegion,userId];
+    const [result] = await pool2.execute(query, params)
 
     if (result.affectedRows > 0) {
       res.status(200).json({ message: 'MyPage update successfully', user: result[0] });
@@ -283,23 +286,25 @@ app.put('/user/editmyinform',isAuthenticated,  async (req, res) => { //마이페
   }
 })
 
-app.post('', isAuthenticated, async (req, res) => { //비밀번호 체크
+app.post('/api/check-password', isAuthenticated, async (req, res) => { //비밀번호 체크
+
+  const {password} = req.body;
+
   try {
     const query = 'SELECT password FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
 
     if (result.length > 0) {
-      if (!bcrypt.compareSync(body.password, result[0].password)) {
-        connection.release();
-        return res.status(401).json({ error: 'Invalid username or password' });
+      if (!bcrypt.compareSync(password, result[0].password)) {
+        return res.status(401).json({ message: '비밀번호가 일치하지 않거나 해당하는 회원이 없습니다.' });
       }
       res.status(200).json({ message: 'Password check successfully' });
     } else {
-      res.status(404).json({ message: 'User not found.' });
+      res.status(404).json({ message: '해당하는 회원이 없습니다.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'error', error: error.message });
   }
 })
 
@@ -311,7 +316,7 @@ app.delete('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈
     if (result.affectedRows > 0) {
       res.status(200).json({ message: 'User delete successfully' });
     } else {
-      res.status(404).json({ message: 'User not found.' });
+      res.status(404).json({ message: '해당하는 회원을 찾을 수 없습니다.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
@@ -720,18 +725,14 @@ app.get('', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
   }
 })
 
-app.get('', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
-  const p_state = req.body.p_state;
+app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
+  const p_state = req.params.p_state;
 
   try{
     const query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
     const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    res.status(200).json({ message: 'Post list successfully', postData : result });
     
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Post list successfully', postData : result });
-    } else {
-      res.status(404).json({ message: 'Post not found.' });
-    }
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
