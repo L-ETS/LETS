@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useContext } from "react";
 import Button from 'react-bootstrap/Button';
-import styles from '../styles/EditMyInform.module.css'; 
+import styles from '../styles/MyInform.module.css';
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import regions from "./regionData";
 import UserContext from "../contexts/UserContext";
 
-function EditMyInform({user}) {
+function EditMyInform({...user}) {
     const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디    
     const [email, setEmail] = useState('');
     const [nickname, setNickname] = useState('');
@@ -37,19 +37,18 @@ function EditMyInform({user}) {
         setEmailError('');
     }
     
-
     try {
-        const response = await axios.put(`/user/:userId/editmyinform`, {
+        const response = await axios.put(`/user/editmyinform`, {
             email: email,
             nickname: nickname,
             wideRegion: wideRegion,
             detailRegion: detailRegion
         });
         
-        setEmail(user.map(e => e.email === user.email ? {...e, email: email} : e));
-        setNickname(user.map(n => n.nickname === user.nickname ? {...n, nickname: nickname} : n));
-        setWideRegion(user.map(wr => wr.wideRegion === user.wideRegion ? {...wr, wideRegion: wideRegion} : wr));
-        setDetailRegion(user.map(dr => dr.detailRegion === user.detailRegion ? {...dr, detailRegion: detailRegion} : dr));
+        setEmail(email);
+        setNickname(nickname);
+        setWideRegion(wideRegion);
+        setDetailRegion(detailRegion);
 
         console.log(response.data);
         alert('회원정보 수정 완료');
@@ -69,20 +68,19 @@ function EditMyInform({user}) {
                 </tr>
                 <tr>
                     <td className={styles.tableBold}>비밀번호</td>
-                    <td><input type="password" placeholder=" "/></td>
+                    <td><input type="password" placeholder="비밀번호를 입력하세요."/></td>
                 </tr>
                 <tr>
                     <td className={styles.tableBold}>비밀번호 확인</td>
-                    <td><input type="password" placeholder=" "/></td>
+                    <td><input type="passwordCheck" placeholder="비밀번호를 확인하세요."/></td>
                 </tr>
 
               <tr className={styles.input_group}>
                 <td className={styles.tableBold}>닉네임 </td>
                 <input
                   type="text"
-                  id="nickname"
                   value={nickname}
-                  placeholder=" "
+                  placeholder={user.nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   />
                 {nicknameError && <p>{nicknameError}</p>}
@@ -92,9 +90,8 @@ function EditMyInform({user}) {
                 <td className={styles.tableBold}>이메일</td>
                 <input
                   type="email"
-                  id="email"
                   value={email}
-                  placeholder=" "
+                  placeholder={user.email}
                   onChange={(e) => setEmail(e.target.value)}
                   />
                  {emailError && <p>{emailError}</p>}
@@ -148,8 +145,8 @@ function EditMyInform({user}) {
               </tr>
                 {regionError && <p>{regionError}</p>}
               </table>
-            </form>
               <Button variant="outline-success" type="submit" onClick={goEditMyPage}>수정</Button>
+            </form>
           </div>
         );
 }

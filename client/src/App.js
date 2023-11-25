@@ -24,12 +24,11 @@ function App() {
         <Route path='mypost' element={<MyPost/>}/>
         <Route path='bookmark' element={<BookMark/>}/>
         <Route path='myinform' element={<MyInform/>}/>
+        <Route path='editmyinform' element={<EditMyInform/>}/>
       </Route> 
       <Route path='/posts/upload' element={<Upload/>} />
       <Route path='/posts/:postId' element={<PostDetail/>}/>
       <Route path='/posts/:postId/edit' element={<EditPost/>}/>
-      <Route path='/posts/editmyinform' element={<EditMyInform/>}/>
-
     </Routes>
   );
 }
