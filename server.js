@@ -263,14 +263,15 @@ app.get('/user/fetchInfo', isAuthenticated, async (req, res) => { //마이페이
   }
 })
 
-app.put('/user/editmyinform',  async (req, res) => { //마이페이지 수정
+app.put('/user/editmyinform',isAuthenticated,  async (req, res) => { //마이페이지 수정
   
-  const { nickname, email, wideRegion, detailRegion} = req.body;
-  // const hashedPassword = await bcrypt.hash(password, saltRounds);
+  const { password, nickname, email, wideRegion, detailRegion} = req.body;
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   try{
-    const query = 'UPDATE user SET nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE userId = ?';
-    const params = [ nickname, email, wideRegion, detailRegion, req.session.user];
+    const query = 'UPDATE user SET password =?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE userId = ?';
+    const params = [ hashedPassword, nickname, email, wideRegion, detailRegion, req.session.user];
     const [result] = await pool2.execute(query, params)
 
     if (result.affectedRows > 0) {
