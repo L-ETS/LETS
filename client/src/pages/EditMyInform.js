@@ -138,7 +138,6 @@ function EditMyInform({...user}) {
               <tr className={styles.input_group}>
                 <td className={styles.tableBold}>거래 희망 지역</td>
                 <select 
-                  value={wideRegion}
                   onChange={(e) => {
                       setWideRegion(e.target.value);
                       setDetailRegion('');
@@ -152,14 +151,13 @@ function EditMyInform({...user}) {
                         }
                     }}
                     >
-                  <option value={wideRegion}>선택</option>
+                  <option value=''>선택</option>
                   {Object.keys(regions).map(region => (
                       <option key={region} value={region}>{region}</option>
                       ))}
                 </select>
       
                 <select 
-                  value={detailRegion}
                   onChange={(e) => {
                       setDetailRegion(e.target.value)
                     }}
@@ -172,7 +170,7 @@ function EditMyInform({...user}) {
                         }
                     }}
                     disabled={!wideRegion}>
-                  <option value={detailRegion}>선택</option>
+                  <option value=''>선택</option>
                   {
                       wideRegion ?
                       regions[wideRegion].map(region => (
