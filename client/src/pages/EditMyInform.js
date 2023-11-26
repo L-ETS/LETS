@@ -64,6 +64,13 @@ function EditMyInform({...user}) {
     } else {
         setEmailError('');
     }
+
+    if (!wideRegion || !detailRegion) {
+      setRegionError('지역을 선택해주세요.');
+      return;
+    } else {
+      setRegionError('');
+    }
     
     try {
         const response = await axios.put(`/user/editmyinform`,requestData);
