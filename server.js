@@ -310,13 +310,13 @@ app.post('/api/check-password', isAuthenticated, async (req, res) => { //비밀�
 
 app.delete('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈퇴
   try {
-    const query = 'DELETE FROM user WHERE userId = ?';
-    const [result] = await pool2.execute(query, [req.session.user]);
+    const query = 'UPDATE user SET active = ?, deleteAt = ? WHERE userId = ?';
+    const [result] = await pool2.execute(query, [false, new Date(),req.session.user]);
 
     if (result.affectedRows > 0) {
       res.status(200).json({ message: 'User delete successfully' });
     } else {
-      res.status(404).json({ message: '해당하는 회원을 찾을 수 없습니다.' });
+      res.status(404).json({ message: 'User not found.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
