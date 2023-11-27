@@ -743,7 +743,7 @@ app.get('/postList/:userId', isAuthenticated, async (req, res) => {
   
   try {
     const query = 'SELECT * FROM post WHERE userId = ?';
-    const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    const [result] = await pool2.execute(query, [userId]);
     res.status(200).json({ message: 'Post list successfully', postData : result });
 
   } catch (error) {
