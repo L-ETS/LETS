@@ -738,6 +738,20 @@ app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 �
   }
 })
 
+app.get('/postList/:userId', isAuthenticated, async (req, res) => {
+  const {userId} = req.params;
+  
+  try {
+    const query = 'SELECT * FROM post WHERE userId = ?';
+    const [result] = await pool2.execute(query, [userId]);
+    res.status(200).json({ message: 'Post list successfully', postData : result });
+
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
 app.get('/user/likepost', isAuthenticated, (req, res) => { //유저 좋아요 게시글 조회
   let sql = 'SELECT postId FROM likepost WHERE userId = ?';
   let params = [req.session.user];

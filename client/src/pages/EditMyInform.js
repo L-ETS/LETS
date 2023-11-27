@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
 import styles from '../styles/MyInform.module.css';
 import { useNavigate } from 'react-router-dom';
@@ -6,7 +6,7 @@ import axios from "axios";
 import regions from "./regionData";
 import UserContext from "../contexts/UserContext";
 
-function EditMyInform({...user}) {
+function EditMyInform() {
     const { logginedUserId } = useContext(UserContext); //현재 로그인된 유저의 아이디
     const [password, setPassword] = useState('');
     const [passwordCheck, setPasswordCheck] = useState('');    
@@ -21,7 +21,24 @@ function EditMyInform({...user}) {
     const [emailError, setEmailError] = useState('');
     const [regionError, setRegionError] = useState('');
     const routing =  useNavigate();
-    
+
+    const UserInfo = async () => {
+      try {
+        const response = await axios.get(`/user/fetchInfo`);
+        setEmail(response.data.user.email); 
+        setNickname(response.data.user.nickname);
+        setWideRegion(response.data.user.wideRegion);
+        setDetailRegion(response.data.user.detailRegion);
+      } catch (error) {
+        console.log(error);
+        alert('오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+      }
+    }
+
+    useEffect(()=>{
+      UserInfo();
+    },[])
+
     const requestData = {
         password: password,
         nickname: nickname,
@@ -29,7 +46,7 @@ function EditMyInform({...user}) {
         wideRegion: wideRegion,
         detailRegion: detailRegion
       };
-    
+
     const goEditMyPage = async (e) => {
     e.preventDefault();
 
@@ -98,7 +115,7 @@ function EditMyInform({...user}) {
                     <td>{logginedUserId}</td>
                 </tr>
                 <tr>
-                    <td className={styles.tableBold}>비밀번호</td>
+                    <td className={styles.tableBold}>새 비밀번호 </td>
                 <input
                     type="password"
                     id="password"
@@ -109,7 +126,7 @@ function EditMyInform({...user}) {
                 {passwordError && <p>{passwordError}</p>}
                 </tr>
                 <tr>
-                    <td className={styles.tableBold}>비밀번호 확인</td>
+                    <td className={styles.tableBold}>새 비밀번호 확인</td>
                 <input
                     type="password"
                     id="passwordCheck"
@@ -125,7 +142,6 @@ function EditMyInform({...user}) {
                 <input
                   type="text"
                   value={nickname}
-                  placeholder={user.nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   />
                 {nicknameError && <p>{nicknameError}</p>}
@@ -136,7 +152,6 @@ function EditMyInform({...user}) {
                 <input
                   type="email"
                   value={email}
-                  placeholder={user.email}
                   onChange={(e) => setEmail(e.target.value)}
                   />
                  {emailError && <p>{emailError}</p>}
@@ -147,18 +162,21 @@ function EditMyInform({...user}) {
                 <select 
                   onChange={(e) => {
                       setWideRegion(e.target.value);
-                      setDetailRegion('');
+                      setDetailRegion('선택');
                   }}
                   onBlur={()=>{
                       if(!wideRegion || !detailRegion) {
                           setRegionError('지역을 선택해주세요.')
+                          return;
+                        } else if (detailRegion === '선택') {
+                          setRegionError('상세 지역을 선택해주세요.')
                           return;
                         } else {
                             setRegionError('');
                         }
                     }}
                     >
-                  <option value=''>선택</option>
+                  <option value=''>{wideRegion}</option>
                   {Object.keys(regions).map(region => (
                       <option key={region} value={region}>{region}</option>
                       ))}
@@ -169,15 +187,18 @@ function EditMyInform({...user}) {
                       setDetailRegion(e.target.value)
                     }}
                     onBlur={()=>{
-                        if(!wideRegion || !detailRegion) {
+                        if(!wideRegion) {
                             setRegionError('지역을 선택해주세요.')
+                            return;
+                        } else if (detailRegion === '선택') {
+                          setRegionError('상세 지역을 선택해주세요.')
                             return;
                         } else {
                             setRegionError('');
                         }
                     }}
                     disabled={!wideRegion}>
-                  <option value=''>선택</option>
+                  <option value=''>{detailRegion}</option>
                   {
                       wideRegion ?
                       regions[wideRegion].map(region => (
@@ -188,7 +209,7 @@ function EditMyInform({...user}) {
               </tr>
                 {regionError && <p>{regionError}</p>}
               </table>
-              <Button variant="outline-success" type="submit" onClick={goEditMyPage}>수정</Button>
+              <Button variant="outline-success" type="submit" onClick={goEditMyPage} disabled={regionError}>수정</Button>
             </form>
           </div>
         );
