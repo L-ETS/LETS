@@ -928,13 +928,13 @@ app.post('/chat/:user1/:user2/:postId', async (req, res) => {
 app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
   const logginedUserId = req.params.logginedUserId;
   const uuid = req.params.uuid;
-
   try {
-    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND BIN_TO_UUID(room_uuid,0) = ?';
+    const selectQuery = 'SELECT * from chatroom, post WHERE (user1 = ? OR user2 = ?) AND BIN_TO_UUID(room_uuid,0) = ? and chatroom.postId = post.postId';
     const [rows] = await pool2.execute(selectQuery, [logginedUserId, logginedUserId, uuid]);
-    
     if (rows.length > 0) {
-      res.status(200).json({ exist: true });
+      let opponentUserId;
+      rows[0].user1 === rows[0].userId ? opponentUserId = rows[0].user2 : opponentUserId = rows[0].user1;
+      res.status(200).json({ exist: true, oUserId: opponentUserId});
     } else {
       res.status(401).json({ exist: false });
     }
@@ -966,7 +966,6 @@ app.get('/posts/uuid/:uuid', async (req, res) => {
 
         if(postRows.length > 0) {
           res.status(200).json({post: postRows[0]});
-          
         } else {
           res.status(400);
         }

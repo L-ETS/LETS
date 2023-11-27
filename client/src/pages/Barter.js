@@ -168,7 +168,7 @@ function Barter({setIsLogin}) {
                 //수정일을 표기하기.
                 return (
                   <ListGroup.Item key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
-                    <Badge bg="secondary">{post.p_state}</Badge>
+                    <Badge bg="secondary">{post.p_state === "NULL" ? "거래 가능" : "거래 완료"}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</p>
                     <p>작성자: {post.userId}</p>
@@ -181,7 +181,7 @@ function Barter({setIsLogin}) {
                 //작성일을 표기하기.
                 return (
                   <ListGroup.Item key={index} onClick={()=>{navigate(`/posts/${post.postId}`);}}>
-                    <Badge bg="secondary">{post.p_state}</Badge>
+                    <Badge bg="secondary">{post.p_state === "NULL" ? "거래 가능" : "거래 완료"}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</p>
                     <p>작성자: {post.userId}</p>

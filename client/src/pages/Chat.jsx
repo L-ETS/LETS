@@ -7,6 +7,8 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import Spinner from 'react-bootstrap/Spinner';
 import '../styles/Chat.modules.css';
+import Dropdown from 'react-bootstrap/Dropdown';
+import DropdownButton from 'react-bootstrap/DropdownButton';
 
  //댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
@@ -18,7 +20,9 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [postId, setPostId] = useState('');
     const [postTitle, setPostTitle] = useState('');
     const [postP_state, setPostP_state] = useState('');
+    const [postUserId ,setPostUserId] = useState('');
     const [imageUrl, setImageUrl] = useState('');
+    const [opponentUserId, setOpponentUserId] = useState('');
     const [isShow, setIsShow] = useState(true);    //해당 페이지 보여줄지 여부를 결정.
     const [isLoading, setisLoding] = useState(true);
 
@@ -44,7 +48,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         try {
             const response = await axios.get(`/chat/authenticate/${logginedUserId}/${room_uuid}`);
             const exist = response.data.exist;
-
+            //console.log(response.data.oUserId);
+            setOpponentUserId(response.data.oUserId);
             if(exist) setIsShow(true);
             else setIsShow(false);
         } catch (error) {
@@ -60,8 +65,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             const postData = response.data.post;
             setPostId(postData.postId);
             setPostTitle(postData.title);
-            setPostP_state(postData.p_state);
-
+            setPostP_state(postData.p_state === "NULL" ? "거래 가능" : "거래 완료");
+            setPostUserId(postData.userId);
         } catch (error) {
             console.log(error);
             alert('에러 발생. 다시 시도해주세요.');
@@ -82,10 +87,25 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         }
     }
 
+    const handlePstate = async (eventKey) => {
+    
+        try {
+          const response = await axios.put(`/post/edit/pstate`, {
+            postId: postId,
+            p_state: eventKey
+          });
+          setPostP_state(eventKey === "NULL" ? "거래 가능" : "거래 완료");
+          
+        } catch (error) {
+          alert('거래 상태 바꾸기에 실패했습니다.');
+          console.log(error);
+        }
+    }
+
    // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
    //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
-        // chatAuthenticate();
+        chatAuthenticate();
         fetchPostData();
         // fetchImage();
         const queryMessage = query(messageRef, where("room", "==", room_uuid), orderBy("createAt", "asc"));     
@@ -108,10 +128,14 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         return(
             <div className="message">
                 <PostPreview title={postTitle} p_state={postP_state} postId={postId} imageUrl={imageUrl} isLoading={isLoading}/>
+                <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
+                  <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
+                  <Dropdown.Item eventKey={opponentUserId}>거래 완료</Dropdown.Item>
+                </DropdownButton>
                 <main>
                     {messageList.map((msg,idx) => (
                         <div key={idx} className={`messageList ${msg.user === logginedUserId ? 'sent' : 'received'}`}>
-                        <p>{msg.user} : {msg.text}</p>
+                            <p>{msg.user} : {msg.text}</p>
                         </div>
                         ))}
                 </main>
