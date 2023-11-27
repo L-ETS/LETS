@@ -143,8 +143,8 @@ app.post('/user/register', async (req, res) => {
 app.post('/user/login', (req, res) => {
   const body = { ...req.body };
 
-  let sql = 'SELECT * FROM USER WHERE userId = ?';
-  let params = [body.userId];
+  let sql = 'SELECT * FROM USER WHERE userId = ? and active = ?';
+  let params = [body.userId, 1];
 
   pool.getConnection((error, connection) => {
     if (error) {
