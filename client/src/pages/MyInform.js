@@ -85,7 +85,7 @@ function WithdrawalModal({showWithDrawalModal, setShowWithDrawalModal}) {
       
       if(checkPwResopnse.status === 200) {
 
-        const withdrawalResponse = await axios.delete('/user/withdrawal');
+        const withdrawalResponse = await axios.put('/user/withdrawal');
         
         if(withdrawalResponse.status === 200) {
           alert('언젠간 또 만나길,,');
@@ -99,8 +99,6 @@ function WithdrawalModal({showWithDrawalModal, setShowWithDrawalModal}) {
       }
       
     } catch (error) {
-      //DB 수정이 끝나고 코드 잘 돌아갈 때는 자세한 에러메시지는 클라이언트에게 보여주지 않도록 수정할 것.
-      alert(`회원탈퇴 실패: ${JSON.stringify(error.response)}`);
       console.error(error);
     }
   }
