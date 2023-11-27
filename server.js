@@ -308,7 +308,7 @@ app.post('/api/check-password', isAuthenticated, async (req, res) => { //비밀�
   }
 })
 
-app.delete('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈퇴
+app.put('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈퇴
   try {
     const query = 'UPDATE user SET active = ?, deleteAt = ? WHERE userId = ?';
     const [result] = await pool2.execute(query, [false, new Date(),req.session.user]);
