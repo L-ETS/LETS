@@ -1,0 +1,43 @@
+.login_page {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.input_group {
+  margin-bottom: 20px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  flex-grow: 1; /* This allows the buttons to grow and occupy available space */
+  margin-right: 5px; /* Spacing between buttons */
+}
+
+button:last-child {
+  margin-right: 0; /* Ensures the last button doesn't have extra margin */
+}
+
+button:hover {
+  background-color: #0056b3;
+}

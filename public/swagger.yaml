@@ -1,0 +1,454 @@
+openapi: 3.0.0
+info:
+  description:
+    api명세
+  version:  "1.0.0"
+  title:  swagger
+servers:
+  - url:  'http://localhost:8080/'
+tags:
+  - name: posts
+  - name: comment
+  - name: user
+paths:
+  /posts:
+    get:
+      tags:
+        - posts
+      summary: 모든 게시물 조회
+      responses:
+        '200':
+          description: 성공적으로 게시물을 조회했습니다.
+    post:
+      tags:
+        - posts
+      summary: 새로운 게시물 작성
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 게시물 제목
+                content:
+                  type: string
+                  description: 게시물 내용
+                author:
+                  type: string
+                  description: 게시물 작성자
+              required:
+                - title
+                - content
+                - author
+      responses:
+        '201':
+          description: 게시물이 성공적으로 작성되었습니다.
+  /posts/criteria:
+    get:
+      tags:
+        - posts
+      summary: 게시물 상태 분류
+      operationId: criteria
+      parameters:
+        - name: criteria
+          in: query
+          description: 게시물 상태 분류
+          required: true
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - 거래 가능
+                - 거래 진행 중
+                - 거래 완료
+              default: 거래 가능
+  /posts/{postId}:
+    get:
+      tags:
+        - posts
+      summary: 특정 게시물 조회
+      parameters:
+        - name: postId
+          in: path
+          description: 조회할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공적으로 게시물을 조회했습니다.
+        '404':
+          description: 해당 ID의 게시물을 찾을 수 없습니다.
+    put:
+      tags:
+        - posts
+      summary: 게시물 수정
+      parameters:
+        - name: postId
+          in: path
+          description: 수정할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: 게시물 제목
+                content:
+                  type: string
+                  description: 게시물 내용
+              required:
+                - title
+                - content
+      responses:
+        '200':
+          description: 게시물이 성공적으로 수정되었습니다.
+        '404':
+          description: 해당 ID의 게시물을 찾을 수 없습니다.
+    delete:
+      tags:
+        - posts
+      summary: 게시물 삭제
+      parameters:
+        - name: postId
+          in: path
+          description: 삭제할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 게시물이 성공적으로 삭제되었습니다.
+        '404':
+          description: 해당 ID의 게시물을 찾을 수 없습니다.
+  /posts/{postId}/comments:
+    get:
+      tags:
+        - comment
+      summary: 특정 게시물의 모든 댓글 조회
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 조회할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공적으로 댓글을 조회했습니다.
+  /posts/{postId}/comments/{commentId}:
+    get:
+      tags:
+        - comment
+      summary: 특정 댓글 조회
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 조회할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+        - name: commentId
+          in: path
+          description: 조회할 댓글의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 성공적으로 댓글을 조회했습니다.
+        '404':
+          description: 해당 ID의 게시물 또는 댓글을 찾을 수 없습니다.
+    post:
+      tags:
+        - comment
+      summary: 새로운 댓글 작성
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 작성할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: 댓글 내용
+                author:
+                  type: string
+                  description: 댓글 작성자
+              required:
+                - content
+                - author
+      responses:
+        '201':
+          description: 댓글이 성공적으로 작성되었습니다.
+    put:
+      tags:
+        - comment
+      summary: 댓글 수정
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 수정할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+        - name: commentId
+          in: path
+          description: 수정할 댓글의 ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content:
+                  type: string
+                  description: 댓글 내용
+              required:
+                - content
+      responses:
+        '200':
+          description: 댓글이 성공적으로 수정되었습니다.
+        '404':
+          description: 해당 ID의 게시물 또는 댓글을 찾을 수 없습니다.
+    delete:
+      tags:
+        - comment
+      summary: 댓글 삭제
+      parameters:
+        - name: postId
+          in: path
+          description: 댓글을 삭제할 게시물의 ID
+          required: true
+          schema:
+            type: integer
+        - name: commentId
+          in: path
+          description: 삭제할 댓글의 ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: 댓글이 성공적으로 삭제되었습니다.
+        '404':
+          description: 해당 ID의 게시물 또는 댓글을 찾을 수 없습니다.
+  /user:
+    post:
+      tags:
+        - user
+      summary: Create user
+      description: This can only be done by the logged in user.
+      operationId: createUser
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Created user object
+        required: true
+  /user/login:
+    get:
+      tags:
+        - user
+      summary: Logs user into the system
+      operationId: loginUser
+      parameters:
+        - name: username
+          in: query
+          description: The user name for login
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          description: The password for login in clear text
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+  '/user/{username}':
+    get:
+      tags:
+        - user
+      summary: Get user by user name
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched. Use user1 for testing.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+    put:
+      tags:
+        - user
+      summary: Updated user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      parameters:
+        - name: username
+          in: path
+          description: name that need to be updated
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid user supplied
+        '404':
+          description: User not found
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        description: Updated user object
+        required: true
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+components:
+  schemas:
+    Page:
+      type: object
+      required:
+        - postId
+        - userId
+        - title
+        - content
+        - view_count
+        - create_date
+        - update_date
+        - image
+      properties:
+        postId:
+          type: integer
+          format: int32
+        userId:
+          type: string
+        title:
+          type: string
+          format: text
+        view_count:
+          type: integer
+          format: int32
+        create_date:
+          type: string
+          format: date-time
+          example: '2023-10-10T22:28:33'
+        update_time:
+          type: string
+          format: date-time
+          example: '2023-10-11T08:11:56'
+        image:
+          type: image
+    User:
+      type: object
+      properties:
+        userId:
+          type: string
+        password:
+          type: string
+        email:
+          type: string
+        nickname:
+          type: string
+        region:
+          type: string
+    requestBodies:
+       UserArray:
+        content:
+          application/json:
+             schema:
+              type: array
+              items:
+                $ref: '#/components/schema/User'
+        description: List of user object
+        required: true
+    
+        
+        
