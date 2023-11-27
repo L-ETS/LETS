@@ -314,7 +314,14 @@ app.put('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈퇴
     const [result] = await pool2.execute(query, [false, new Date(),req.session.user]);
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'User delete successfully' });
+      
+      req.session.destroy(err => {
+        if (err) {
+          return res.status(500).json({ success: false, message: 'Failed to logout' });
+        }
+        res.clearCookie('session-cookie'); // Clear the session cookie
+        res.status(200).json({ success: true, message: 'Logged out and withdrawal' });
+      });
     } else {
       res.status(404).json({ message: 'User not found.' });
     }
