@@ -143,8 +143,8 @@ app.post('/user/register', async (req, res) => {
 app.post('/user/login', (req, res) => {
   const body = { ...req.body };
 
-  let sql = 'SELECT * FROM USER WHERE userId = ?';
-  let params = [body.userId];
+  let sql = 'SELECT * FROM USER WHERE userId = ? and active = ?';
+  let params = [body.userId, 1];
 
   pool.getConnection((error, connection) => {
     if (error) {
@@ -247,13 +247,13 @@ app.get('/posts', (req, res) => {
   })
 })
 
-app.get('/user/mypage', isAuthenticated, async (req, res) => { //마이페이지 조회
+app.get('/user/fetchInfo', isAuthenticated, async (req, res) => { //마이페이지 조회
   try {
     const query = 'SELECT * FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
 
     if (result.length > 0) {
-      res.status(200).json({ message: 'MyPage load successfully', p_state: result[0] });
+      res.status(200).json({ message: 'MyPage load successfully', user: result[0] });
     } else {
       res.status(404).json({ message: 'User not found.' });
     }
@@ -263,16 +263,19 @@ app.get('/user/mypage', isAuthenticated, async (req, res) => { //마이페이지
   }
 })
 
-app.put('', isAuthenticated, async (req, res) => { //마이페이지 수정
-  const { password, nickname, email, wideRegion, detailRegion} = {...req.body};
-  const hashedPassword = await bcrypt.hash(body.password, saltRounds);
+app.put('/user/editmyinform',isAuthenticated,  async (req, res) => { //마이페이지 수정
+  
+  const { password, nickname, email, wideRegion, detailRegion} = req.body;
+  const saltRounds = 10;
+  const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   try{
-    const query = 'UPDATE user SET password = ?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE postId = ?';
-    const [result] = await pool2.execute(hashedPassword, nickname, email, wideRegion, detailRegion, [req.session.user]);
+    const query = 'UPDATE user SET password =?, nickname = ?, email = ?, wideRegion = ?, detailRegion = ? WHERE userId = ?';
+    const params = [ hashedPassword, nickname, email, wideRegion, detailRegion, req.session.user];
+    const [result] = await pool2.execute(query, params)
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'MyPage update successfully', p_state: result[0] });
+      res.status(200).json({ message: 'MyPage update successfully', user: result[0] });
     } else {
       res.status(404).json({ message: 'User not found.' });
     }
@@ -283,33 +286,42 @@ app.put('', isAuthenticated, async (req, res) => { //마이페이지 수정
   }
 })
 
-app.post('', isAuthenticated, async (req, res) => { //비밀번호 체크
+app.post('/api/check-password', isAuthenticated, async (req, res) => { //비밀번호 체크
+
+  const {password} = req.body;
+
   try {
     const query = 'SELECT password FROM user WHERE userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
 
     if (result.length > 0) {
-      if (!bcrypt.compareSync(body.password, result[0].password)) {
-        connection.release();
-        return res.status(401).json({ error: 'Invalid username or password' });
+      if (!bcrypt.compareSync(password, result[0].password)) {
+        return res.status(401).json({ message: '비밀번호가 일치하지 않거나 해당하는 회원이 없습니다.' });
       }
       res.status(200).json({ message: 'Password check successfully' });
     } else {
-      res.status(404).json({ message: 'User not found.' });
+      res.status(404).json({ message: '해당하는 회원이 없습니다.' });
     }
   } catch (error) {
     console.error('The error is: ', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ message: 'error', error: error.message });
   }
 })
 
-app.delete('', isAuthenticated, async (req, res)=>{ //회원 탈퇴
+app.put('/user/withdrawal', isAuthenticated, async (req, res)=>{ //회원 탈퇴
   try {
-    const query = 'DELETE FROM user WHERE userId = ?';
-    const [result] = await pool2.execute(query, [req.session.user]);
+    const query = 'UPDATE user SET active = ?, deleteAt = ? WHERE userId = ?';
+    const [result] = await pool2.execute(query, [false, new Date(),req.session.user]);
 
     if (result.affectedRows > 0) {
-      res.status(200).json({ message: 'User delete successfully' });
+      
+      req.session.destroy(err => {
+        if (err) {
+          return res.status(500).json({ success: false, message: 'Failed to logout' });
+        }
+        res.clearCookie('session-cookie'); // Clear the session cookie
+        res.status(200).json({ success: true, message: 'Logged out and withdrawal' });
+      });
     } else {
       res.status(404).json({ message: 'User not found.' });
     }
@@ -704,11 +716,10 @@ app.put('/post/edit/pstate', async (req, res) => { //게시글 상태 전환
   }
 })
 
-app.get('', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
+app.get('/user/getlikeposts', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
   try{
     const query = 'SELECT p.*, l.* FROM post AS p JOIN likepost AS l ON p.postId = l.postId AND l.userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
-    
     if (result.length > 0) {
       res.status(200).json({ message: 'Post list successfully', postData : result });
     } else {
@@ -720,18 +731,28 @@ app.get('', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
   }
 })
 
-app.get('', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
-  const p_state = req.body.p_state;
+app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
+  const p_state = req.params.p_state;
 
   try{
     const query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
     const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    res.status(200).json({ message: 'Post list successfully', postData : result });
     
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Post list successfully', postData : result });
-    } else {
-      res.status(404).json({ message: 'Post not found.' });
-    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('/postList/:userId', isAuthenticated, async (req, res) => {
+  const {userId} = req.params;
+  
+  try {
+    const query = 'SELECT * FROM post WHERE userId = ?';
+    const [result] = await pool2.execute(query, [userId]);
+    res.status(200).json({ message: 'Post list successfully', postData : result });
+
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
@@ -902,7 +923,33 @@ app.delete('/comment/delete', async (req, res) => {
   }
 });
 
-app.post('/chat/:user1/:user2/:postId', async (req, res) => {
+app.get('', async (req, res) => { //랜덤 게시물 출력
+  try {
+    const query = 'SELECT * FROM post WHERE p_state = NULL ORDER BY RAND() LIMIT 1';
+    const [result] = await pool2.execute(query);
+
+    if (result.length > 0 && result[0].postId !== undefined) {
+      try {
+        const query2 = 'SELECT * FROM image WHERE postId = ?';
+        const [result2] = await pool2.execute(query2, [result[0].postId]);
+    
+        if (result2.length > 0) {
+          res.status(200).json({ message: 'Random Post load successfully', post: result, image: result2 });
+        } else {
+          res.status(404).json({ message: 'Image not found.' });
+        }
+      } catch (error) {
+        console.error('The error is: ', error);
+        res.status(500).json({ error: error.message });
+      }
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});app.post('/chat/:user1/:user2/:postId', async (req, res) => {
   try {
     const { user1, user2, postId } = req.params;
     const query = 'SELECT BIN_TO_UUID(room_uuid,0) AS UUID FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';

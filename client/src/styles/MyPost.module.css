@@ -1,0 +1,14 @@
+.container {
+    display: grid;
+}
+
+.postStatus {
+    margin-left: 20px;
+}
+
+.content {
+    border: 1px solid lightgrey;
+    margin-top: 20px;
+    margin-left: 20px;
+    padding: 20px;
+}
