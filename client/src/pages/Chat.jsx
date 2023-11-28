@@ -132,8 +132,6 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         return(
     <div className="message">
                 <PostPreview title={postTitle} p_state={postP_state} postId={postId} imageUrl={imageUrl} isLoading={isLoading}/>
-    {logginedUserId !== opponentUserId ?
-    <div>
                 <Modal show={showAlert} onHide={()=>{setShowAlert(false)}}>
                     <Modal.Header>
                         <Modal.Title>거래를 완료하겠습니까?</Modal.Title>
@@ -150,6 +148,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
                         }}>거래 완료!</Button>
                     </Modal.Footer>
                 </Modal>
+                {logginedUserId !== opponentUserId ?
+                <div>
                 <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
                   <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
                   <Dropdown.Item eventKey="NULL" onClick={()=>setShowAlert(true)}>거래 완료</Dropdown.Item>
