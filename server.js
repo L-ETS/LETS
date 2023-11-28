@@ -924,7 +924,33 @@ app.delete('/comment/delete', async (req, res) => {
   }
 });
 
+app.get('', async (req, res) => { //랜덤 게시물 출력
+  try {
+    const query = 'SELECT * FROM post WHERE p_state = NULL ORDER BY RAND() LIMIT 1';
+    const [result] = await pool2.execute(query);
 
+    if (result.length > 0 && result[0].postId !== undefined) {
+      try {
+        const query2 = 'SELECT * FROM image WHERE postId = ?';
+        const [result2] = await pool2.execute(query2, [result[0].postId]);
+    
+        if (result2.length > 0) {
+          res.status(200).json({ message: 'Random Post load successfully', post: result, image: result2 });
+        } else {
+          res.status(404).json({ message: 'Image not found.' });
+        }
+      } catch (error) {
+        console.error('The error is: ', error);
+        res.status(500).json({ error: error.message });
+      }
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
 //이 코드는 반드시 가장 하단에 놓여야 함. 고객에 URL란에 아무거나 입력하면 index.html(리액트 프로젝트 빌드파일)을 전해달란 의미.
 app.get('*', function (request, response) {
