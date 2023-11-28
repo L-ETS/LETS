@@ -3,12 +3,14 @@ import { addDoc, collection, serverTimestamp, query, onSnapshot, where, orderBy 
 import { db } from "../config/firebase";
 import UserContext from "../contexts/UserContext";
 import PostPreview from "../components/PostPreview";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Spinner from 'react-bootstrap/Spinner';
 import '../styles/Chat.modules.css';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import Modal from 'react-bootstrap/Modal';  
+import Button from 'react-bootstrap/Button';
 
  //댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
@@ -25,6 +27,8 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [opponentUserId, setOpponentUserId] = useState('');
     const [isShow, setIsShow] = useState(true);    //해당 페이지 보여줄지 여부를 결정.
     const [isLoading, setisLoding] = useState(true);
+    const [showAlert, setShowAlert] = useState(false);
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -128,10 +132,27 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         return(
             <div className="message">
                 <PostPreview title={postTitle} p_state={postP_state} postId={postId} imageUrl={imageUrl} isLoading={isLoading}/>
+                <Modal show={showAlert} onHide={()=>{setShowAlert(false)}}>
+                    <Modal.Header>
+                        <Modal.Title>거래를 완료하겠습니까?</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>교환이 성사되었다면 완료 버튼을 눌러주세요!<br />이후 거래가 종료됩니다.
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button onClick={()=>setShowAlert(false)}>취소</Button>
+                        <Button onClick={() => {
+                            handlePstate(opponentUserId);
+                            setShowAlert(false);
+                            alert('수고하셨습니다,, 행복하세요');
+                            navigate('/');
+                        }}>거래 완료!</Button>
+                    </Modal.Footer>
+                </Modal>
                 <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
                   <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
-                  <Dropdown.Item eventKey={opponentUserId}>거래 완료</Dropdown.Item>
+                  <Dropdown.Item eventKey="NULL" onClick={()=>setShowAlert(true)}>거래 완료</Dropdown.Item>
                 </DropdownButton>
+
                 <main>
                     {messageList.map((msg,idx) => (
                         <div key={idx} className={`messageList ${msg.user === logginedUserId ? 'sent' : 'received'}`}>
