@@ -289,7 +289,7 @@ function PostDetail() {
 
             {/* 댓글 항목 출력 */}
             {
-              comments.map((comment, idx)=><Comment comment={comment} comments={comments} setComments={setComments} key={idx}/>)
+              comments.map((comment, idx)=><Comment comment={comment} comments={comments} setComments={setComments} Comment post={post} key={idx}/>)
             }
           </Col>
         </Row>

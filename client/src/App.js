@@ -12,7 +12,8 @@ import MyProfile from './pages/MyProfile';
 import MyPost from './pages/MyPost';
 import MyInform from './pages/MyInform';
 import BookMark from './pages/BookMark';
-
+import Chat from './pages/Chat';
+import ChatList from './pages/ChatList';
 
 function App() {
   return (
@@ -29,6 +30,8 @@ function App() {
       <Route path='/posts/upload' element={<Upload/>} />
       <Route path='/posts/:postId' element={<PostDetail/>}/>
       <Route path='/posts/:postId/edit' element={<EditPost/>}/>
+      <Route path='/chat/:room_uuid' element={<Chat/>}/>
+      <Route path='/user/chatlist' element={<ChatList/>}/>
     </Routes>
   );
 }
