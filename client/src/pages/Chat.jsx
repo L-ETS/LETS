@@ -150,10 +150,6 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
                 </Modal>
                 {logginedUserId !== opponentUserId ?
                 <div>
-                <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
-                  <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
-                  <Dropdown.Item eventKey="NULL" onClick={()=>setShowAlert(true)}>거래 완료</Dropdown.Item>
-                </DropdownButton>
                     <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
                     <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
                     <Dropdown.Item eventKey={opponentUserId}>거래 완료</Dropdown.Item>
