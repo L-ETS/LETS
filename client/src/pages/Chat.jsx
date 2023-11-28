@@ -48,7 +48,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         try {
             const response = await axios.get(`/chat/authenticate/${logginedUserId}/${room_uuid}`);
             const exist = response.data.exist;
-            //console.log(response.data.oUserId);
+            console.log(response.data.oUserId);
             setOpponentUserId(response.data.oUserId);
             if(exist) setIsShow(true);
             else setIsShow(false);
@@ -128,10 +128,16 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         return(
             <div className="message">
                 <PostPreview title={postTitle} p_state={postP_state} postId={postId} imageUrl={imageUrl} isLoading={isLoading}/>
-                <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
-                  <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
-                  <Dropdown.Item eventKey={opponentUserId}>거래 완료</Dropdown.Item>
-                </DropdownButton>
+                {logginedUserId !== opponentUserId ?
+                <div>
+                    <DropdownButton id="dropdown-basic-button" title={postP_state} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
+                    <Dropdown.Item eventKey="NULL">거래 가능</Dropdown.Item>
+                    <Dropdown.Item eventKey={opponentUserId}>거래 완료</Dropdown.Item>
+                    </DropdownButton>
+                </div>
+                :
+                null
+                }
                 <main>
                     {messageList.map((msg,idx) => (
                         <div key={idx} className={`messageList ${msg.user === logginedUserId ? 'sent' : 'received'}`}>
