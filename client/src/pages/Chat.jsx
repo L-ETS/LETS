@@ -12,7 +12,10 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Modal from 'react-bootstrap/Modal';  
 import Button from 'react-bootstrap/Button';
 
- //댓글 채팅 버튼 -> 1대1 채팅 연결
+// 거래완료 후 채팅 막기 필요
+// 채팅 내 새로고침 시 세션오류
+
+//댓글 채팅 버튼 -> 1대1 채팅 연결
 function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [newMessage, setNewMessage] = useState(""); // 입력받은 메시지
     const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
@@ -180,5 +183,4 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
         )
     }
 }
-
 export default Chat;

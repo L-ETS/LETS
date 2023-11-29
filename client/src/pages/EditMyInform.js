@@ -85,8 +85,11 @@ function EditMyInform() {
     if (!wideRegion || !detailRegion) {
       setRegionError('지역을 선택해주세요.');
       return;
+    } else if (detailRegion === '선택') {
+      setRegionError('상세 지역을 선택해주세요.')
+      return;
     } else {
-      setRegionError('');
+        setRegionError('');
     }
     
     try {
@@ -165,11 +168,8 @@ function EditMyInform() {
                       setDetailRegion('선택');
                   }}
                   onBlur={()=>{
-                      if(!wideRegion || !detailRegion) {
+                      if(!wideRegion) {
                           setRegionError('지역을 선택해주세요.')
-                          return;
-                        } else if (detailRegion === '선택') {
-                          setRegionError('상세 지역을 선택해주세요.')
                           return;
                         } else {
                             setRegionError('');
@@ -187,11 +187,8 @@ function EditMyInform() {
                       setDetailRegion(e.target.value)
                     }}
                     onBlur={()=>{
-                        if(!wideRegion) {
-                            setRegionError('지역을 선택해주세요.')
-                            return;
-                        } else if (detailRegion === '선택') {
-                          setRegionError('상세 지역을 선택해주세요.')
+                        if(detailRegion === '선택') {
+                            setRegionError('상세 지역을 선택해주세요.')
                             return;
                         } else {
                             setRegionError('');

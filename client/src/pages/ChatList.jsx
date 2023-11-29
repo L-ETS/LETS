@@ -4,6 +4,8 @@ import { collection, query, onSnapshot, where, orderBy } from 'firebase/firestor
 import { db } from "../config/firebase";
 import { useNavigate } from "react-router-dom";
 
+// 채팅 목록 내 거래 상태 추가
+
 function ChatList() {
   const [myRoomuuid, setMyRoomuuid] = useState([]);
   const [myImageList, setMyImageList] = useState([]);
