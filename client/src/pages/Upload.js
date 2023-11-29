@@ -15,6 +15,7 @@ function Upload() {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [wideRegion, setWideRegion] = useState('');
   const [detailRegion, setDetailRegion] = useState('');
+  const [pstate,setPstate] = useState("NULL");
   const [manualControl, setManualControl] = useState(false);
 
   const navigate = useNavigate();
@@ -86,6 +87,7 @@ function Upload() {
     formData.append('content', content);
     formData.append('wideRegion', wideRegion);
     formData.append('detailRegion', detailRegion);
+    formData.append('p_state', pstate);
     images.forEach((image, index) => {
       formData.append('images', image);
     });

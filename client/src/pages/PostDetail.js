@@ -12,8 +12,6 @@ import Badge from 'react-bootstrap/Badge';
 import styles from '../styles/reply.module.css';
 import Comment from "../components/Comment";
 import UserContext from "../contexts/UserContext";
-import Dropdown from 'react-bootstrap/Dropdown';
-import DropdownButton from 'react-bootstrap/DropdownButton';
 
 
 function PostDetail() {
@@ -132,21 +130,6 @@ function PostDetail() {
       console.log(error);
     }
   }
-
-  const handlePstate = async (eventKey) => {
-    
-    try {
-      const response = await axios.put(`/post/edit/pstate`, {
-        postId: postId,
-        p_state: eventKey
-      });
-      setDropdownBtnTitle(eventKey);
-      
-    } catch (error) {
-      alert('거래 상태 바꾸기에 실패했습니다.');
-      console.log(error);
-    }
-  }
   
   if(loading) {
     return (
@@ -177,17 +160,7 @@ function PostDetail() {
         <Row>
           <Col>
             <div style={{display: 'flex'}}>
-              {
-                logginedUserId === post.userId ?
-                <DropdownButton id="dropdown-basic-button" title={dropdownBtnTitle} variant="success" onSelect={(eventKey) => handlePstate(eventKey)}>
-                  <Dropdown.Item eventKey="거래 가능">거래 가능</Dropdown.Item>
-                  <Dropdown.Item eventKey="예약 중">예약 중</Dropdown.Item>
-                  <Dropdown.Item eventKey="거래 완료">거래 완료</Dropdown.Item>
-                </DropdownButton>
-                :
-                <h4><Badge bg="success">{post.p_state}</Badge></h4>
-
-              }
+              <h4><Badge bg="success">{post.p_state === "NULL" ? "거래 가능" : "거래 완료"}</Badge></h4>
               <h2>{post.title}</h2>
             </div>
 

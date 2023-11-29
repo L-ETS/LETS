@@ -72,7 +72,7 @@ function ChatList() {
             snapshot.forEach((doc) => {
               messages.push({...doc.data(), id: doc.id});
             });
-            console.log(messages);
+            //console.log(messages);
             if(ruuid && messages.length === 0){
               messages.push({
                 createAt: 0,

@@ -337,7 +337,7 @@ app.get('/posts/upload', isAuthenticated, (req, res) => {
 
 app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //게시글 업로드
 
-  const { title, content, wideRegion, detailRegion } = { ...req.body };
+  const { title, content, wideRegion, detailRegion, p_state } = req.body;
   let postId;
 
   pool.getConnection((error, connection) => {
@@ -346,9 +346,9 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
       return res.status(500).json({ message: 'Database connection error.' });
     }
     else {
-      //post테이블에 게시글 정보 저장.
-      let sql = 'INSERT INTO post (userId, title, content, wideRegion, detailRegion) VALUES (?, ?, ?, ?, ?)';
-      let params = [req.session.user, title, content, wideRegion, detailRegion];
+      //post테이블에 게시글 정보 저장.,
+      let sql = 'INSERT INTO post (userId, title, content, wideRegion, detailRegion, p_state) VALUES (?, ?, ?, ?, ?, ?)';
+      let params = [req.session.user, title, content, wideRegion, detailRegion, p_state];
       connection.query(sql, params, async (error, result) => {
         if (error) {
           console.error('Error executing the query: ' + error.stack)
@@ -975,13 +975,13 @@ app.get('', async (req, res) => { //랜덤 게시물 출력
 app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
   const logginedUserId = req.params.logginedUserId;
   const uuid = req.params.uuid;
-
   try {
-    const selectQuery = 'SELECT * from chatroom WHERE user1 = ? OR user2 = ? AND BIN_TO_UUID(room_uuid,0) = ?';
+    const selectQuery = 'SELECT * from chatroom, post WHERE (user1 = ? OR user2 = ?) AND BIN_TO_UUID(room_uuid,0) = ? and chatroom.postId = post.postId';
     const [rows] = await pool2.execute(selectQuery, [logginedUserId, logginedUserId, uuid]);
-    
     if (rows.length > 0) {
-      res.status(200).json({ exist: true });
+      let opponentUserId;
+      rows[0].user1 === rows[0].userId ? opponentUserId = rows[0].user2 : opponentUserId = rows[0].user1;
+      res.status(200).json({ exist: true, oUserId: opponentUserId});
     } else {
       res.status(401).json({ exist: false });
     }
@@ -1013,7 +1013,6 @@ app.get('/posts/uuid/:uuid', async (req, res) => {
 
         if(postRows.length > 0) {
           res.status(200).json({post: postRows[0]});
-          
         } else {
           res.status(400);
         }
