@@ -4,8 +4,9 @@ import styles from '../styles/MyPost.module.css';
 import axios from "axios";
 
 function MyPost() {
-    const beforeTrade = '거래 가능';
-    const tradeComplete = '거래 완료';
+    const allTrade = 'at';
+    const beforeTrade = 'bt';
+    const tradeComplete = 'tc';
     const [postList, setPostList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -29,7 +30,7 @@ function MyPost() {
     return (
         <div className={styles.container}>
             <div className={styles.postStatus}>
-                <Button variant="outline-success">전체 글</Button>{' '}
+                <Button variant="outline-success" onClick={()=>fetchPosts(allTrade)}>전체 글</Button>{' '}
                 <Button variant="outline-success" onClick={()=>fetchPosts(beforeTrade)}>거래 가능</Button>{' '}
                 <Button variant="outline-success" onClick={()=>fetchPosts(tradeComplete)}>거래 완료</Button>{' '}  
             </div>

@@ -733,12 +733,21 @@ app.get('/user/getlikeposts', isAuthenticated, async (req, res) => { // 좋아�
 
 app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
   const p_state = req.params.p_state;
-
+  let query;
+  let query_p_state = 'NULL';
   try{
-    const query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
-    const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    if (p_state === 'bt') { // 거래 가능
+      query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?'
+    }
+    else if (p_state === 'tc') { // 거래 완료
+      query = 'SELECT * FROM post WHERE p_state != ? AND userId = ?';
+    }
+    else if (p_state === 'at') { // 모든 거래
+      query = 'SELECT * FROM post WHERE p_state = ? or userId = ?';
+      query_p_state = req.session.user;
+    }
+    const [result] = await pool2.execute(query, [query_p_state, req.session.user]);
     res.status(200).json({ message: 'Post list successfully', postData : result });
-    
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
