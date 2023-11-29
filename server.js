@@ -339,7 +339,7 @@ app.post('/posts', isAuthenticated, upload.array('images'), (req, res) => { //�
 
   const { title, content, wideRegion, detailRegion, p_state } = req.body;
   let postId;
-
+  // 게시글 작성 시 p_state 기본값 "NULL"
   pool.getConnection((error, connection) => {
     if (error) {
       console.log(error);

@@ -11,6 +11,9 @@ import styles from '../styles/Barter.module.css';
 import Badge from 'react-bootstrap/Badge';
 import UserContext from '../contexts/UserContext';
 
+// image 미리보기 있으면 좋을 듯
+// 댓글 수 표기 ex) 3 comments
+
 function Barter({setIsLogin}) {
 
   const navigate = useNavigate();
