@@ -34,19 +34,19 @@ function MyPost() {
                 <Button variant="outline-success" onClick={()=>fetchPosts(tradeComplete)}>거래 완료</Button>{' '}  
             </div>
             {
-                postList.map(post => <Post title={post.title} author={post.userId} key={post.postId}/>)
+                postList.map(post => <Post title={post.title} content={post.content} author={post.userId} key={post.postId}/>)
             }
         </div>
     )
 }
 
-function Post({title, author}) {
+function Post({title, content, author}) {
     return (
         <div className={styles.content}>
             <div style={{fontWeight:700}}>{title}</div>
             <br></br>
             <div>{author}</div>
-            <div>글 내용은~~~ 상위 div 반복으로 붙여넣기!</div>
+            <div>{content}</div>
         </div>
     )
 }
