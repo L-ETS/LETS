@@ -756,6 +756,38 @@ app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 �
   }
 })
 
+app.get('', isAuthenticated, async (req, res) => { // 마이페이지 거래완료 출력 ( 상대방꺼 )
+  try{
+    const query = 'SELECT * FROM post WHERE p_state = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post list successfully', postData : result });
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('', isAuthenticated, async (req, res) => { // 마이페이지 거래완료 출력 ( 자기꺼랑 상대방꺼 모두 )
+  try{
+    const query = 'SELECT * FROM post WHERE p_state = ? OR userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user, req.session.user]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post list successfully', postData : result });
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
 app.get('/postList/:userId', isAuthenticated, async (req, res) => {
   const {userId} = req.params;
   
