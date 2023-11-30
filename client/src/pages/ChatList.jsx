@@ -11,6 +11,7 @@ function ChatList() {
   const [myImageList, setMyImageList] = useState([]);
   const [myPostIdList, setMyPostIdList] = useState([]);
   const [userIdList, setuserIdList] = useState([]);
+  const [pstateList, setPstateList] = useState([]);
   const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
   const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
   const currentTimeInSeconds = Math.floor(Date.now() / 1000); // 현재 시간 초
@@ -37,9 +38,6 @@ function ChatList() {
   useEffect(() => {
     axios.get(`/user/getChatlist`)
       .then(res => {
-        //console.log("유저는 ", logginedUserId);
-        //console.log("chatlist: ", res.data);
-        //console.log(res.data.chatList);
         const myChatList = res.data.chatList;
         myChatList.map((mychat, index) => {
             setMyRoomuuid(prev => [...prev, mychat.uuid]);
@@ -52,12 +50,8 @@ function ChatList() {
 
   useEffect(() => {
     if(myRoomuuid.length !== 0) {
-      //console.log(myRoomuuid);
       axios.get('/posts/get/uuid', {params : {uuid : myRoomuuid}})
       .then(res => {
-        //console.log(res.data.imagelist);
-        ///console.log(res.data.postIdlist);
-        //console.log(res.data.uuidlist);
         res.data.postIdlist.map((postId, index) => {
           setMyPostIdList(prev => [...prev, postId]);
         });
@@ -66,7 +60,11 @@ function ChatList() {
         });
         res.data.opponentUserIdlist.map((userid, index) => {
           setuserIdList(prev => [...prev, userid]);
-      });
+        });
+        res.data.p_statelist.map((p_state, index) => {
+          setPstateList(prev => [...prev, p_state]);
+        });
+
         myRoomuuid.map((ruuid, index) => {
           const queryMessage = query(messageRef, where("room", "==", ruuid), orderBy("createAt", "desc"));
           onSnapshot(queryMessage, (snapshot) => {
@@ -109,7 +107,7 @@ function ChatList() {
                   alt="Image" width="100" height="100" class="rounded-circle" />
                   <div class="media-body ml-4">
                     <div class="d-flex align-items-center justify-content-between mb-1">
-                      <h5 class="mb-0">{userIdList[index]}</h5>
+                      <h5 class="mb-0">{userIdList[index]} {pstateList[index] === 'NULL' ? '거래 가능' : '거래 완료'}</h5>
                       <small class="small font-weight-bold">
                         {getTimeDifference(msg.createAt, currentTimeInSeconds)}
                       </small>

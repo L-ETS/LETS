@@ -1050,7 +1050,6 @@ app.get('/image/:postId', isAuthenticated, async (req, res) => {
 app.get('/user/getChatlist', isAuthenticated, async (req, res) => { // 유저의 채팅방 리스트를 가져오는 코드
   try {
     const user = req.session.user;
-    //console.log(user);
     const query = 'SELECT BIN_TO_UUID(room_uuid,0) AS uuid FROM chatroom WHERE user1 = ? OR user2 = ?';
     const [result] = await pool2.execute(query, [user, user]);
 
@@ -1066,36 +1065,25 @@ app.get('/user/getChatlist', isAuthenticated, async (req, res) => { // 유저의
 });
 
 app.get('/posts/get/uuid', isAuthenticated, async (req, res) => { // uuid값으로 포스트 정보 가져오기
-  //console.log(req.query.uuid);
-  //console.log(req.query.uuid.length);
   const user = req.session.user;
   let uuid_List = [];
   let postId_List = [];
   let image_List = [];
   let userId_List = [];
+  let pstate_List = [];
 
   try {
-    //console.log(req.query.uuid);
     await req.query.uuid.map(async (mychat, index) => {
       uuid_List.push(mychat);
-      //console.log(mychat);
-      
-      const selectQuery = 'SELECT postId, user1, user2 FROM chatroom WHERE BIN_TO_UUID(room_uuid,0) = ?';
+
+      const selectQuery = 'SELECT chatroom.postId, user1, user2, p_state FROM chatroom, post WHERE BIN_TO_UUID(room_uuid,0) = ? AND chatroom.postId = post.postId';
       const [chatRoomPostId] = await pool2.execute(selectQuery, [mychat]);
       postId_List[index] = chatRoomPostId[0].postId;
-      //console.log("pi: ", chatRoomPostId[0].postId);
-      //postId_List.push(chatRoomPostId[0].postId);
-
+      pstate_List[index] = chatRoomPostId[0].p_state;
       chatRoomPostId[0].user1 == user ? userId_List[index] = chatRoomPostId[0].user2 : userId_List[index] = chatRoomPostId[0].user1;
-      //console.log("u1: ", chatRoomPostId[0].user1);
-      //console.log("u2: ", chatRoomPostId[0].user2);
-
       const selectQuery2 = 'SELECT imageUrl FROM image WHERE postId = ?';
       const [chatRoomImage] = await pool2.execute(selectQuery2, [chatRoomPostId[0].postId]);
-      //console.log("iu: ", chatRoomImage[0].imageUrl);
       image_List[index] = chatRoomImage[0].imageUrl;
-      
-      //console.log(mychat, "\n", chatRoomPostId[0], "\n", chatRoomImage[0].imageUrl);
     });
   } catch (error) {
     console.error('The error is: ', error);
@@ -1103,16 +1091,14 @@ app.get('/posts/get/uuid', isAuthenticated, async (req, res) => { // uuid값으�
   }
 
   setTimeout(() => {
-    //console.log("ul: ", uuid_List);
-    //console.log("pl: ", postId_List);
-    //console.log("il: ", image_List);
     if(uuid_List && postId_List && image_List) {
       res.status(200).json({
         message: "Load My ChatList!",
         uuidlist: uuid_List,
         postIdlist: postId_List,
         imagelist: image_List,
-        opponentUserIdlist: userId_List});
+        opponentUserIdlist: userId_List,
+        p_statelist: pstate_List});
     }
     else res.status(404).json({ message: 'Do not Load My ChatList!' });
   }, 100); // 0.1초 기다림 - 비동기 문제 해결 방안
