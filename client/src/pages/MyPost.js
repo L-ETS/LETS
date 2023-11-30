@@ -5,8 +5,8 @@ import axios from "axios";
 
 function MyPost() {
     const allTrade = 'at';
-    const beforeTrade = 'bt';
-    const tradeComplete = 'tc';
+    const beforeTrade = '거래 가능';
+    const tradeComplete = '거래 완료';
     const [postList, setPostList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 

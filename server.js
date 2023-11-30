@@ -736,11 +736,13 @@ app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 �
   let query;
   let query_p_state = 'NULL';
   try{
-    if (p_state === 'bt') { // 거래 가능
+    if (p_state === '거래 가능') { // 거래 가능
       query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?'
+      query_p_state = p_state;
     }
-    else if (p_state === 'tc') { // 거래 완료
-      query = 'SELECT * FROM post WHERE p_state != ? AND userId = ?';
+    else if (p_state === '거래 완료') { // 거래 완료
+      query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
+      query_p_state = p_state;
     }
     else if (p_state === 'at') { // 모든 거래
       query = 'SELECT * FROM post WHERE p_state = ? or userId = ?';
