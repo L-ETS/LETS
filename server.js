@@ -733,12 +733,53 @@ app.get('/user/getlikeposts', isAuthenticated, async (req, res) => { // 좋아�
 
 app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 거래상태 목록 출력
   const p_state = req.params.p_state;
-
+  let query;
+  let query_p_state = 'NULL';
   try{
-    const query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
-    const [result] = await pool2.execute(query, [p_state, req.session.user]);
+    if (p_state === 'bt') { // 거래 가능
+      query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
+    }
+    else if (p_state === 'tc') { // 거래 완료
+      query = 'SELECT * FROM post WHERE p_state != ? AND userId = ?';
+    }
+    else if (p_state === 'at') { // 모든 거래
+      query = 'SELECT * FROM post WHERE p_state = ? or userId = ?';
+      query_p_state = req.session.user;
+    }
+    const [result] = await pool2.execute(query, [query_p_state, req.session.user]);
     res.status(200).json({ message: 'Post list successfully', postData : result });
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('', isAuthenticated, async (req, res) => { // 마이페이지 거래완료 출력 ( 상대방꺼 )
+  try{
+    const query = 'SELECT * FROM post WHERE p_state = ?';
+    const [result] = await pool2.execute(query, [req.session.user]);
     
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post list successfully', postData : result });
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
+  } catch (error) {
+    console.error('The error is: ', error);
+    res.status(500).json({ error: error.message });
+  }
+})
+
+app.get('', isAuthenticated, async (req, res) => { // 마이페이지 거래완료 출력 ( 자기꺼랑 상대방꺼 모두 )
+  try{
+    const query = 'SELECT * FROM post WHERE p_state = ? OR userId = ?';
+    const [result] = await pool2.execute(query, [req.session.user, req.session.user]);
+    
+    if (result.length > 0) {
+      res.status(200).json({ message: 'Post list successfully', postData : result });
+    } else {
+      res.status(404).json({ message: 'Post not found.' });
+    }
   } catch (error) {
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
@@ -949,7 +990,11 @@ app.get('', async (req, res) => { //랜덤 게시물 출력
     console.error('The error is: ', error);
     res.status(500).json({ error: error.message });
   }
-});app.post('/chat/:user1/:user2/:postId', async (req, res) => {
+
+});
+
+app.post('/chat/:user1/:user2/:postId', async (req, res) => {
+
   try {
     const { user1, user2, postId } = req.params;
     const query = 'SELECT BIN_TO_UUID(room_uuid,0) AS UUID FROM chatroom WHERE user1 = ? AND user2 = ? AND postId = ?';

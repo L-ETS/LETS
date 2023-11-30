@@ -15,7 +15,6 @@ import MyPost from './pages/MyPost';
 import MyInform from './pages/MyInform';
 import BookMark from './pages/BookMark';
 
-
 function App() {
   return (
     <Routes>

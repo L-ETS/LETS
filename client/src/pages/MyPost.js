@@ -4,8 +4,9 @@ import styles from '../styles/MyPost.module.css';
 import axios from "axios";
 
 function MyPost() {
-    const beforeTrade = '거래 가능';
-    const tradeComplete = '거래 완료';
+    const allTrade = 'at';
+    const beforeTrade = 'bt';
+    const tradeComplete = 'tc';
     const [postList, setPostList] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -29,24 +30,24 @@ function MyPost() {
     return (
         <div className={styles.container}>
             <div className={styles.postStatus}>
-                <Button variant="outline-success">전체 글</Button>{' '}
+                <Button variant="outline-success" onClick={()=>fetchPosts(allTrade)}>전체 글</Button>{' '}
                 <Button variant="outline-success" onClick={()=>fetchPosts(beforeTrade)}>거래 가능</Button>{' '}
                 <Button variant="outline-success" onClick={()=>fetchPosts(tradeComplete)}>거래 완료</Button>{' '}  
             </div>
             {
-                postList.map(post => <Post title={post.title} author={post.userId} key={post.postId}/>)
+                postList.map(post => <Post title={post.title} content={post.content} author={post.userId} key={post.postId}/>)
             }
         </div>
     )
 }
 
-function Post({title, author}) {
+function Post({title, content, author}) {
     return (
         <div className={styles.content}>
             <div style={{fontWeight:700}}>{title}</div>
             <br></br>
             <div>{author}</div>
-            <div>글 내용은~~~ 상위 div 반복으로 붙여넣기!</div>
+            <div>{content}</div>
         </div>
     )
 }
