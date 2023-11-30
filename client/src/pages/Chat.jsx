@@ -55,7 +55,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
         try {
             const response = await axios.get(`/chat/authenticate/${logginedUserId}/${room_uuid}`);
             const exist = response.data.exist;
-            console.log(response.data.oUserId);
+            console.log('상대 유저: ',response.data.oUserId);
             setOpponentUserId(response.data.oUserId);
             if(exist) setIsShow(true);
             else setIsShow(false);
@@ -74,6 +74,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
             setPostTitle(postData.title);
             setPostP_state(postData.p_state === "NULL" ? "거래 가능" : "거래 완료");
             setPostUserId(postData.userId);
+            console.log('fetch pstate: ',postData.p_state);
         } catch (error) {
             console.log(error);
             alert('에러 발생. 다시 시도해주세요.');
@@ -102,7 +103,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
             p_state: eventKey
           });
           setPostP_state(eventKey === "NULL" ? "거래 가능" : "거래 완료");
-          
+          console.log('handle pstate: ',postP_state);
         } catch (error) {
           alert('거래 상태 바꾸기에 실패했습니다.');
           console.log(error);
@@ -123,14 +124,14 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
             });
             //console.log(messages);
             setMessageList(messages);
-            console.log('상태: ',p_state);
+            console.log('useEffect: ',postP_state);
         });
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
     },[]);
 
     useEffect(() => {
         fetchImage();
-    }, [postId])
+    }, [postId, p_state])
 
     if(isShow && !isLoading)
         return(
@@ -169,7 +170,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
                         </div>
                         ))}
                 </main>
-                {p_state !== "NULL" ?
+                {postP_state === "거래 가능" ?
                 <form onSubmit={handleSubmit}>
                     <input onChange={(e) => setNewMessage(e.target.value)} value={newMessage}/>
                     <button type="submit">전송</button>
