@@ -166,7 +166,12 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (ì°¸ê³
                 <main>
                     {messageList.map((msg,idx) => (
                         <div key={idx} className={`messageList ${msg.user === logginedUserId ? 'sent' : 'received'}`}>
-                            <p>{msg.user} : {msg.text}</p>
+                            <div style={{color: "gray"}}>
+                            {msg.user}
+                                <p>
+                                    {msg.text}
+                                </p>
+                            </div>
                         </div>
                         ))}
                 </main>
