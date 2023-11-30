@@ -13,7 +13,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
  //댓글 채팅 버튼 -> 1대1 채팅 연결
-function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
+function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
     const [newMessage, setNewMessage] = useState(""); // 입력받은 메시지
     const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
     const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
@@ -120,6 +120,7 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
             });
             //console.log(messages);
             setMessageList(messages);
+            console.log('상태: ',p_state);
         });
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
     },[]);
@@ -165,11 +166,13 @@ function Chat() { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참고 자료)
                         </div>
                         ))}
                 </main>
+                {p_state !== "NULL" ?
                 <form onSubmit={handleSubmit}>
                     <input onChange={(e) => setNewMessage(e.target.value)} value={newMessage}/>
                     <button type="submit">전송</button>
                 </form>
-                
+                : null
+                }
             </div>
         )
     else {
