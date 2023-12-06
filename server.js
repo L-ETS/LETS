@@ -681,7 +681,7 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
 
 app.get('/posts/get/postId/', async (req, res) => { // 거래 가능한 게시글 조회
   try{
-    const query = 'select postId from post where p_state = ?';
+    const query = 'select postId from post where p_state = ? ORDER BY RAND() LIMIT 1';
     const result = await pool2.execute(query, ["NULL"]);
 
     if (result[0].length > 0) {
