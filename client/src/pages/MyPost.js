@@ -35,7 +35,7 @@ function MyPost() {
                 <Button variant="outline-success" onClick={()=>fetchPosts(tradeComplete)}>거래 완료</Button>{' '}  
             </div>
             {
-                postList.map(post => <Post title={post.title} content={post.content} author={post.userId} key={post.postId}/>)
+                postList.map(post => <Post title={post.title} content={post.content} author={post.nickname} key={post.postId}/>)
             }
         </div>
     )

@@ -10,7 +10,7 @@ function BookMark() {
     useEffect(() => {
       axios.get('/user/getlikeposts')
       .then(response => {
-        console.log(response.data.postData);
+        //console.log(response.data.postData);
         SetLikeposts(response.data.postData);
       })
       .catch((error) => {
@@ -23,7 +23,7 @@ function BookMark() {
         {likeposts.map((post, index) => (
             <div className={styles.content} key={index}>
                 <div style={{fontWeight:700}}>{post.title}</div><br/>
-                <div>{post.userId}</div>
+                <div>{post.nickname}</div>
                 <div>{post.content}</div>
             </div>
         ))}

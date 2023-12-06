@@ -48,7 +48,7 @@ function Comment({comment, comments, setComments, post}) {
 
   const handleChat = async () => {
     let user1, user2;
-    console.log("ppid: ", post.postId);
+    //console.log("ppid: ", post.postId);
     if (logginedUserId < comment.userId) {
       user1 = logginedUserId;
       user2 = comment.userId;
@@ -94,7 +94,7 @@ function Comment({comment, comments, setComments, post}) {
         </Modal.Footer>
       </Modal>
       <div>
-        <div className={styles.writer}>{comment.userId}</div>
+        <div className={styles.writer}>{comment.nickname}</div>
         {
           showModifyUi ?
           null
@@ -109,7 +109,15 @@ function Comment({comment, comments, setComments, post}) {
                 }} style={{borderRadius: '5px'}}>수정</button>
                 <button className={styles.delete} onClick={()=>setShowAlert(true)} style={{borderRadius: '5px'}}>삭제</button>
               </div>
-              : <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button>
+              :
+                <div>
+                {
+                post.userId === logginedUserId ?
+                <button onClick={handleChat} style={{borderRadius: '5px'}}>채팅</button>
+                :
+                null
+                }
+                </div>
             } 
           </div>
         }

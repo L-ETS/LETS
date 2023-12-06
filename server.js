@@ -229,8 +229,7 @@ app.get('/posts', (req, res) => {
       connection.release();
     }
     else {
-      let sql = `SELECT * FROM post WHERE wideRegion = '${wideRegion}' AND detailRegion = '${detailRegion}' ORDER BY update_date DESC`;
-
+      let sql = `SELECT post.*, user.nickname FROM post, user WHERE post.userId = user.userId AND post.wideRegion = '${wideRegion}' AND post.detailRegion = '${detailRegion}' ORDER BY update_date DESC`;
       connection.query(sql, (error, result) => {
         if (error) {
           console.error('Error executing the query: ' + error.stack);
@@ -537,7 +536,8 @@ app.put('/posts/:postId/edit', isAuthenticated, upload.array('images'), (req, re
 app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 출력
   const postId = req.params.postId;
 
-  let sql = 'SELECT * FROM POST WHERE postId = ?';
+  let sql = 'SELECT post.*, user.nickname FROM post, user WHERE post.userId = user.userId AND post.postId = ?';
+  
   let params = [postId];
   let isMyPost = false;
 
@@ -574,7 +574,7 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
             
               
               //댓글 출력
-              sql = 'SELECT * FROM comment WHERE postId = ?';
+              sql = 'SELECT comment.*, user.nickname FROM comment, user WHERE comment.userId = user.userId AND comment.postId = ?';
               params = [postId];
               connection.query(sql, params, (error, results) => {
                 if (error) {
@@ -592,10 +592,10 @@ app.get('/posts/:postId', isAuthenticated, (req, res) => { //특정 게시글 �
 
                     if (results.affectedRows === 0) {
                       // This means the post was the user's own post and the view_count was not increased
-                      res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                      res.status(200).json({ message: 'Viewed your own post.', post: post, images: images, isMyPost: isMyPost, comments: comments, nickname: post.nickname });
                     } else {
                       // The view_count was increased
-                      res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost, comments: comments });
+                      res.status(200).json({ message: 'View count updated successfully.', post: post, images: images, isMyPost: isMyPost, comments: comments, nickname: post.nickname });
                     }
                   });
                 }
@@ -716,10 +716,10 @@ app.put('/post/edit/pstate', async (req, res) => { //게시글 상태 전환
 
 app.get('/user/getlikeposts', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
   try{
-    const query = 'SELECT p.* FROM post AS p JOIN likepost AS l ON p.postId = l.postId AND l.userId = ?';
+    const query = 'SELECT post.*, user.nickname FROM post, likepost, user WHERE post.postId = likepost.postId AND likepost.userId = ? AND user.userId = post.userId';
     const [result] = await pool2.execute(query, [req.session.user]);
     if (result.length > 0) {
-      res.status(200).json({ message: 'Post list successfully', postData : result });
+      res.status(200).json({ message: 'Post list successfully', postData: result});
     } else {
       res.status(404).json({ message: 'Post not found.' });
     }
@@ -735,13 +735,13 @@ app.get('/postList/:p_state', isAuthenticated, async (req, res) => { // 특정 �
   let query_p_state = 'NULL';
   try{
     if (p_state === 'bt') { // 거래 가능
-      query = 'SELECT * FROM post WHERE p_state = ? AND userId = ?';
+      query = 'SELECT post.*, user.nickname FROM post, user WHERE post.p_state = ? AND post.userId = ? AND post.userId = user.userId';
     }
     else if (p_state === 'tc') { // 거래 완료
-      query = 'SELECT * FROM post WHERE p_state != ? AND userId = ?';
+      query = 'SELECT post.*, user.nickname FROM post, user WHERE post.p_state != ? AND post.userId = ? AND post.userId = user.userId';
     }
     else if (p_state === 'at') { // 모든 거래
-      query = 'SELECT * FROM post WHERE p_state = ? or userId = ?';
+      query = 'SELECT post.*, user.nickname FROM post, user WHERE (post.p_state = ? or post.userId = ?) AND post.userId = user.userId';
       query_p_state = req.session.user;
     }
     const [result] = await pool2.execute(query, [query_p_state, req.session.user]);
@@ -886,7 +886,7 @@ app.post('/comment', async (req, res) => {
     const [insertResult] = await pool2.execute(insertQuery, [postId, userId, content]);
 
     const commentId = insertResult.insertId; //삽입된 데이터의 id값.
-    const selectQuery = 'SELECT * FROM comment WHERE commentId = ?';
+    const selectQuery = 'SELECT comment.*, user.nickname FROM comment, user WHERE comment.userId = user.userId AND comment.commentId = ?';
     const [selectResults] = await pool2.execute(selectQuery, [commentId]);
     
     if (selectResults.length > 0) {
@@ -900,7 +900,7 @@ app.post('/comment', async (req, res) => {
   }
 });
 
-app.get('/comment/:commentId', (req, res) => {
+app.get('/comment/:commentId', (req, res) => { // 사용 안 하는 것 같음
   const { commentId } = req.params;
   pool2.getConnection((error, connection) => {
     if (error) {
@@ -909,7 +909,7 @@ app.get('/comment/:commentId', (req, res) => {
       return;
     }
 
-    const sql = 'SELECT * FROM comment WHERE commentId = ?';
+    const sql = 'SELECT comment.*, user.nickname FROM comment, user WHERE comment.userId = user.userId AND comment.commentId = ?';
     const params = [commentId];
 
     connection.query(sql, params, (error, results) => {
@@ -1024,7 +1024,9 @@ app.get('/chat/authenticate/:logginedUserId/:uuid', async (req, res) => {
     if (rows.length > 0) {
       let opponentUserId;
       rows[0].user1 === rows[0].userId ? opponentUserId = rows[0].user2 : opponentUserId = rows[0].user1;
-      res.status(200).json({ exist: true, oUserId: opponentUserId});
+      const selectQuery2 = 'SELECT * FROM user WHERE userId = ?';
+      const [row] = await pool2.execute(selectQuery2, [opponentUserId]);
+      res.status(200).json({ exist: true, oUserId: opponentUserId, oNickname: row[0].nickname});
     } else {
       res.status(401).json({ exist: false });
     }
@@ -1113,6 +1115,7 @@ app.get('/posts/get/uuid', isAuthenticated, async (req, res) => { // uuid값으�
   let postId_List = [];
   let image_List = [];
   let userId_List = [];
+  let nickname_List = [];
   let pstate_List = [];
 
   try {
@@ -1124,8 +1127,13 @@ app.get('/posts/get/uuid', isAuthenticated, async (req, res) => { // uuid값으�
       postId_List[index] = chatRoomPostId[0].postId;
       pstate_List[index] = chatRoomPostId[0].p_state;
       chatRoomPostId[0].user1 == user ? userId_List[index] = chatRoomPostId[0].user2 : userId_List[index] = chatRoomPostId[0].user1;
-      const selectQuery2 = 'SELECT imageUrl FROM image WHERE postId = ?';
-      const [chatRoomImage] = await pool2.execute(selectQuery2, [chatRoomPostId[0].postId]);
+
+      const selectQuery2 = 'SELECT * FROM user WHERE userId = ?'
+      const [userNickname] = await pool2.execute(selectQuery2, [userId_List[index]]);
+      nickname_List[index] = userNickname[0].nickname;
+
+      const selectQuery3 = 'SELECT imageUrl FROM image WHERE postId = ?';
+      const [chatRoomImage] = await pool2.execute(selectQuery3, [chatRoomPostId[0].postId]);
       image_List[index] = chatRoomImage[0].imageUrl;
     });
   } catch (error) {
@@ -1141,6 +1149,7 @@ app.get('/posts/get/uuid', isAuthenticated, async (req, res) => { // uuid값으�
         postIdlist: postId_List,
         imagelist: image_List,
         opponentUserIdlist: userId_List,
+        opponentNicknamelist: nickname_List,
         p_statelist: pstate_List});
     }
     else res.status(404).json({ message: 'Do not Load My ChatList!' });

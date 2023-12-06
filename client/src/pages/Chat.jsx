@@ -28,6 +28,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
     const [postUserId ,setPostUserId] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [opponentUserId, setOpponentUserId] = useState('');
+    const [opponentNickname, setOpponentNickname] = useState('');
     const [isShow, setIsShow] = useState(true);    //해당 페이지 보여줄지 여부를 결정.
     const [isLoading, setisLoding] = useState(true);
     const [showAlert, setShowAlert] = useState(false);
@@ -55,8 +56,8 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
         try {
             const response = await axios.get(`/chat/authenticate/${logginedUserId}/${room_uuid}`);
             const exist = response.data.exist;
-            console.log('상대 유저: ',response.data.oUserId);
             setOpponentUserId(response.data.oUserId);
+            setOpponentNickname(response.data.oNickname);
             if(exist) setIsShow(true);
             else setIsShow(false);
         } catch (error) {
@@ -110,8 +111,6 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
         }
     }
 
-   // a b = db / test001, test002 | test001t, est002 ==> / {uuid/uid1/uid2} / chatlist q == b
-   //chat btn -> {uid1/uid2} / o -> con / x -> uuid create
     useEffect(() => {
         chatAuthenticate();
         fetchPostData();
@@ -124,7 +123,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
             });
             //console.log(messages);
             setMessageList(messages);
-            console.log('useEffect: ',postP_state);
+            //console.log('useEffect: ',postP_state);
         });
         // 쿼리를 여러가지 조건으로 검색하기 위해서는 복합색인에 추가해야함
     },[]);
@@ -167,7 +166,7 @@ function Chat({p_state}) { // https://www.youtube.com/watch?v=0gLr-pBIPhI (참�
                     {messageList.map((msg,idx) => (
                         <div key={idx} className={`messageList ${msg.user === logginedUserId ? 'sent' : 'received'}`}>
                             <div style={{color: "gray"}}>
-                            {msg.user}
+                            {msg.user === logginedUserId ? "나" : opponentNickname}
                                 <p>
                                     {msg.text}
                                 </p>

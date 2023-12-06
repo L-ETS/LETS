@@ -174,7 +174,7 @@ function Barter({setIsLogin}) {
                     <Badge bg="secondary">{post.p_state === "NULL" ? "거래 가능" : "거래 완료"}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>수정일: {update.getFullYear()}년 {update.getMonth()+1}월 {update.getDate()}일</p>
-                    <p>작성자: {post.userId}</p>
+                    <p>작성자: {post.nickname}</p>
                     <p>조회수: {post.view_count}</p>
                   </ListGroup.Item>
                 )
@@ -187,7 +187,7 @@ function Barter({setIsLogin}) {
                     <Badge bg="secondary">{post.p_state === "NULL" ? "거래 가능" : "거래 완료"}</Badge>
                     <h4>제목: {post.title}</h4>
                     <p>작성일: {create.getFullYear()}년 {create.getMonth()+1}월 {create.getDate()}일</p>
-                    <p>작성자: {post.userId}</p>
+                    <p>작성자: {post.nickname}</p>
                     <p>조회수: {post.view_count}</p>
                   </ListGroup.Item>
                 )

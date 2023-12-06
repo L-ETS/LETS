@@ -11,6 +11,7 @@ function ChatList() {
   const [myImageList, setMyImageList] = useState([]);
   const [myPostIdList, setMyPostIdList] = useState([]);
   const [userIdList, setuserIdList] = useState([]);
+  const [nicknameList, setNicknameList] = useState([]);
   const [pstateList, setPstateList] = useState([]);
   const [messageList, setMessageList] = useState([]); // 저장된 메시지 리스트
   const messageRef = collection(db, "messages"); // firebase.js에서 선언해준 db를 가져와서 Cloud Firestore의 'messages/'를 참조
@@ -61,6 +62,9 @@ function ChatList() {
         res.data.opponentUserIdlist.map((userid, index) => {
           setuserIdList(prev => [...prev, userid]);
         });
+        res.data.opponentNicknamelist.map((nickname, index) => {
+          setNicknameList(prev => [...prev, nickname]);
+        });
         res.data.p_statelist.map((p_state, index) => {
           setPstateList(prev => [...prev, p_state]);
         });
@@ -107,7 +111,7 @@ function ChatList() {
                   alt="Image" width="100" height="100" class="rounded-circle" />
                   <div class="media-body ml-4">
                     <div class="d-flex align-items-center justify-content-between mb-1">
-                      <h5 class="mb-0">{userIdList[index]} {pstateList[index] === 'NULL' ? '거래 가능' : '거래 완료'}</h5>
+                      <h5 class="mb-0">{nicknameList[index]} {pstateList[index] === 'NULL' ? '거래 가능' : '거래 완료'}</h5>
                       <small class="small font-weight-bold">
                         {getTimeDifference(msg.createAt, currentTimeInSeconds)}
                       </small>
