@@ -716,7 +716,7 @@ app.put('/post/edit/pstate', async (req, res) => { //게시글 상태 전환
 
 app.get('/user/getlikeposts', isAuthenticated, async (req, res) => { // 좋아요 목록 출력
   try{
-    const query = 'SELECT p.*, l.* FROM post AS p JOIN likepost AS l ON p.postId = l.postId AND l.userId = ?';
+    const query = 'SELECT p.* FROM post AS p JOIN likepost AS l ON p.postId = l.postId AND l.userId = ?';
     const [result] = await pool2.execute(query, [req.session.user]);
     if (result.length > 0) {
       res.status(200).json({ message: 'Post list successfully', postData : result });
