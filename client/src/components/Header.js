@@ -17,8 +17,7 @@ function Header() {
     axios.get('/posts/get/postId/')
       .then(res => {
         const postId = res.data.postId;
-        const randomValue = Math.floor(Math.random() * postId.length);
-        navigate(`/posts/${postId[randomValue].postId}`);
+        navigate(`/posts/${postId[0].postId}`);
       })
       .catch((error) => {
         console.error('데이터 가져오기 오류:', error);
