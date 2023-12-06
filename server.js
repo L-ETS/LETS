@@ -679,15 +679,13 @@ app.delete('/posts/:postId', isAuthenticated, (req, res) => { // 게시글 삭�
   })
 });
 
-app.get('', async (req, res) => { //게시글 상태 정보 조회
-  const postId = req.body.postId;
-
+app.get('/posts/get/postId/', async (req, res) => { // 거래 가능한 게시글 조회
   try{
-    const query = 'SELECT p_state FROM post WHERE postId = ?';
-    const result = await pool2.execute(query, [postId]);
-    
-    if (result.length > 0) {
-      res.status(200).json({ message: 'Post State successfully', p_state: result[0] });
+    const query = 'select postId from post where p_state = ?';
+    const result = await pool2.execute(query, ["NULL"]);
+
+    if (result[0].length > 0) {
+      res.status(200).json({ message: 'success', postId: result[0] });
     } else {
       res.status(404).json({ message: 'Post State not found.' });
     }
